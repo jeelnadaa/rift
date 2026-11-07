@@ -87,3 +87,12 @@ Tracked so nothing from PLAN.md is forgotten. Not started.
 ## Log
 
 - 2026-11-07: Started implementation. Local machine has no Qt/libtorrent toolchain (installing one was not allowed), so Qt/libtorrent code is verified by CI; `src/core`, the extension and the release scripts are tested locally.
+
+### Resume note (2026-11-07, session cut by usage limit)
+- Done and committed: core + tests, HTTP engine, torrent engine, storage, settings, model, IPC, native host, CMake,
+  platform, the full QML UI (ui/qml/*), packaging (windows rc/manifest/iss, macOS Info.plist, Linux desktop/metainfo), LICENSE (MIT).
+- In progress: browser extension. Written: browser/src/logic.js, background.js, icons/. Still to write:
+  manifest (Chromium with "key" from scratchpad extkey.txt → ID llhjnffjocckdmklgdcpnllflgcacppo; Firefox id browser@rift.app),
+  popup.html/css/js, options.html/js, browser/build.mjs, browser/test.mjs.
+- Not started: scripts/next-version.py (+test), .github/workflows/release.yml + ci.yml (release smoke test: exit 4 = warning,
+  other non-zero = fatal), rift-static/download.html macOS arm64/x64 names, README.md, ticking items above, local test run.
