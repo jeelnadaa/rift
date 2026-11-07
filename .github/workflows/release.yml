@@ -1,0 +1,292 @@
+# Every push to main builds Rift for Windows, macOS (Apple silicon + Intel) and Linux, plus the browser
+# extension, and publishes them as the next GitHub release (vX.Y.Z, marked "latest").
+# The version comes from git tags (scripts/next-version.py); asset names are a contract with
+# rift-static/download.html (see AGENTS.md rule 10).
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  QT_VERSION: "6.8.3"
+  QT_MODULES: ""
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Unit tests that need no toolchain
+        run: |
+          bash scripts/test-core.sh
+          python3 tests/test_next_version.py
+      - id: v
+        run: echo "version=$(python3 scripts/next-version.py)" >> "$GITHUB_OUTPUT"
+      - run: echo "Next release is v${{ steps.v.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+
+  extension:
+    needs: version
+    runs-on: ubuntu-latest
+    env:
+      V: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node browser/test.mjs
+      - run: node browser/build.mjs "$V"
+      - name: Zip
+        run: |
+          mkdir -p out
+          (cd dist/browser/chromium && zip -qr "$GITHUB_WORKSPACE/out/Rift-$V-browser-chromium.zip" .)
+          (cd dist/browser/firefox && zip -qr "$GITHUB_WORKSPACE/out/Rift-$V-browser-firefox.zip" .)
+      - uses: actions/upload-artifact@v4
+        with: { name: extension, path: out/* }
+
+  windows:
+    needs: version
+    runs-on: windows-2022
+    env:
+      V: ${{ needs.version.outputs.version }}
+      VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        name: Expose the Actions cache to vcpkg
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+      - name: libtorrent + libcurl (vcpkg)
+        shell: pwsh
+        run: |
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install libtorrent curl[ssl] --triplet x64-windows --clean-after-build
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Configure and build
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRIFT_VERSION="$env:V" `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          cmake --build build
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Tests
+        shell: pwsh
+        run: |
+          .\build\core_tests.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $env:QT_QPA_PLATFORM = "offscreen"
+          .\build\rift_ui_harness.exe
+          if ($LASTEXITCODE -ne 0) { Write-Output "::warning::UI harness reported QML problems (exit $LASTEXITCODE)" }
+      - name: Deploy
+        shell: pwsh
+        run: |
+          $d = "build\deploy"
+          New-Item -ItemType Directory -Force $d | Out-Null
+          Copy-Item build\Rift.exe, build\rift-native-host.exe $d
+          windeployqt --release --qmldir ui\qml --no-translations --no-system-d3d-compiler --no-opengl-sw "$d\Rift.exe"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          windeployqt --release --no-translations "$d\rift-native-host.exe"
+          Copy-Item "$env:VCPKG_INSTALLATION_ROOT\installed\x64-windows\bin\*.dll" $d
+          Copy-Item LICENSE $d\LICENSE.txt
+          # Smoke test the deployed app: exit 4 = QML warnings (reported), anything else non-zero = broken.
+          $env:QT_QPA_PLATFORM = "offscreen"
+          $p = Start-Process -FilePath "$d\Rift.exe" -ArgumentList "--smoke-test" -Wait -PassThru -NoNewWindow
+          if ($p.ExitCode -eq 4) { Write-Output "::warning::Smoke test reported QML warnings" }
+          elseif ($p.ExitCode -ne 0) { Write-Output "::error::Smoke test failed with exit $($p.ExitCode)"; exit 1 }
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out | Out-Null
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress; $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc /Qp "/DAppVersion=$env:V" "/DSourceDir=$PWD\build\deploy" "/DOutputDir=$PWD\out" packaging\windows\rift.iss
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          # Portable: same files plus portable.flag (settings and data live next to Rift.exe)
+          $p = "build\portable\Rift"
+          New-Item -ItemType Directory -Force $p | Out-Null
+          Copy-Item build\deploy\* $p -Recurse
+          New-Item -ItemType File "$p\portable.flag" | Out-Null
+          Compress-Archive -Path $p -DestinationPath "out\Rift-$env:V-windows-x64-portable.zip"
+      - uses: actions/upload-artifact@v4
+        with: { name: windows, path: out/* }
+
+  macos:
+    needs: version
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+          - arch: x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    env:
+      V: ${{ needs.version.outputs.version }}
+      ARCH: ${{ matrix.arch }}
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
+      - name: libtorrent (Homebrew)
+        run: brew install libtorrent-rasterbar ninja
+      - name: App icon
+        run: |
+          mkdir -p rift.iconset
+          for s in 16 32 128 256 512; do
+            sips -z $s $s design/brand/rift-icon-512.png --out rift.iconset/icon_${s}x${s}.png >/dev/null
+            d=$((s*2)); [ $d -le 1024 ] && sips -z $d $d design/brand/rift-icon-512.png --out rift.iconset/icon_${s}x${s}@2x.png >/dev/null
+          done
+          iconutil -c icns rift.iconset -o packaging/macos/rift.icns
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRIFT_VERSION="$V" \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix)" -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
+          cmake --build build
+      - name: Tests
+        run: |
+          ./build/core_tests
+          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness || echo "::warning::UI harness reported QML problems ($?)"
+      - name: Bundle
+        run: |
+          APP=build/Rift.app
+          cp build/rift-native-host "$APP/Contents/MacOS/"
+          macdeployqt "$APP" -qmldir=ui/qml -executable="$APP/Contents/MacOS/rift-native-host" -always-overwrite
+          codesign --force --deep --sign - "$APP"
+          set +e
+          QT_QPA_PLATFORM=offscreen "$APP/Contents/MacOS/Rift" --smoke-test; rc=$?
+          set -e
+          if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"; elif [ $rc -ne 0 ]; then echo "::error::Smoke test failed ($rc)"; exit 1; fi
+      - name: Package
+        run: |
+          mkdir -p out dmg
+          ditto -c -k --keepParent build/Rift.app "out/Rift-$V-macos-$ARCH.zip"
+          cp -R build/Rift.app dmg/
+          ln -s /Applications dmg/Applications
+          hdiutil create -volname "Rift $V" -srcfolder dmg -ov -format UDZO "out/Rift-$V-macos-$ARCH.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.arch }}
+          path: out/*
+
+  linux:
+    needs: version
+    runs-on: ubuntu-22.04
+    env:
+      V: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build pkg-config libtorrent-rasterbar-dev libcurl4-openssl-dev \
+            libboost-dev libssl-dev libgl1-mesa-dev libxkbcommon-dev libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
+            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libfuse2 rpm ruby ruby-dev file
+          sudo gem install --no-document fpm
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRIFT_VERSION="$V" -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build
+      - name: Tests
+        run: |
+          ./build/core_tests
+          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness || echo "::warning::UI harness reported QML problems ($?)"
+      - name: AppImage
+        run: |
+          DESTDIR=$PWD/AppDir cmake --install build
+          wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy*.AppImage
+          export QML_SOURCES_PATHS=$PWD/ui/qml EXTRA_QT_MODULES="svg" LDAI_OUTPUT="Rift-$V-linux-x86_64.AppImage"
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --executable AppDir/usr/bin/rift-native-host \
+            --desktop-file packaging/linux/rift.desktop --icon-file packaging/linux/rift.png --plugin qt --output appimage
+          set +e
+          QT_QPA_PLATFORM=offscreen ./Rift-$V-linux-x86_64.AppImage --appimage-extract-and-run --smoke-test; rc=$?
+          set -e
+          if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"; elif [ $rc -ne 0 ]; then echo "::error::Smoke test failed ($rc)"; exit 1; fi
+          mkdir -p out && mv "Rift-$V-linux-x86_64.AppImage" out/
+      - name: deb, rpm and tar.gz
+        run: |
+          # The deployed AppDir (Rift + bundled Qt) goes to /opt/rift; /usr/bin/rift is a launcher.
+          rm -rf stage && mkdir -p stage/opt/rift stage/usr/bin stage/usr/share/applications stage/usr/share/icons/hicolor/512x512/apps stage/usr/share/metainfo
+          cp -a AppDir/usr/. stage/opt/rift/
+          rm -rf stage/opt/rift/share/applications stage/opt/rift/share/metainfo
+          printf '#!/bin/sh\nexec /opt/rift/bin/rift "$@"\n' > stage/usr/bin/rift && chmod 755 stage/usr/bin/rift
+          cp packaging/linux/rift.desktop stage/usr/share/applications/
+          cp packaging/linux/rift.png stage/usr/share/icons/hicolor/512x512/apps/
+          cp packaging/linux/app.rift.Rift.metainfo.xml stage/usr/share/metainfo/
+          common=(-s dir -C stage -n rift -v "$V" --license MIT --url https://rift.app -m "Rift <noreply@rift.app>"
+                  --description "Torrents and direct downloads in one fast, calm window" --category net)
+          fpm "${common[@]}" -t deb -a amd64 -p "out/rift_${V}_amd64.deb" -d libc6 -d libgl1 -d libxkbcommon0 -d libfontconfig1 -d libxcb-cursor0 .
+          fpm "${common[@]}" -t rpm -a x86_64 -p "out/rift-${V}.x86_64.rpm" .
+          tar -C stage/opt -czf "out/Rift-$V-linux-x86_64.tar.gz" --transform 's,^rift,Rift-'"$V"',' rift
+      - uses: actions/upload-artifact@v4
+        with: { name: linux, path: out/* }
+
+  publish:
+    needs: [version, extension, windows, macos, linux]
+    runs-on: ubuntu-latest
+    env:
+      V: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/download-artifact@v4
+        with: { path: artifacts, merge-multiple: true }
+      - name: Check asset names (contract with rift-static/download.html)
+        run: |
+          cd artifacts
+          for f in "Rift-$V-windows-x64-setup.exe" "Rift-$V-windows-x64-portable.zip" \
+                   "Rift-$V-macos-arm64.dmg" "Rift-$V-macos-x64.dmg" "Rift-$V-macos-arm64.zip" "Rift-$V-macos-x64.zip" \
+                   "Rift-$V-linux-x86_64.AppImage" "rift_${V}_amd64.deb" "rift-${V}.x86_64.rpm" "Rift-$V-linux-x86_64.tar.gz" \
+                   "Rift-$V-browser-chromium.zip" "Rift-$V-browser-firefox.zip"; do
+            test -f "$f" || { echo "::error::missing $f"; exit 1; }
+          done
+          sha256sum * > SHA256SUMS
+      - name: Publish v${{ env.V }}
+        run: |
+          prev=$(git tag --list 'v*' --sort=-v:refname | head -n1 || true)
+          {
+            echo "## Rift $V"
+            echo
+            echo "| Platform | Download |"
+            echo "|---|---|"
+            echo "| Windows 10/11 (x64) | \`Rift-$V-windows-x64-setup.exe\` · portable \`.zip\` |"
+            echo "| macOS 12+ Apple silicon | \`Rift-$V-macos-arm64.dmg\` |"
+            echo "| macOS 12+ Intel | \`Rift-$V-macos-x64.dmg\` |"
+            echo "| Linux x86_64 | \`.AppImage\` · \`.deb\` · \`.rpm\` · \`.tar.gz\` |"
+            echo "| Browser extension | Chromium / Firefox \`.zip\` |"
+            echo
+            echo "The app is not code-signed yet: on Windows choose *More info → Run anyway*; on macOS right-click Rift → *Open* the first time."
+            echo
+            if [ -n "$prev" ]; then echo "### Changes since $prev"; git log --pretty='- %s' "$prev"..HEAD | head -n 60; fi
+          } > notes.md
+          gh release create "v$V" artifacts/* --target "$GITHUB_SHA" --title "Rift $V" --notes-file notes.md --latest
