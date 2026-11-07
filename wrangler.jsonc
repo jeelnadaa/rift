@@ -1,0 +1,14 @@
+// Cloudflare Workers config: serves the static site in rift-static/ (no build step).
+// "name" must match the Worker name chosen in the Cloudflare dashboard.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rift",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./rift-static",
+    // /download serves download.html; /download.html redirects to /download
+    "html_handling": "auto-trailing-slash",
+    // unknown paths get rift-static/404.html with status 404
+    "not_found_handling": "404-page"
+  }
+}

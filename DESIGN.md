@@ -361,6 +361,8 @@ The public site lives in **[rift-static/](rift-static)**. It is plain HTML/CSS/J
    - Build output directory: **`rift-static`**
 4. Save and deploy. Every push to the production branch redeploys. Add a custom domain under **Custom domains** if you want one.
 
+**Workers flow instead of Pages.** If Cloudflare opens the Workers setup (it asks for a *Deploy command* `npx wrangler deploy`), that works too: the repo-root [wrangler.jsonc](wrangler.jsonc) serves `rift-static/` as static assets, with clean URLs, the custom 404 page, `_headers` and `_redirects`. Leave the build command empty and keep the deploy command `npx wrangler deploy`. The Worker name in the dashboard must match `"name"` in `wrangler.jsonc` (`rift`).
+
 ### Real downloads
 
 - `assets/config.js` sets `repo: 'owner/name'`. The download page calls `https://api.github.com/repos/<repo>/releases/latest` and points each button at the matching release file. File names are matched with any version, so `Rift-1.0.0-windows-x64-setup.exe` matches `Rift-1.4.2-windows-x64-setup.exe`. The response is cached for 10 minutes per visitor.
