@@ -43,7 +43,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: n.display()
         color: Theme.c.text
-        font.family: Theme.fontMono
+        font.family: Theme.fontMono; font.features: Theme.numFeatures
         font.pixelSize: Theme.type.num
         selectByMouse: true
         selectionColor: Theme.selection

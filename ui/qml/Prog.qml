@@ -20,7 +20,7 @@ Rectangle {
         radius: parent.radius
         width: Math.max(p.value > 0 ? height : 0, parent.width * Math.min(1, Math.max(0, p.value)))
         color: p.fill
-        Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.OutCubic } }
+        Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
 
         Rectangle {
             visible: p.active && !Theme.reducedMotion && bar.width > 20

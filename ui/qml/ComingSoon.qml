@@ -28,6 +28,7 @@ Rectangle {
             font.family: Theme.fontUi
             font.pixelSize: Theme.type.section
             font.weight: Font.Bold
+            font.variableAxes: Theme.displayAxes
         }
         Text {
             Layout.fillWidth: true

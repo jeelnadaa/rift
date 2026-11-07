@@ -10,7 +10,7 @@ Rectangle {
     implicitHeight: visible ? 44 : 0
     color: Theme.accentSoft
     clip: true
-    Behavior on implicitHeight { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutCubic } }
+    Behavior on implicitHeight { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
     Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.soft(Theme.accent, 0.25) }
 
     RowLayout {

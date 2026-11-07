@@ -40,7 +40,8 @@ Rectangle {
                 font.family: Theme.fontUi
                 font.pixelSize: 19
                 font.weight: Font.ExtraBold
-                font.letterSpacing: -0.8
+                font.letterSpacing: -0.5
+                font.variableAxes: Theme.displayAxes
             }
             Item { Layout.fillWidth: true }
             Btn {

@@ -84,7 +84,7 @@ Popup {
     enter: Transition {
         ParallelAnimation {
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motion.fast }
-            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.97; to: 1; duration: Theme.motion.base; easing.type: Easing.OutBack }
+            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.97; to: 1; duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
         }
     }
     exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Theme.motion.fast } }

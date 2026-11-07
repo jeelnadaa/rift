@@ -56,8 +56,8 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
+        anchors.leftMargin: Theme.size.pad + 4
+        anchors.rightMargin: Theme.size.pad + 4
         spacing: 12
         opacity: r.dim ? 0.62 : 1
 
@@ -127,7 +127,7 @@ Item {
             horizontalAlignment: Text.AlignRight
             text: r.size > 0 ? App.fmtBytes(r.size) : "—"
             color: Theme.c.text2
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: Theme.type.num
         }
         // Progress
@@ -138,7 +138,7 @@ Item {
             Text {
                 text: r.progress >= 1 ? "100%" : (Math.floor(r.progress * 1000) / 10).toFixed(1) + "%"
                 color: Theme.c.text2
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 12
             }
             Prog {
@@ -170,7 +170,7 @@ Item {
             horizontalAlignment: Text.AlignRight
             text: r.down > 0 ? App.fmtSpeed(r.down) : "—"
             color: r.down > 0 ? Theme.c.down : Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: Theme.type.num
         }
         Text {
@@ -179,7 +179,7 @@ Item {
             horizontalAlignment: Text.AlignRight
             text: r.up > 0 ? App.fmtSpeed(r.up) : "—"
             color: r.up > 0 ? Theme.c.up : Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: Theme.type.num
         }
         // ETA
@@ -189,7 +189,7 @@ Item {
             horizontalAlignment: Text.AlignRight
             text: r.st === "downloading" && r.eta >= 0 ? App.fmtEta(r.eta) : r.st === "seeding" ? "×" + r.ratio.toFixed(2) : "—"
             color: Theme.c.text2
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: Theme.type.num
         }
         // Seeds/peers or connections
@@ -199,7 +199,7 @@ Item {
             horizontalAlignment: Text.AlignRight
             text: r.kind === "bt" ? r.seeds + "·" + r.peers : (r.conns > 0 ? qsTr("%n conn", "", r.conns) : "—")
             color: Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 12
         }
     }

@@ -14,16 +14,16 @@ ToolTip {
 
     contentItem: Row {
         spacing: 8
-        leftPadding: 10
-        rightPadding: tip.kbd.length ? 6 : 10
+        leftPadding: 9
+        rightPadding: tip.kbd.length ? 6 : 9
         topPadding: 6
         bottomPadding: 6
         Text {
             text: tip.text
             color: Theme.c.window
             font.family: Theme.fontUi
-            font.pixelSize: 12
-            font.weight: Font.DemiBold
+            font.pixelSize: 13
+            font.weight: Font.Medium
             anchors.verticalCenter: parent.verticalCenter
         }
         Rectangle {
@@ -38,20 +38,20 @@ ToolTip {
                 anchors.centerIn: parent
                 text: tip.kbd
                 color: Theme.c.window
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 11
                 font.weight: Font.DemiBold
             }
         }
     }
     background: Rectangle {
-        radius: 7
+        radius: 6
         color: Theme.c.text
     }
     enter: Transition {
         ParallelAnimation {
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motion.fast }
-            NumberAnimation { property: "scale"; from: 0.94; to: 1; duration: Theme.motion.base; easing.type: Easing.OutBack }
+            NumberAnimation { property: "scale"; from: 0.94; to: 1; duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
         }
     }
     exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Theme.motion.fast } }

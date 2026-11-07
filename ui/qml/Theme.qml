@@ -19,9 +19,14 @@ QtObject {
     readonly property string fontMono: "JetBrains Mono"
     readonly property string fontSerif: "Instrument Serif"
 
-    // ---- Type scale (px) ------------------------------------------------------------
+    // ---- Type (DESIGN.md §3). Body defaults (14 px, weight 450, wdth 96) are the app font, set in C++.
+    readonly property var numFeatures: ({ "tnum": 1, "zero": 1 })   // numbers never jitter
+    readonly property var displayAxes: ({ "wdth": 85, "opsz": 96 })  // page titles, wordmark
+    readonly property var statAxes: ({ "wdth": 85, "opsz": 48 })     // big numbers
+    readonly property int weightBody: 450
+    readonly property int weightNav: 550
     readonly property QtObject type: QtObject {
-        readonly property int caption: 11
+        readonly property int caption: 12
         readonly property int small: 13
         readonly property int body: 14
         readonly property int num: 13
@@ -50,6 +55,7 @@ QtObject {
         readonly property int control: theme.compact ? 32 : 36
         readonly property int controlSmall: theme.compact ? 26 : 30
         readonly property int tab: 42
+        readonly property int pad: theme.compact ? 12 : 16       // panel padding
         readonly property int icon: 16
         readonly property int iconSmall: 14
         readonly property int iconLarge: 20
@@ -64,9 +70,11 @@ QtObject {
         readonly property int emphasized: theme.reducedMotion ? 120 : 440
         readonly property int tooltipDelay: 450
         readonly property int rowStagger: theme.reducedMotion ? 0 : 22
-        readonly property var standard: [0.2, 0.8, 0.2, 1, 1, 1]
-        readonly property var spring: [0.2, 1.3, 0.3, 1, 1, 1]
+        readonly property var standard: [0.2, 0.8, 0.2, 1, 1, 1]   // cubic-bezier(.2,.8,.2,1)
+        readonly property var exit: [0.4, 0, 1, 1, 1, 1]
+        readonly property var spring: [0.2, 1.3, 0.3, 1, 1, 1]     // cubic-bezier(.2,1.3,.3,1)
         readonly property real pressScale: theme.reducedMotion ? 1 : 0.965
+        readonly property real squashScale: theme.reducedMotion ? 1 : 0.88   // switches/checkboxes on press
     }
 
     // ---- Palettes ---------------------------------------------------------------------

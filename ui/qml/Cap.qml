@@ -3,10 +3,11 @@ import QtQuick
 
 Text {
     color: Theme.c.text3
-    font.family: Theme.fontUi
+    font.family: Theme.fontMono
+    font.features: Theme.numFeatures
     font.pixelSize: Theme.type.caption
-    font.weight: Font.Bold
-    font.letterSpacing: 0.9
+    font.weight: Font.DemiBold
+    font.letterSpacing: Theme.type.caption * 0.07
     font.capitalization: Font.AllUppercase
     elide: Text.ElideRight
 }

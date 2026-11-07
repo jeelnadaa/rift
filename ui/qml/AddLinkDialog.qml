@@ -64,7 +64,7 @@ RDialog {
                 color: Theme.c.text
                 placeholderTextColor: Theme.c.text3
                 selectionColor: Theme.selection
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 12
                 padding: 10
                 background: Rectangle {
@@ -103,7 +103,7 @@ RDialog {
             visible: (dlg.info.names || []).length > 0 && dlg.total <= 6 && dlg.total > 0
             text: (dlg.info.names || []).slice(0, 6).join("\n")
             color: Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 12
             elide: Text.ElideMiddle
         }

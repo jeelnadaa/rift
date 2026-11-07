@@ -25,12 +25,14 @@ Item {
                 required property string text
                 required property string kind
                 required property string action
-                readonly property color col: kind === "danger" ? Theme.c.danger : kind === "ok" ? Theme.c.success : Theme.accent
+                // Toasts are inverted (app.css .toast): ink background, window-coloured text. Status colours
+                // come from the opposite palette so they stay readable on the ink.
+                readonly property QtObject inv: Theme.dark ? Theme.stone : Theme.obsidian
+                readonly property color col: kind === "danger" ? inv.danger : kind === "ok" ? inv.success : Theme.accents[Theme.accentName][Theme.dark ? 0 : 1]
                 width: host.width
                 height: Math.max(48, label.implicitHeight + 24)
-                radius: Theme.radius.md
-                color: Theme.c.raised
-                border.color: Theme.c.line
+                radius: 10
+                color: Theme.c.text
                 clip: true
                 property real remaining: 1
 
@@ -48,7 +50,7 @@ Item {
                 Component.onCompleted: if (!Theme.reducedMotion) enterAnim.start()
                 ParallelAnimation {
                     id: enterAnim
-                    NumberAnimation { target: rise; property: "y"; from: 14; to: 0; duration: Theme.motion.slow; easing.type: Easing.OutBack }
+                    NumberAnimation { target: rise; property: "y"; from: 14; to: 0; duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
                     NumberAnimation { target: t; property: "opacity"; from: 0; to: 1; duration: Theme.motion.base }
                 }
 
@@ -81,9 +83,10 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: t.text
                     wrapMode: Text.Wrap
-                    color: Theme.c.text
+                    color: Theme.c.window
                     font.family: Theme.fontUi
-                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                    font.pixelSize: 14
                 }
                 Row {
                     id: acts
@@ -96,7 +99,7 @@ Item {
                         text: qsTr("Undo")
                         small: true
                         variant: "ghost"
-                        tint: Theme.accent
+                        tint: t.col
                         tip: qsTr("Bring the removed downloads back")
                         kbd: "Ctrl+Z"
                         onClicked: { host.undo(); toastModel.remove(t.index) }
@@ -105,6 +108,7 @@ Item {
                         iconName: "x"
                         small: true
                         variant: "ghost"
+                        tint: Theme.c.window
                         tip: qsTr("Dismiss")
                         onClicked: toastModel.remove(t.index)
                     }

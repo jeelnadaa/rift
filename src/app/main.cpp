@@ -1,5 +1,6 @@
 // Rift entry point: single instance, portable mode, QML bootstrap, and the CI smoke test.
 #include "controller.hpp"
+#include "fonts.hpp"
 #include "ipc.hpp"
 #include "version.hpp"
 
@@ -86,8 +87,7 @@ int main(int argc, char *argv[]) {
     }
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
-    QDirIterator fonts(QStringLiteral(":/fonts"), {QStringLiteral("*.ttf"), QStringLiteral("*.otf")}, QDir::Files);
-    while (fonts.hasNext()) QFontDatabase::addApplicationFont(fonts.next());
+    installAppFonts();
 
     if (smoke) g_prevHandler = qInstallMessageHandler(smokeHandler);
 

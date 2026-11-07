@@ -49,7 +49,7 @@ Popup {
     enter: Transition {
         ParallelAnimation {
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motion.base }
-            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.965; to: 1; duration: Theme.motion.slow; easing.type: Easing.OutBack }
+            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.965; to: 1; duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
         }
     }
     exit: Transition {

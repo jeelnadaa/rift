@@ -36,7 +36,7 @@ Popup {
     enter: Transition {
         ParallelAnimation {
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Theme.motion.base }
-            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.965; to: 1; duration: Theme.motion.slow; easing.type: Easing.OutBack }
+            NumberAnimation { property: "scale"; from: Theme.reducedMotion ? 1 : 0.965; to: 1; duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
         }
     }
     exit: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Theme.motion.fast } }
@@ -81,7 +81,7 @@ Popup {
                     Layout.bottomMargin: 16
                     text: "Rift " + App.version
                     color: Theme.c.text3
-                    font.family: Theme.fontMono
+                    font.family: Theme.fontMono; font.features: Theme.numFeatures
                     font.pixelSize: 11
                 }
             }
@@ -105,6 +105,7 @@ Popup {
                     font.family: Theme.fontUi
                     font.pixelSize: Theme.type.section
                     font.weight: Font.Bold
+                    font.variableAxes: Theme.displayAxes
                     font.letterSpacing: -0.4
                 }
                 Btn { iconName: "x"; variant: "ghost"; tip: qsTr("Close"); kbd: "Esc"; onClicked: sd.close() }
@@ -207,7 +208,7 @@ Popup {
                                 border.width: sd.s.accent === modelData ? 2 : 0
                                 border.color: Theme.c.text
                                 scale: swm.containsMouse ? 1.12 : 1
-                                Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+                                Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
                                 Icon { anchors.centerIn: parent; visible: sd.s.accent === sw.modelData; name: "check"; size: 13; stroke: 2.4; color: "#FFFFFF" }
                                 MouseArea { id: swm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: sd.set("accent", sw.modelData) }
                                 Tip { visible: swm.containsMouse; text: sw.modelData.charAt(0).toUpperCase() + sw.modelData.slice(1) }

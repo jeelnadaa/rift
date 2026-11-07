@@ -39,8 +39,9 @@ Item {
             text: e.filtered ? qsTr("Nothing matches") : qsTr("Drop anything here")
             color: Theme.c.text
             font.family: Theme.fontUi
-            font.pixelSize: Theme.type.section
+            font.pixelSize: 20
             font.weight: Font.Bold
+            font.variableAxes: Theme.displayAxes
             font.letterSpacing: -0.4
         }
         Text {

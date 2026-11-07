@@ -39,7 +39,7 @@ Item {
             width: parent.width * Math.min(1, s.value)
             color: Theme.c.success
             opacity: 0.85
-            Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.OutCubic } }
+            Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
         }
         Repeater {
             model: s.size > 0 ? s.connections : []
@@ -50,7 +50,7 @@ Item {
                 width: Math.max(2, s.width * (modelData.cursor - modelData.start) / s.size)
                 height: s.height
                 color: Theme.connectionPalette[index % Theme.connectionPalette.length]
-                Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.OutCubic } }
+                Behavior on width { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
                 Rectangle {
                     anchors.right: parent.right
                     width: 2

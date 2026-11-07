@@ -32,8 +32,8 @@ Rectangle {
         radius: Theme.radius.sm - 1
         color: Theme.c.raised
         border.color: Theme.c.line
-        Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
-        Behavior on width { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutCubic } }
+        Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
+        Behavior on width { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
     }
 
     Row {

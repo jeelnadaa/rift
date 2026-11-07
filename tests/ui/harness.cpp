@@ -3,6 +3,7 @@
 // Needs only Qt, so it runs anywhere (CI on every OS, and locally without libtorrent/libcurl).
 //   QT_QPA_PLATFORM=offscreen rift_ui_harness [--show]
 #include "app/downloadmodel.hpp"
+#include "app/fonts.hpp"
 #include "app/settings.hpp"
 
 #include <QApplication>
@@ -63,6 +64,7 @@ int main(int argc, char *argv[]) {
     const QString shots = shotsIdx > 0 && shotsIdx + 1 < app.arguments().size() ? app.arguments().at(shotsIdx + 1) : QString();
     g_prev = qInstallMessageHandler(handler);
     QQuickStyle::setStyle(QStringLiteral("Basic"));
+    installAppFonts();
 
     QTemporaryDir dir;
     Settings settings(dir.filePath(QStringLiteral("settings.ini")));

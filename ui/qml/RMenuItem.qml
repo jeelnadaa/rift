@@ -52,7 +52,7 @@ MenuItem {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             color: Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 11
         }
         Icon {

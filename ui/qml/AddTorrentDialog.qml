@@ -86,7 +86,7 @@ RDialog {
             Text {
                 text: qsTr("%1 of %2 selected").arg(App.fmtBytes(dlg.pickedSize)).arg(App.fmtBytes(dlg.info.size || 0))
                 color: Theme.c.text3
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 12
             }
         }
@@ -134,7 +134,7 @@ RDialog {
                         Text {
                             text: App.fmtBytes(fd.modelData.size)
                             color: Theme.c.text3
-                            font.family: Theme.fontMono
+                            font.family: Theme.fontMono; font.features: Theme.numFeatures
                             font.pixelSize: 12
                         }
                     }
@@ -190,7 +190,7 @@ RDialog {
         Text {
             text: App.freeBytes >= 0 ? qsTr("%1 free on disk").arg(App.fmtBytes(App.freeBytes)) : ""
             color: App.freeBytes >= 0 && App.freeBytes < dlg.pickedSize ? Theme.c.danger : Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 12
         },
         Item { Layout.fillWidth: true },

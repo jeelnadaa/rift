@@ -18,13 +18,14 @@ RDialog {
             font.family: Theme.fontUi
             font.pixelSize: 32
             font.weight: Font.ExtraBold
-            font.letterSpacing: -1.4
+            font.letterSpacing: -1.6
+            font.variableAxes: Theme.displayAxes
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("Version %1").arg(App.version)
             color: Theme.c.text2
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 13
         }
         Text {
@@ -45,7 +46,7 @@ RDialog {
             wrapMode: Text.Wrap
             text: App.engineVersions
             color: Theme.c.text3
-            font.family: Theme.fontMono
+            font.family: Theme.fontMono; font.features: Theme.numFeatures
             font.pixelSize: 11
         }
     }

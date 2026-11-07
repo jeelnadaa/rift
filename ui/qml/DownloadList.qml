@@ -61,8 +61,8 @@ FocusScope {
         Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.c.line }
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.leftMargin: Theme.size.pad + 4
+            anchors.rightMargin: Theme.size.pad + 4
             spacing: 12
             Repeater {
                 model: [["name", qsTr("Name"), -1, true, Text.AlignLeft],
@@ -88,10 +88,13 @@ FocusScope {
                         anchors.left: hc.modelData[4] === Text.AlignRight ? undefined : parent.left
                         anchors.leftMargin: hc.modelData[0] === "name" ? 28 : 0
                         spacing: 4
-                        Cap {
+                        Text {
                             text: hc.modelData[1]
                             color: hc.sorted ? Theme.c.text : hm.containsMouse ? Theme.c.text2 : Theme.c.text3
+                            font.pixelSize: 13
+                            font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
+                            Behavior on color { ColorAnimation { duration: Theme.motion.fast } }
                         }
                         Icon {
                             visible: hc.sorted
@@ -169,7 +172,7 @@ FocusScope {
                 PauseAnimation { duration: Math.min(row.index, 24) * Theme.motion.rowStagger }
                 ParallelAnimation {
                     NumberAnimation { target: row; property: "opacity"; to: 1; duration: Theme.motion.base }
-                    NumberAnimation { target: lift; property: "y"; to: 0; duration: Theme.motion.slow; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: lift; property: "y"; to: 0; duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard }
                 }
             }
         }

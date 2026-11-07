@@ -13,7 +13,7 @@ Rectangle {
         anchors.centerIn: parent
         text: parent.text
         color: Theme.c.text2
-        font.family: Theme.fontMono
+        font.family: Theme.fontMono; font.features: Theme.numFeatures
         font.pixelSize: 11
         font.weight: Font.DemiBold
     }

@@ -15,7 +15,7 @@ Rectangle {
         anchors.centerIn: parent
         text: k.kind === "bt" ? "TORRENT" : "HTTP"
         color: k.col
-        font.family: Theme.fontMono
+        font.family: Theme.fontMono; font.features: Theme.numFeatures
         font.pixelSize: 10
         font.weight: Font.Bold
         font.letterSpacing: 0.6

@@ -21,6 +21,9 @@ TextField {
     selectByMouse: true
     hoverEnabled: true
     Accessible.name: placeholderText.length ? placeholderText : tip
+    // Long values (paths) show their beginning when the field isn't being edited.
+    onTextChanged: if (!activeFocus) cursorPosition = 0
+    onActiveFocusChanged: if (!activeFocus) cursorPosition = 0
 
     background: Rectangle {
         radius: Theme.radius.sm

@@ -29,6 +29,7 @@ Rectangle {
                 font.family: Theme.fontUi
                 font.pixelSize: Theme.type.page
                 font.weight: Font.Bold
+                font.variableAxes: Theme.displayAxes
                 font.letterSpacing: -0.8
             }
             Field { id: search; Layout.preferredWidth: 260; iconName: "search"; placeholderText: qsTr("Search history"); onTextEdited: hv.reload() }
@@ -66,9 +67,9 @@ Rectangle {
                         Layout.fillWidth: true
                         spacing: 2
                         Text { Layout.fillWidth: true; text: hr.modelData.name; elide: Text.ElideMiddle; color: Theme.c.text; font.family: Theme.fontUi; font.pixelSize: Theme.type.body; font.weight: Font.DemiBold }
-                        Text { Layout.fillWidth: true; text: hr.modelData.path; elide: Text.ElideMiddle; color: Theme.c.text3; font.family: Theme.fontMono; font.pixelSize: 11 }
+                        Text { Layout.fillWidth: true; text: hr.modelData.path; elide: Text.ElideMiddle; color: Theme.c.text3; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 11 }
                     }
-                    Text { text: App.fmtBytes(hr.modelData.size); color: Theme.c.text2; font.family: Theme.fontMono; font.pixelSize: Theme.type.num }
+                    Text { text: App.fmtBytes(hr.modelData.size); color: Theme.c.text2; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: Theme.type.num }
                     Text { Layout.preferredWidth: 130; horizontalAlignment: Text.AlignRight; text: App.fmtRelative(hr.modelData.completedAt); color: Theme.c.text3; font.family: Theme.fontUi; font.pixelSize: 13 }
                     Btn { small: true; variant: "ghost"; iconName: "copy"; tip: qsTr("Copy the source link"); onClicked: App.copyText(hr.modelData.source) }
                     Btn { small: true; variant: "ghost"; iconName: "download"; tip: qsTr("Download again"); onClicked: hv.win.openAdd(hr.modelData.source, {}) }

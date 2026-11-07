@@ -33,12 +33,12 @@ Rectangle {
                 SequentialAnimation on scale {
                     running: halo.visible
                     loops: Animation.Infinite
-                    NumberAnimation { from: 1; to: 2.6; duration: 1600; easing.type: Easing.OutCubic }
+                    NumberAnimation { from: 1; to: 2.6; duration: 1600; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard }
                 }
                 SequentialAnimation on opacity {
                     running: halo.visible
                     loops: Animation.Infinite
-                    NumberAnimation { from: 0.5; to: 0; duration: 1600; easing.type: Easing.OutCubic }
+                    NumberAnimation { from: 0.5; to: 0; duration: 1600; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard }
                 }
             }
         }

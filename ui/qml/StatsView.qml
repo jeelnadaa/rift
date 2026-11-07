@@ -26,7 +26,7 @@ Rectangle {
         radius: Theme.radius.lg
         color: Theme.c.raised
         border.color: hov.hovered ? Theme.soft(Theme.accent, 0.35) : Theme.c.line
-        transform: Translate { y: hov.hovered ? -2 : 0; Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutCubic } } }
+        transform: Translate { y: hov.hovered ? -2 : 0; Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } } }
         HoverHandler { id: hov }
         Column {
             anchors.left: parent.left
@@ -44,7 +44,8 @@ Rectangle {
                 font.family: Theme.fontUi
                 font.pixelSize: 26
                 font.weight: Font.Bold
-                font.letterSpacing: -0.6
+                font.letterSpacing: -0.78
+                font.variableAxes: Theme.statAxes
             }
         }
     }
@@ -64,6 +65,7 @@ Rectangle {
                 font.family: Theme.fontUi
                 font.pixelSize: Theme.type.page
                 font.weight: Font.Bold
+                font.variableAxes: Theme.displayAxes
                 font.letterSpacing: -0.8
             }
             GridLayout {
@@ -88,8 +90,8 @@ Rectangle {
                     spacing: 8
                     RowLayout {
                         Cap { text: qsTr("Speed, last 2 minutes"); Layout.fillWidth: true }
-                        Text { text: "↓ " + App.fmtSpeed(App.downSpeed); color: Theme.c.down; font.family: Theme.fontMono; font.pixelSize: 12 }
-                        Text { text: "↑ " + App.fmtSpeed(App.upSpeed); color: Theme.c.up; font.family: Theme.fontMono; font.pixelSize: 12 }
+                        Text { text: "↓ " + App.fmtSpeed(App.downSpeed); color: Theme.c.down; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
+                        Text { text: "↑ " + App.fmtSpeed(App.upSpeed); color: Theme.c.up; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
                     }
                     SpeedGraph { Layout.fillWidth: true; Layout.fillHeight: true; samples: App.speedHistory }
                 }
@@ -107,7 +109,7 @@ Rectangle {
                     spacing: 10
                     RowLayout {
                         Cap { text: qsTr("Daily traffic, last 30 days"); Layout.fillWidth: true }
-                        Text { text: qsTr("%1 ↓ · %2 ↑").arg(App.fmtBytes(sv.totalDown)).arg(App.fmtBytes(sv.totalUp)); color: Theme.c.text3; font.family: Theme.fontMono; font.pixelSize: 12 }
+                        Text { text: qsTr("%1 ↓ · %2 ↑").arg(App.fmtBytes(sv.totalDown)).arg(App.fmtBytes(sv.totalUp)); color: Theme.c.text3; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
                     }
                     Item {
                         Layout.fillWidth: true

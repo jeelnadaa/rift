@@ -60,6 +60,20 @@ if(APPLE)
     target_link_libraries(rift_appqt PUBLIC "-framework IOKit" "-framework CoreFoundation")
 endif()
 
+# Fonts (ui/fonts, OFL) and icons are compiled into rift_appqt so the app and the UI harness share them.
+file(GLOB RIFT_FONTS ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.ttf ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.otf)
+set(RIFT_FONT_ALIASES "")
+foreach(f IN LISTS RIFT_FONTS)
+    get_filename_component(n ${f} NAME)
+    set_source_files_properties(${f} PROPERTIES QT_RESOURCE_ALIAS ${n})
+endforeach()
+if(RIFT_FONTS)
+    qt_add_resources(rift_appqt "rift_fonts" PREFIX "/fonts" FILES ${RIFT_FONTS})
+endif()
+set_source_files_properties(ui/assets/tray.png PROPERTIES QT_RESOURCE_ALIAS tray.png)
+set_source_files_properties(ui/assets/rift-256.png PROPERTIES QT_RESOURCE_ALIAS rift-256.png)
+qt_add_resources(rift_appqt "rift_icons" PREFIX "/icons" FILES ui/assets/tray.png ui/assets/rift-256.png)
+
 # ---------------------------------------------------------------- native messaging host
 qt_add_executable(rift-native-host src/nativehost/main.cpp src/app/ipc.cpp src/app/ipc.hpp)
 target_include_directories(rift-native-host PRIVATE src)
@@ -125,18 +139,6 @@ endif()
 qt_add_executable(Rift WIN32 MACOSX_BUNDLE ${RIFT_APP_SOURCES} ${MACOS_ICON})
 target_include_directories(Rift PRIVATE src ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
-file(GLOB RIFT_FONTS ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.ttf ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.otf)
-set(RIFT_FONT_ALIASES "")
-foreach(f IN LISTS RIFT_FONTS)
-    get_filename_component(n ${f} NAME)
-    set_source_files_properties(${f} PROPERTIES QT_RESOURCE_ALIAS ${n})
-endforeach()
-if(RIFT_FONTS)
-    qt_add_resources(Rift "rift_fonts" PREFIX "/fonts" FILES ${RIFT_FONTS})
-endif()
-set_source_files_properties(ui/assets/tray.png PROPERTIES QT_RESOURCE_ALIAS tray.png)
-set_source_files_properties(ui/assets/rift-256.png PROPERTIES QT_RESOURCE_ALIAS rift-256.png)
-qt_add_resources(Rift "rift_icons" PREFIX "/icons" FILES ui/assets/tray.png ui/assets/rift-256.png)
 
 target_link_libraries(Rift PRIVATE
     Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Svg

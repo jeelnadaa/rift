@@ -21,6 +21,19 @@ CheckBox {
         border.width: c.checkState !== Qt.Unchecked ? 0 : 1.5
         border.color: c.hovered ? Theme.c.text3 : Theme.c.line
         Behavior on color { ColorAnimation { duration: Theme.motion.fast } }
+        // Pops 1.18× when checked; squashes .88 while pressed (DESIGN.md §5).
+        scale: c.pressed ? Theme.motion.squashScale : 1
+        Behavior on scale { NumberAnimation { duration: c.pressed ? Theme.motion.press : Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
+        Connections {
+            target: c
+            function onCheckStateChanged() { if (c.checkState !== Qt.Unchecked && !Theme.reducedMotion) pop.restart() }
+        }
+        SequentialAnimation {
+            id: pop
+            NumberAnimation { target: popScale; properties: "xScale,yScale"; to: 1.18; duration: Theme.motion.fast; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard }
+            NumberAnimation { target: popScale; properties: "xScale,yScale"; to: 1; duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring }
+        }
+        transform: Scale { id: popScale; origin.x: 9; origin.y: 9 }
         Icon {
             anchors.centerIn: parent
             name: c.checkState === Qt.PartiallyChecked ? "minimize" : "check"
@@ -29,7 +42,7 @@ CheckBox {
             stroke: 2.4
             scale: c.checkState !== Qt.Unchecked ? 1 : 0.4
             opacity: c.checkState !== Qt.Unchecked ? 1 : 0
-            Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
             Behavior on opacity { NumberAnimation { duration: Theme.motion.fast } }
         }
     }

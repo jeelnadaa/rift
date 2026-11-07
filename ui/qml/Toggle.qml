@@ -22,8 +22,10 @@ Switch {
         border.width: s.checked ? 0 : 1
         border.color: Theme.c.line
         Behavior on color { ColorAnimation { duration: Theme.motion.base } }
+        scale: s.pressed ? Theme.motion.squashScale : 1
+        Behavior on scale { NumberAnimation { duration: s.pressed ? Theme.motion.press : Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
         Rectangle {
-            width: 14
+            width: s.pressed ? 17 : 14
             height: 14
             radius: 7
             y: 3
@@ -31,7 +33,8 @@ Switch {
             color: s.checked ? Theme.onAccent : Theme.c.raised
             border.width: s.checked ? 0 : 1
             border.color: Theme.c.line
-            Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+            Behavior on width { NumberAnimation { duration: Theme.motion.fast } }
+            Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
         }
     }
     contentItem: Text {

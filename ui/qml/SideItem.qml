@@ -46,8 +46,8 @@ Item {
             anchors.fill: parent
             anchors.leftMargin: 12 + (ma.containsMouse && !s.selected ? 4 : 0)
             anchors.rightMargin: 10 + (ma.containsMouse ? 2 : 0)
-            Behavior on anchors.leftMargin { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
-            Behavior on anchors.rightMargin { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutCubic } }
+            Behavior on anchors.leftMargin { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
+            Behavior on anchors.rightMargin { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
 
             Item {
                 id: lead
@@ -60,7 +60,7 @@ Item {
                     name: s.iconName
                     color: s.selected ? Theme.accent : Theme.c.text2
                     scale: ma.containsMouse ? 1.12 : 1
-                    Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+                    Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
                 }
                 Rectangle {
                     visible: s.dot.a > 0
@@ -68,7 +68,7 @@ Item {
                     width: 9; height: 9; radius: 3
                     color: s.dot
                     scale: ma.containsMouse ? 1.15 : 1
-                    Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+                    Behavior on scale { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
                 }
             }
             Text {
@@ -82,7 +82,7 @@ Item {
                 color: s.selected ? Theme.c.text : Theme.c.text2
                 font.family: Theme.fontUi
                 font.pixelSize: Theme.type.body
-                font.weight: s.selected ? Font.DemiBold : Font.Medium
+                font.weight: s.selected ? Font.DemiBold : Theme.weightNav
             }
             Text {
                 id: cnt
@@ -91,7 +91,7 @@ Item {
                 visible: s.count >= 0
                 text: s.count
                 color: s.selected ? Theme.accent : Theme.c.text3
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 12
             }
         }

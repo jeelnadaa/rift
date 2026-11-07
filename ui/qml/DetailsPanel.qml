@@ -75,7 +75,7 @@ Rectangle {
                             color: Theme.accent
                             width: t.on ? parent.width - 16 : (parent.width - 16) * 0.2
                             opacity: t.on ? 1 : 0
-                            Behavior on width { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+                            Behavior on width { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
                             Behavior on opacity { NumberAnimation { duration: Theme.motion.fast } }
                         }
                         MouseArea {
@@ -119,8 +119,8 @@ Rectangle {
 
                     Banner {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                        Layout.leftMargin: Theme.size.pad + 4
+                        Layout.rightMargin: Theme.size.pad + 4
                         visible: dp.d.state === "error"
                         kind: "danger"
                         text: dp.d.error || qsTr("This download stopped because of an error.")
@@ -130,8 +130,8 @@ Rectangle {
                     }
                     Banner {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                        Layout.leftMargin: Theme.size.pad + 4
+                        Layout.rightMargin: Theme.size.pad + 4
                         visible: dp.d.state === "stalled"
                         kind: "warn"
                         closable: false
@@ -147,8 +147,8 @@ Rectangle {
                     // Name + progress
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                        Layout.leftMargin: Theme.size.pad + 4
+                        Layout.rightMargin: Theme.size.pad + 4
                         spacing: 8
                         RowLayout {
                             Layout.fillWidth: true
@@ -171,7 +171,7 @@ Rectangle {
                             Text {
                                 text: (Math.floor((dp.d.progress || 0) * 1000) / 10).toFixed(1) + "%"
                                 color: Theme.c.text
-                                font.family: Theme.fontMono
+                                font.family: Theme.fontMono; font.features: Theme.numFeatures
                                 font.pixelSize: 13
                                 font.weight: Font.DemiBold
                             }
@@ -179,14 +179,14 @@ Rectangle {
                                 Layout.fillWidth: true
                                 text: App.fmtBytes(dp.d.done || 0) + qsTr(" of ") + (dp.d.size > 0 ? App.fmtBytes(dp.d.size) : qsTr("unknown size"))
                                 color: Theme.c.text3
-                                font.family: Theme.fontMono
+                                font.family: Theme.fontMono; font.features: Theme.numFeatures
                                 font.pixelSize: 12
                             }
                             Text {
                                 visible: dp.d.state === "downloading" && dp.d.eta >= 0
                                 text: qsTr("%1 left").arg(App.fmtEta(dp.d.eta || 0))
                                 color: Theme.c.text2
-                                font.family: Theme.fontMono
+                                font.family: Theme.fontMono; font.features: Theme.numFeatures
                                 font.pixelSize: 12
                             }
                         }
@@ -218,8 +218,8 @@ Rectangle {
                     // Three columns of facts
                     GridLayout {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                        Layout.leftMargin: Theme.size.pad + 4
+                        Layout.rightMargin: Theme.size.pad + 4
                         columns: ov.availableWidth > 900 ? 3 : ov.availableWidth > 560 ? 2 : 1
                         columnSpacing: 28
                         rowSpacing: 14
@@ -286,8 +286,8 @@ Rectangle {
                     color: Theme.c.surface
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        anchors.leftMargin: Theme.size.pad + 4
+                        anchors.rightMargin: Theme.size.pad + 4
                         spacing: 12
                         Cap { text: qsTr("File"); Layout.fillWidth: true; Layout.leftMargin: 28 }
                         Cap { text: qsTr("Size"); Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight }
@@ -305,8 +305,8 @@ Rectangle {
                     MouseArea { id: fm; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.NoButton }
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        anchors.leftMargin: Theme.size.pad + 4
+                        anchors.rightMargin: Theme.size.pad + 4
                         spacing: 12
                         Check {
                             checked: fr.modelData.priority > 0
@@ -331,7 +331,7 @@ Rectangle {
                             horizontalAlignment: Text.AlignRight
                             text: App.fmtBytes(fr.modelData.size)
                             color: Theme.c.text2
-                            font.family: Theme.fontMono
+                            font.family: Theme.fontMono; font.features: Theme.numFeatures
                             font.pixelSize: 12
                         }
                         Prog {
@@ -364,8 +364,8 @@ Rectangle {
                     color: Theme.c.surface
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        anchors.leftMargin: Theme.size.pad + 4
+                        anchors.rightMargin: Theme.size.pad + 4
                         spacing: 12
                         Cap { text: qsTr("Address"); Layout.preferredWidth: 200 }
                         Cap { text: qsTr("Client"); Layout.fillWidth: true }
@@ -383,10 +383,10 @@ Rectangle {
                     height: 32
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        anchors.leftMargin: Theme.size.pad + 4
+                        anchors.rightMargin: Theme.size.pad + 4
                         spacing: 12
-                        Text { Layout.preferredWidth: 200; text: pr.modelData.ip + ":" + pr.modelData.port; color: Theme.c.text; font.family: Theme.fontMono; font.pixelSize: 12; elide: Text.ElideRight }
+                        Text { Layout.preferredWidth: 200; text: pr.modelData.ip + ":" + pr.modelData.port; color: Theme.c.text; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12; elide: Text.ElideRight }
                         Text { Layout.fillWidth: true; text: pr.modelData.client; color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13; elide: Text.ElideRight }
                         Row {
                             Layout.preferredWidth: 70
@@ -396,8 +396,8 @@ Rectangle {
                             Icon { visible: pr.modelData.seed; name: "seeds"; size: 13; color: Theme.accent }
                         }
                         Prog { Layout.preferredWidth: 90; value: pr.modelData.progress; fill: Theme.c.violet }
-                        Text { Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight; text: pr.modelData.down > 0 ? App.fmtSpeed(pr.modelData.down) : "—"; color: Theme.c.down; font.family: Theme.fontMono; font.pixelSize: 12 }
-                        Text { Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight; text: pr.modelData.up > 0 ? App.fmtSpeed(pr.modelData.up) : "—"; color: Theme.c.up; font.family: Theme.fontMono; font.pixelSize: 12 }
+                        Text { Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight; text: pr.modelData.down > 0 ? App.fmtSpeed(pr.modelData.down) : "—"; color: Theme.c.down; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
+                        Text { Layout.preferredWidth: 80; horizontalAlignment: Text.AlignRight; text: pr.modelData.up > 0 ? App.fmtSpeed(pr.modelData.up) : "—"; color: Theme.c.up; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
                     }
                 }
                 Text {
@@ -428,8 +428,8 @@ Rectangle {
                         height: 40
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 16
-                            anchors.rightMargin: 16
+                            anchors.leftMargin: Theme.size.pad + 4
+                            anchors.rightMargin: Theme.size.pad + 4
                             spacing: 12
                             Rectangle {
                                 width: 8; height: 8; radius: 4
@@ -438,16 +438,16 @@ Rectangle {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 1
-                                Text { Layout.fillWidth: true; text: tr.modelData.url; elide: Text.ElideMiddle; color: Theme.c.text; font.family: Theme.fontMono; font.pixelSize: 12 }
+                                Text { Layout.fillWidth: true; text: tr.modelData.url; elide: Text.ElideMiddle; color: Theme.c.text; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
                                 Text { Layout.fillWidth: true; visible: text.length > 0; text: tr.modelData.message; elide: Text.ElideRight; color: Theme.c.text3; font.family: Theme.fontUi; font.pixelSize: 12 }
                             }
-                            Text { text: qsTr("tier %1").arg(tr.modelData.tier); color: Theme.c.text3; font.family: Theme.fontMono; font.pixelSize: 12 }
+                            Text { text: qsTr("tier %1").arg(tr.modelData.tier); color: Theme.c.text3; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12 }
                             Text {
                                 Layout.preferredWidth: 110
                                 horizontalAlignment: Text.AlignRight
                                 text: tr.modelData.seeds >= 0 ? tr.modelData.seeds + " · " + tr.modelData.peers : "—"
                                 color: Theme.c.text2
-                                font.family: Theme.fontMono
+                                font.family: Theme.fontMono; font.features: Theme.numFeatures
                                 font.pixelSize: 12
                             }
                         }
@@ -498,15 +498,15 @@ Rectangle {
                     readonly property real len: Math.max(1, modelData.end - modelData.start)
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                        anchors.leftMargin: Theme.size.pad + 4
+                        anchors.rightMargin: Theme.size.pad + 4
                         spacing: 12
                         Rectangle { width: 10; height: 10; radius: 3; color: Theme.connectionPalette[cr.index % Theme.connectionPalette.length] }
-                        Text { text: "#" + (cr.index + 1); color: Theme.c.text2; font.family: Theme.fontMono; font.pixelSize: 12; Layout.preferredWidth: 30 }
+                        Text { text: "#" + (cr.index + 1); color: Theme.c.text2; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12; Layout.preferredWidth: 30 }
                         Text {
                             Layout.preferredWidth: 220
                             text: App.fmtBytes(cr.modelData.start) + " – " + App.fmtBytes(cr.modelData.end)
-                            color: Theme.c.text3; font.family: Theme.fontMono; font.pixelSize: 12
+                            color: Theme.c.text3; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12
                         }
                         Prog {
                             Layout.fillWidth: true
@@ -518,7 +518,7 @@ Rectangle {
                             Layout.preferredWidth: 90
                             horizontalAlignment: Text.AlignRight
                             text: App.fmtSpeed(cr.modelData.speed)
-                            color: Theme.c.down; font.family: Theme.fontMono; font.pixelSize: 12
+                            color: Theme.c.down; font.family: Theme.fontMono; font.features: Theme.numFeatures; font.pixelSize: 12
                         }
                     }
                 }
@@ -537,8 +537,8 @@ Rectangle {
                 spacing: 8
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    Layout.leftMargin: Theme.size.pad + 4
+                    Layout.rightMargin: Theme.size.pad + 4
                     Layout.topMargin: 12
                     spacing: 16
                     Row { spacing: 6; Rectangle { width: 10; height: 3; color: Theme.c.down; anchors.verticalCenter: parent.verticalCenter }
@@ -551,8 +551,8 @@ Rectangle {
                 SpeedGraph {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    Layout.leftMargin: Theme.size.pad + 4
+                    Layout.rightMargin: Theme.size.pad + 4
                     Layout.bottomMargin: 12
                     samples: App.speedHistory
                 }

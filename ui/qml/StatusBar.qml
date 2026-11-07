@@ -40,7 +40,7 @@ Rectangle {
             Text {
                 text: cell.text
                 color: Theme.c.text2
-                font.family: Theme.fontMono
+                font.family: Theme.fontMono; font.features: Theme.numFeatures
                 font.pixelSize: 11
                 anchors.verticalCenter: parent.verticalCenter
             }

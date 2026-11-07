@@ -33,10 +33,10 @@ AbstractButton {
         : Theme.c.text
 
     scale: pressed ? Theme.motion.pressScale : 1
-    Behavior on scale { NumberAnimation { duration: b.pressed ? Theme.motion.press : Theme.motion.base; easing.type: Easing.OutBack } }
+    Behavior on scale { NumberAnimation { duration: b.pressed ? Theme.motion.press : Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
     transform: Translate {
         y: b.hovered && !b.pressed && b.enabled && !b.ghost ? -1 : 0
-        Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutCubic } }
+        Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
     }
 
     background: Rectangle {
@@ -49,6 +49,20 @@ AbstractButton {
         border.width: b.ghost && !b.on ? 0 : 1
         border.color: b.primary ? Theme.accent : b.danger ? Theme.c.danger : b.on ? Theme.soft(Theme.accent, 0.4) : Theme.c.line
         Behavior on color { ColorAnimation { duration: Theme.motion.fast } }
+
+        // Primary buttons gain a soft accent shadow on hover.
+        Rectangle {
+            z: -1
+            anchors.fill: parent
+            anchors.topMargin: 6
+            anchors.leftMargin: 4
+            anchors.rightMargin: 4
+            anchors.bottomMargin: -4
+            radius: parent.radius + 2
+            color: Theme.accent
+            opacity: b.primary && b.hovered && b.enabled ? (Theme.dark ? 0.35 : 0.25) : 0
+            Behavior on opacity { NumberAnimation { duration: Theme.motion.fast } }
+        }
 
         Rectangle {
             anchors.fill: parent
@@ -76,15 +90,18 @@ AbstractButton {
                 anchors.verticalCenter: parent.verticalCenter
                 transform: Translate {
                     x: b.hovered && (b.iconName === "chevR" || b.iconName === "external") ? 2 : 0
-                    y: b.hovered && (b.iconName === "download" || b.iconName === "arrowD") ? 1.5
-                       : b.hovered && (b.iconName === "upload" || b.iconName === "arrowUp2") ? -1.5 : 0
-                    Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
-                    Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.OutBack } }
+                    y: b.hovered && (b.iconName === "download" || b.iconName === "arrowD") ? 2
+                       : b.hovered && (b.iconName === "upload" || b.iconName === "arrowUp2" || b.iconName === "arrowU") ? -2 : 0
+                    Behavior on x { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
+                    Behavior on y { NumberAnimation { duration: Theme.motion.base; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.spring } }
                 }
+                // DESIGN.md §5: plus and close rotate 90°, refresh/recheck spin −180°, settings 60°, trash tilts
                 rotation: !b.hovered ? 0
-                          : (b.iconName === "refresh" || b.iconName === "recheck" || b.iconName === "plus") ? 90
-                          : b.iconName === "settings" ? 45 : 0
-                Behavior on rotation { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.OutCubic } }
+                          : (b.iconName === "plus" || b.iconName === "x") ? 90
+                          : (b.iconName === "refresh" || b.iconName === "recheck") ? -180
+                          : b.iconName === "settings" ? 60
+                          : b.iconName === "trash" ? -12 : 0
+                Behavior on rotation { NumberAnimation { duration: Theme.motion.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Theme.motion.standard } }
             }
             Text {
                 visible: !b.iconOnly

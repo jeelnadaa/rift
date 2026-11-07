@@ -159,8 +159,7 @@ ApplicationWindow {
 
             Banner {
                 Layout.fillWidth: true
-                Layout.margins: 10
-                Layout.bottomMargin: 0
+                strip: true
                 visible: App.clipboardOffer.length > 0 && root.page === "transfers"
                 kind: "info"
                 iconName: App.clipboardOffer.indexOf("magnet:") === 0 ? "magnet" : "link"
@@ -171,8 +170,7 @@ ApplicationWindow {
             }
             Banner {
                 Layout.fillWidth: true
-                Layout.margins: 10
-                Layout.bottomMargin: 0
+                strip: true
                 visible: App.freeBytes >= 0 && App.settings.minFreeSpaceGB > 0 && App.freeBytes < App.settings.minFreeSpaceGB * 1073741824 && root.page === "transfers"
                 kind: "danger"
                 closable: false
@@ -275,6 +273,7 @@ ApplicationWindow {
                 font.family: Theme.fontUi
                 font.pixelSize: Theme.type.section
                 font.weight: Font.Bold
+                font.variableAxes: Theme.displayAxes
             }
         }
     }
