@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Download Rift</title>
+<meta name="description" content="Download Rift for Windows, macOS and Linux, and get the browser extension for Chrome, Edge, Brave and Firefox. Nothing else to install.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0A09'/%3E%3Cg transform='translate(32 32) scale(.7) translate(-32 -32)'%3E%3Cpath transform='translate(-1.1 -4.6)' d='M39.24 6.66A17 28 0 1 0 24.76 57.34Z' fill='%23EDE8DF'/%3E%3Cpath transform='translate(1.1 4.6)' d='M39.24 6.66A17 28 0 1 1 24.76 57.34Z' fill='%23C9A15E'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/rift.css">
+<style>
+/* ---------- Head ---------- */
+.head{padding:clamp(120px,16vh,180px) 0 clamp(40px,6vw,70px);position:relative}
+.h1{margin:0;font-weight:600;font-size:clamp(3.6rem,12.5vw,14.5rem);line-height:.84;letter-spacing:-.06em;font-variation-settings:"wght" 600,"wdth" 80,"opsz" 96}
+.h1 .ln{display:block}
+.h1 .ln:nth-child(2){padding-left:12vw}
+.h1 .s{color:var(--signal);font-size:1.05em;letter-spacing:-.02em}
+.h1 .s .ch{font-variation-settings:normal!important}
+.sniff{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;margin:34px 0 0 12vw;font-size:1.15rem}
+.sniff b{font-weight:700}
+.ver{font-family:var(--mono);font-size:.8rem;color:var(--mute);display:flex;gap:16px;flex-wrap:wrap}
+.ver span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:1px}
+
+/* ---------- Recommended ---------- */
+.rec{position:relative;overflow:hidden;border-radius:28px 8px 28px 8px;background:var(--cobalt);color:var(--on-accent);padding:clamp(24px,4vw,56px);
+  display:grid;grid-template-columns:1.2fr .8fr;gap:clamp(20px,4vw,60px);align-items:end;min-height:420px;isolation:isolate}
+.rec-ghost{position:absolute;right:-.06em;bottom:-.2em;z-index:-1;font-size:clamp(9rem,27vw,30rem);line-height:.8;font-weight:800;letter-spacing:-.07em;
+  font-variation-settings:"wdth" 75,"opsz" 96;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.2);white-space:nowrap;pointer-events:none;
+  transform:translateX(var(--gx,0));transition:transform 1.2s var(--ease)}
+.rec .eyebrow{color:rgba(255,255,255,.75)}
+.rec .eyebrow b{color:var(--on-accent)}
+.rec h2{margin:16px 0 0;font-size:clamp(2.6rem,6vw,6rem);line-height:.9;letter-spacing:-.05em;font-weight:700;font-variation-settings:"wdth" 82,"opsz" 96}
+.rec h2 .s{font-weight:400}
+.rec p{margin:18px 0 0;max-width:46ch;font-size:1.1rem;color:rgba(255,255,255,.85)}
+.rec-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.rec .pill{border-color:var(--on-accent);color:var(--on-accent)}
+.rec .pill::before{background:var(--on-accent)}
+.rec .pill:hover{color:var(--cobalt)}
+.rec .pill.solid{background:var(--on-accent);color:var(--cobalt)}
+.rec .pill.solid::before{background:var(--signal)}
+.rec .pill.solid:hover{color:var(--on-accent);border-color:var(--signal)}
+.facts{list-style:none;margin:0;padding:0;border-top:1.5px solid rgba(255,255,255,.4)}
+.facts li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.22);font-size:.95rem}
+.facts li span{color:rgba(255,255,255,.7)}
+.facts li b{font-family:var(--mono);font-weight:600;font-size:.85rem;text-align:right}
+
+/* ---------- Slabs ---------- */
+.sec{padding:clamp(70px,10vw,140px) 0 0}
+.h2{margin:16px 0 0;font-weight:300;font-size:clamp(2.6rem,6.6vw,7rem);line-height:.9;letter-spacing:-.05em;font-variation-settings:"wght" 300,"wdth" 85,"opsz" 96}
+.h2 .s{color:var(--signal);font-size:1.05em}
+.slabs{display:flex;gap:10px;height:min(700px,82vh);margin-top:clamp(30px,4vw,50px)}
+.slab{flex:1;min-width:0;position:relative;overflow:hidden;border-radius:22px 6px 22px 6px;background:var(--stone2);color:var(--ink);cursor:pointer;
+  transition:flex 1s cubic-bezier(.7,0,.2,1),background .5s,color .5s;text-align:left;display:block;border:1px solid var(--hair)}
+.slab:hover:not(.on){background:var(--stone3)}
+.slab.on{flex:5.2;background:var(--void);color:var(--void-text);cursor:default;border-color:var(--void-line)}
+.slab-n{position:absolute;top:18px;left:20px;font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--signal)}
+.slab-v{position:absolute;left:50%;bottom:24px;writing-mode:vertical-rl;transform:translateX(-50%) rotate(180deg);font-size:clamp(2.2rem,4vw,4.2rem);
+  font-weight:700;letter-spacing:-.05em;line-height:1;font-variation-settings:"wdth" 78,"opsz" 96;white-space:nowrap;transition:opacity .4s,transform .6s var(--ease)}
+.slab.on .slab-v{opacity:0;transform:translateX(-50%) rotate(180deg) translateY(-40px)}
+.slab-in{position:absolute;inset:0;padding:clamp(22px,3vw,40px);display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateX(30px);
+  transition:opacity .4s,transform .7s var(--ease),visibility 0s .4s;min-width:min(720px,80vw);overflow-y:auto;scrollbar-width:thin}
+.slab.on .slab-in{opacity:1;visibility:visible;transform:none;transition:opacity .5s .45s,transform .8s .4s var(--ease),visibility 0s}
+.slab-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-top:22px}
+.slab-h h3{margin:0;font-size:clamp(3rem,7vw,7.5rem);line-height:.82;letter-spacing:-.06em;font-weight:800;font-variation-settings:"wdth" 78,"opsz" 96}
+.slab-h .req{font-family:var(--mono);font-size:.8rem;color:var(--void-mute);text-align:right}
+.slab-h .req b{display:block;color:var(--void-text)}
+.arch{display:inline-flex;gap:4px;padding:3px;border-radius:99px;background:rgba(255,255,255,.06);margin-top:8px}
+.arch button{font-family:var(--mono);font-size:.72rem;font-weight:600;padding:5px 12px;border-radius:99px;color:var(--void-mute)}
+.arch button[aria-pressed="true"]{background:var(--signal);color:var(--on-accent)}
+.files{list-style:none;margin:26px 0 0;padding:0;border-top:1px solid var(--void-line)}
+.file{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;align-items:center;padding:16px 4px;border-bottom:1px solid var(--void-line);
+  transition:background .3s,padding .5s var(--ease)}
+.file:hover{background:rgba(255,255,255,.03);padding-left:14px}
+.file h4{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.file h4 em{font-style:normal;font-family:var(--mono);font-size:.66rem;font-weight:700;padding:3px 7px;border-radius:5px;background:rgba(229,138,87,.16);color:var(--steel);letter-spacing:.04em}
+.file h4 em.good{background:rgba(75,217,138,.14);color:var(--green)}
+.file p{margin:4px 0 0;color:var(--void-mute);font-size:.93rem;max-width:62ch}
+.file code{display:block;margin-top:6px;font-size:.74rem;color:#B9C07A;word-break:break-all}
+.file.soon{opacity:.55}
+.fbtn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:99px;background:var(--cobalt);color:var(--on-accent);font-weight:650;font-size:.92rem;
+  white-space:nowrap;transition:background .25s,transform .3s var(--spring)}
+.fbtn:hover{background:var(--signal);transform:translateY(-2px)}
+.fbtn.ghost{background:transparent;border:1.5px solid var(--void-line);color:var(--void-text)}
+.fbtn.ghost:hover{border-color:var(--signal);background:transparent;color:var(--steel)}
+.fbtn[aria-disabled="true"]{background:rgba(255,255,255,.06);color:var(--void-mute);pointer-events:none}
+.slab-note{margin-top:auto;padding-top:22px;font-family:var(--mono);font-size:.78rem;color:var(--void-mute);display:flex;gap:10px;align-items:flex-start}
+.slab-note::before{content:"→";color:var(--signal)}
+
+/* ---------- Steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:clamp(30px,4vw,50px);border-top:1.5px solid var(--ink)}
+.step{padding:28px 24px 34px 0;border-right:1px solid var(--hair);position:relative}
+.step+.step{padding-left:24px}
+.step:last-child{border-right:0}
+.step b{display:block;font-size:clamp(4rem,8vw,8rem);line-height:.8;font-weight:800;letter-spacing:-.07em;color:var(--cobalt);font-variation-settings:"wdth" 75,"opsz" 96}
+.step p{margin:18px 0 0;font-size:1.25rem;font-weight:600;letter-spacing:-.02em;line-height:1.25;max-width:22ch}
+.step p code{white-space:nowrap;font-size:.8em;background:var(--stone2);padding:2px 6px;border-radius:5px}
+.step.swap p{animation:swap .7s var(--ease) both;animation-delay:calc(var(--k)*90ms)}
+@keyframes swap{from{opacity:0;transform:translateY(18px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+
+/* ---------- Nothing to install ---------- */
+.nothing{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,80px);align-items:center}
+.strike{list-style:none;margin:0;padding:0}
+.strike li{font-size:clamp(1.6rem,3.6vw,3.4rem);font-weight:650;letter-spacing:-.04em;line-height:1.1;color:var(--mute);position:relative;width:fit-content;font-variation-settings:"wdth" 85}
+.strike li::after{content:"";position:absolute;left:-6px;right:-6px;top:55%;height:.1em;background:var(--signal);border-radius:3px;transform:scaleX(0);transform-origin:left;
+  transition:transform .6s var(--ease);transition-delay:calc(var(--k)*140ms + .3s)}
+.strike.in li::after{transform:scaleX(1)}
+.strike li.win{color:var(--ink);font-size:clamp(3rem,7vw,6.8rem);font-weight:800;margin-top:10px;font-variation-settings:"wdth" 78;opacity:0;transform:translateY(20px);
+  transition:opacity .6s 1.2s,transform .8s 1.2s var(--spring)}
+.strike.in li.win{opacity:1;transform:none}
+.strike li.win::after{display:none}
+.strike li.win span{color:var(--signal);font-family:var(--serif);font-style:italic;font-weight:400}
+
+/* ---------- Verify ---------- */
+.verify{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:clamp(30px,4vw,50px)}
+.drop{border:2px dashed var(--hair);border-radius:22px 6px 22px 6px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  text-align:center;padding:28px;cursor:pointer;transition:border-color .3s,background .3s}
+.drop:hover,.drop.over{border-color:var(--cobalt);background:var(--stone2)}
+.drop svg{width:40px;height:40px;color:var(--cobalt)}
+.drop b{font-size:1.2rem}
+.drop small{font-family:var(--mono);font-size:.76rem;color:var(--mute)}
+.vpane{padding:24px;display:flex;flex-direction:column;gap:12px}
+.vpane label{font-family:var(--mono);font-size:.78rem;color:var(--void-mute)}
+.hashin{width:100%;font-family:var(--mono);font-size:.82rem;padding:12px 14px;border-radius:10px;border:1px solid var(--void-line);background:rgba(255,255,255,.04);color:var(--void-text)}
+.hashin:focus{outline:2px solid var(--cobalt);outline-offset:1px}
+.vres{white-space:pre-line;font-family:var(--mono);font-size:.82rem;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--void-line);color:var(--void-mute);word-break:break-all;min-height:3.2em}
+.vres.ok{border-color:var(--green);color:var(--green)}
+.vres.bad{border-color:var(--signal);color:var(--steel)}
+.cmds{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.cmd{display:flex;justify-content:space-between;gap:10px;align-items:center;font-family:var(--mono);font-size:.76rem;padding:9px 12px;border-radius:8px;background:rgba(255,255,255,.04)}
+.cmd span{color:var(--void-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmd button{font-family:var(--mono);font-size:.7rem;color:#B9C07A;flex:none}
+
+/* ---------- Facts grid ---------- */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(30px,4vw,50px);border-top:1.5px solid var(--ink)}
+.gc{padding:26px 22px 30px 0;border-right:1px solid var(--hair)}
+.gc+.gc{padding-left:22px}
+.gc:last-child{border-right:0}
+.gc h4{margin:0;font-size:1.5rem;font-weight:700;letter-spacing:-.03em;font-variation-settings:"wdth" 85}
+.gc p{margin:10px 0 0;color:var(--mute);font-size:1rem}
+.gc code{font-size:.85em;background:var(--stone2);padding:1px 5px;border-radius:4px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:960px){
+  .rec,.nothing,.verify{grid-template-columns:1fr}
+  .slabs{flex-direction:column;height:auto}
+  .slab{flex:none;height:86px;transition:height .8s cubic-bezier(.7,0,.2,1),background .5s,color .5s}
+  .slab.on{height:var(--h,760px)}
+  .slab-v{writing-mode:horizontal-tb;transform:translateY(-50%);left:56px;top:50%;bottom:auto;font-size:2.4rem}
+  .slab.on .slab-v{transform:translateY(-50%) translateX(30px)}
+  .slab-n{top:50%;transform:translateY(-50%)}
+  .slab.on .slab-n{top:18px;transform:none}
+  .slab-in{min-width:0}
+  .steps,.grid4{grid-template-columns:1fr}
+  .step,.gc,.step+.step,.gc+.gc{padding:22px 0;border-right:0;border-bottom:1px solid var(--hair)}
+  .sniff{margin-left:0}
+  .h1 .ln:nth-child(2){padding-left:0}
+}
+@media (max-width:560px){
+  .file{grid-template-columns:1fr}
+  .file .fbtn{justify-self:start}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div id="tear" aria-hidden="true"><i></i><i></i></div>
+
+<header class="nav">
+  <a class="logo" href="/" data-go aria-label="Rift home">
+    <svg class="mk" viewBox="13 0 38 64" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>
+    Rift
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a class="lk" href="#platforms">Platforms</a>
+    <a class="lk" href="#verify">Verify</a>
+    <a class="lk" href="/" data-go>Overview</a>
+  </nav>
+  <div class="nav-act">
+    <button class="pill ico" id="themeToggle" type="button" aria-label="Switch light or dark theme">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+    <a class="pill hot" href="#platforms" aria-current="page">Download</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="head">
+    <h1 class="h1" aria-label="Pick your side of the rift.">
+      <span class="ln" data-split data-kin="600,80" data-peak="800,100" data-radius="280">Pick your</span>
+      <span class="ln" data-split data-offset="8" data-kin="600,80" data-peak="800,100" data-radius="280">side <span class="s">of the rift.</span></span>
+    </h1>
+    <div class="sniff rv" style="--d:.6s">
+      <span id="sniff">Looks like you're on <b>Windows</b>.</span> <span id="relInfo"></span>
+      <span class="ver"><span>Version 1.0.0</span><span>Signed builds</span><span>SHA256SUMS + signature</span></span>
+    </div>
+  </section>
+
+  <!-- Recommended -->
+  <section class="rec rv" aria-labelledby="recT">
+    <span class="rec-ghost" id="recGhost" aria-hidden="true">Windows</span>
+    <div>
+      <span class="eyebrow"><b>✓</b> Recommended for you</span>
+      <h2 id="recT">Rift for <span class="s" id="recOS">Windows</span></h2>
+      <p id="recDesc">One installer with everything inside. Choose any install folder, for just you or everyone on this PC.</p>
+      <div class="rec-btns">
+        <a class="pill solid lg dlb" href="#" id="recMain" data-file="Rift-1.0.0-windows-x64-setup.exe">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+          <span id="recMainL">Download installer (.exe)</span>
+        </a>
+        <a class="pill lg dlb" href="#" id="recAlt" data-file="Rift-1.0.0-windows-x64-portable.zip"><span id="recAltL">Portable ZIP</span></a>
+      </div>
+    </div>
+    <ul class="facts" id="recFacts"></ul>
+  </section>
+
+  <!-- Platforms -->
+  <section class="sec" id="platforms">
+    <span class="eyebrow rv"><b>01</b> All downloads</span>
+    <h2 class="h2" data-split>Four doors. <span class="s">Same Rift.</span></h2>
+    <div class="slabs" id="slabs" role="tablist" aria-label="Platforms"></div>
+  </section>
+
+  <!-- Steps -->
+  <section class="sec" id="steps">
+    <span class="eyebrow rv"><b>02</b> <span id="stepsFor">On Windows</span></span>
+    <h2 class="h2" data-split>Running in <span class="s">three steps.</span></h2>
+    <div class="steps" id="stepsGrid"></div>
+  </section>
+
+  <!-- Nothing else -->
+  <section class="sec">
+    <div class="nothing">
+      <div>
+        <span class="eyebrow rv"><b>03</b> What you need first</span>
+        <h2 class="h2" data-split>Nothing. <span class="s">Really.</span></h2>
+        <p class="rv" style="color:var(--mute);font-size:1.15rem;max-width:44ch;margin-top:24px">Everything Rift needs ships inside it. It works on a fresh computer with no extra downloads, and no background helper runs when Rift is closed.</p>
+      </div>
+      <ul class="strike rv" id="strike">
+        <li style="--k:0">Visual C++ Redistributable</li>
+        <li style="--k:1">.NET Runtime</li>
+        <li style="--k:2">Java</li>
+        <li style="--k:3">Python</li>
+        <li style="--k:4">WebView2 / Electron</li>
+        <li class="win">Just <span>Rift.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Verify -->
+  <section class="sec" id="verify">
+    <span class="eyebrow rv"><b>04</b> Verify your download</span>
+    <h2 class="h2" data-split>Trust, <span class="s">but check.</span></h2>
+    <div class="verify">
+      <label class="drop rv" id="drop" for="pick">
+        <input type="file" id="pick" class="sr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0-5 5m5-5 5 5M4 21h16"/></svg>
+        <b>Drop the file you downloaded</b>
+        <small>SHA-256 is computed in this tab. The file never leaves your computer.</small>
+      </label>
+      <div class="void vpane rv" style="--d:.1s">
+        <label for="hashIn">Expected SHA-256 (from SHA256SUMS)</label>
+        <input class="hashin" id="hashIn" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="64 hex characters">
+        <div class="vres" id="vres" aria-live="polite">Waiting for a file.</div>
+        <div class="cmds">
+          <div class="cmd"><span>certutil -hashfile Rift-1.0.0-windows-x64-setup.exe SHA256</span><button type="button" data-copy>Copy</button></div>
+          <div class="cmd"><span>shasum -a 256 Rift-1.0.0-macos-universal.dmg</span><button type="button" data-copy>Copy</button></div>
+          <div class="cmd"><span>sha256sum -c SHA256SUMS</span><button type="button" data-copy>Copy</button></div>
+          <div class="cmd"><span>minisign -Vm SHA256SUMS -P &lt;Rift public key&gt;</span><button type="button" data-copy>Copy</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Facts -->
+  <section class="sec">
+    <span class="eyebrow rv"><b>05</b> Good to know</span>
+    <div class="grid4">
+      <div class="gc rv"><h4>Updates you approve</h4><p>Rift checks for new versions, verifies the signature, and installs only when you say so. Stable or beta channel.</p></div>
+      <div class="gc rv" style="--d:.08s"><h4>Portable mode</h4><p>The portable builds keep every setting in a <code>Data</code> folder beside the app. Carry it on a USB drive.</p></div>
+      <div class="gc rv" style="--d:.16s"><h4>Clean uninstall</h4><p>Removing Rift removes its shortcuts, file links and browser bridge, and asks whether to keep your data.</p></div>
+      <div class="gc rv" style="--d:.24s"><h4>Linux packages</h4><p>DEB and RPM installs update through your package manager. The AppImage tells you when a new one is out.</p></div>
+    </div>
+  </section>
+
+  <section class="end" aria-label="Back to the overview">
+    <a class="big" href="/" data-go aria-label="Back to the Rift overview"><span>R</span><span>i</span><span>f</span><span>t</span></a>
+  </section>
+  <footer class="foot">
+    <a href="/" data-go>← Back to the overview</a>
+    <span>Rift is a neutral download client. No indexers, no tracker lists, no DRM bypassing.</span>
+  </footer>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/rift.js"></script>
+<script>
+(() => {
+const { $, $$, RM, toast, detectOS } = window.Rift;
+const V = '1.0.0';
+const P = {
+  windows: {
+    name: 'Windows', req: ['Windows 10 or 11', '64-bit (x64)'],
+    files: [
+      { t: 'Installer', tag: 'Recommended', f: `Rift-${V}-windows-x64-setup.exe`, d: 'Choose any install folder, for just you or all users. Works offline. Optionally sets up magnet links, .torrent files, the firewall rule and the browser bridge.' },
+      { t: 'Portable', f: `Rift-${V}-windows-x64-portable.zip`, d: 'Unzip anywhere and run Rift.exe. All settings stay in a Data folder next to it.' },
+      { t: 'Windows on ARM', tag: 'After 1.0', f: 'arm64 installer and portable ZIP', d: 'Native builds for Arm-based Windows PCs are planned after the first release.', soon: true },
+    ],
+    note: 'Signed with Authenticode. No Visual C++ Redistributable or .NET needed.',
+    steps: ['Run the setup and pick where Rift goes.', 'Tick shortcuts, file links and the browser bridge.', 'Open Rift and paste a magnet or any link.'],
+    rec: { main: 'Download installer (.exe)', alt: 'Portable ZIP', desc: 'One installer with everything inside. Choose any install folder, for just you or everyone on this PC.', facts: [['Format', 'Setup .exe'], ['Architecture', 'x64'], ['Requires', 'Windows 10 / 11'], ['Signed', 'Authenticode']] },
+  },
+  macos: {
+    name: 'macOS', req: ['macOS 12 Monterey or later', 'Apple Silicon + Intel'],
+    files: [
+      { t: 'Universal DMG', tag: 'Recommended', f: `Rift-${V}-macos-universal.dmg`, d: 'One app for Apple Silicon and Intel Macs. Open it and drag Rift to Applications.' },
+      { t: 'Universal ZIP', f: `Rift-${V}-macos-universal.zip`, d: 'The same signed app in a ZIP, for scripts and managed Macs.' },
+    ],
+    note: 'Signed with a Developer ID and notarized by Apple, so it opens without warnings.',
+    steps: ['Open the DMG.', 'Drag Rift into Applications.', 'Launch it. Rift lives in your menu bar.'],
+    rec: { main: 'Download for Mac (.dmg)', alt: 'ZIP', desc: 'A single universal app for Apple Silicon and Intel. Drag it to Applications and you are done.', facts: [['Format', 'Disk image .dmg'], ['Architecture', 'Universal'], ['Requires', 'macOS 12+'], ['Signed', 'Notarized']] },
+  },
+  linux: {
+    name: 'Linux', req: ['Most distributions', 'x64 and arm64'], arch: true,
+    files: [
+      { t: 'AppImage', tag: 'Recommended', f: (a) => `Rift-${V}-linux-${a === 'arm64' ? 'aarch64' : 'x86_64'}.AppImage`, d: 'Everything bundled. Make it executable and run it, on almost any distribution.' },
+      { t: 'DEB', f: (a) => `rift_${V}_${a === 'arm64' ? 'arm64' : 'amd64'}.deb`, d: 'Debian, Ubuntu, Linux Mint, Pop!_OS. Adds a menu entry and magnet link handling.' },
+      { t: 'RPM', f: (a) => `rift-${V}.${a === 'arm64' ? 'aarch64' : 'x86_64'}.rpm`, d: 'Fedora, openSUSE, RHEL and friends.' },
+      { t: 'tar.gz', f: (a) => `Rift-${V}-linux-${a === 'arm64' ? 'aarch64' : 'x86_64'}.tar.gz`, d: 'Portable archive. Unpack and run, settings can stay beside it.' },
+      { t: 'Flatpak', tag: 'After 1.0', f: 'Flathub', d: 'Planned after the first release.', soon: true },
+    ],
+    note: 'Tray icon works on KDE, GNOME (with AppIndicator) and other desktops.',
+    steps: ['Download the AppImage.', 'Run <code>chmod +x Rift-*.AppImage</code>.', 'Double-click it, or install the DEB / RPM instead.'],
+    rec: { main: 'Download AppImage', alt: 'DEB / RPM / tar.gz', desc: 'One file that runs on nearly every distribution, with everything bundled. Prefer packages? DEB and RPM are right below.', facts: [['Format', 'AppImage'], ['Architecture', 'x64 · arm64'], ['Requires', 'Most distributions'], ['Signed', 'SHA256SUMS + minisign']] },
+  },
+  browser: {
+    name: 'Browser', req: ['Needs Rift for desktop', 'Chrome · Edge · Brave · Firefox'],
+    files: [
+      { t: 'Chrome & Brave', tag: 'Chrome Web Store', f: 'Works in Chrome, Brave and other Chromium browsers', d: 'Adds "Download with Rift" to links and can take over downloads by type and size.', store: 'Add to Chrome' },
+      { t: 'Microsoft Edge', tag: 'Edge Add-ons', f: 'Microsoft Edge Add-ons', d: 'The same extension, from Microsoft\'s store.', store: 'Add to Edge' },
+      { t: 'Firefox', tag: 'Firefox Add-ons', f: 'addons.mozilla.org', d: 'Context menu, download take-over and cookies for signed-in downloads.', store: 'Add to Firefox' },
+    ],
+    note: 'The Rift installer sets up the browser bridge. It uses native messaging, so no network port is opened.',
+    steps: ['Install Rift for your computer.', 'Add the extension to your browser.', 'Right-click a link and pick “Download with Rift”.'],
+    rec: null,
+  },
+};
+const ORDER = ['windows', 'macos', 'linux', 'browser'];
+const STORES = (window.RIFT_CONFIG || {}).stores || {};
+const STORE_OF = { 'Chrome & Brave': 'chrome', 'Microsoft Edge': 'edge', 'Firefox': 'firefox' };
+let arch = 'x64';
+
+/* ---------- OS detection ---------- */
+const det = detectOS();
+let mine = ORDER.includes(det.os) ? det.os : 'windows';
+if (det.os === 'linux' && det.arm) arch = 'arm64';
+const niceOS = { windows: 'Windows', macos: 'macOS', linux: 'Linux' };
+$('#sniff').innerHTML = det.os === 'mobile'
+  ? 'Rift is a desktop app. Open this page on your <b>computer</b> to get it.'
+  : `Looks like you're on <b>${niceOS[mine]}${det.os === 'linux' ? ' (' + arch + ')' : ''}</b>.`;
+
+function fileName(f) { return typeof f.f === 'function' ? f.f(arch) : f.f; }
+
+/* ---------- Recommended card ---------- */
+function paintRec(os) {
+  const p = P[os], r = p.rec;
+  $('#recOS').textContent = p.name;
+  $('#recGhost').textContent = p.name;
+  $('#recDesc').textContent = r.desc;
+  $('#recMainL').textContent = r.main;
+  $('#recAltL').textContent = r.alt;
+  $('#recMain').dataset.file = fileName(p.files[0]);
+  $('#recAlt').dataset.file = os === 'linux' ? 'DEB / RPM / tar.gz' : fileName(p.files[1]);
+  $('#recAlt').dataset.jump = os === 'linux' ? 'linux' : '';
+  $('#recFacts').innerHTML = r.facts.map(([k, v]) => `<li><span>${k}</span><b>${k === 'Architecture' && os === 'linux' ? arch : v}</b></li>`).join('');
+}
+paintRec(mine);
+// Ghost word drifts with scroll
+addEventListener('scroll', () => { $('#recGhost').style.setProperty('--gx', (-scrollY * 0.15) + 'px'); }, { passive: true });
+
+/* ---------- Slabs ---------- */
+const slabs = $('#slabs');
+slabs.innerHTML = ORDER.map((k, i) => `
+  <div class="slab" id="${k}" role="tab" tabindex="0" aria-selected="false" aria-controls="${k}-in" data-k="${k}">
+    <span class="slab-n">0${i + 1}</span>
+    <span class="slab-v" aria-hidden="true">${P[k].name}</span>
+    <div class="slab-in" id="${k}-in" role="tabpanel"></div>
+  </div>`).join('');
+function paintSlab(k) {
+  const p = P[k], el = $(`#${k}-in`);
+  el.innerHTML = `
+    <div class="slab-h">
+      <h3>${p.name}</h3>
+      <div class="req"><b>${p.req[0]}</b>${p.req[1]}
+        ${p.arch ? `<div><div class="arch" role="group" aria-label="Architecture"><button type="button" data-arch="x64" aria-pressed="${arch === 'x64'}">x64</button><button type="button" data-arch="arm64" aria-pressed="${arch === 'arm64'}">arm64</button></div></div>` : ''}
+      </div>
+    </div>
+    <ul class="files">${p.files.map((f, i) => `
+      <li class="file ${f.soon ? 'soon' : ''}">
+        <div><h4>${f.t}${f.tag ? `<em class="${f.tag === 'Recommended' ? 'good' : ''}">${f.tag}</em>` : ''}</h4><p>${f.d}</p><code>${fileName(f)}</code></div>
+        ${f.soon ? '<span class="fbtn" aria-disabled="true">Coming later</span>'
+          : f.store ? (STORES[STORE_OF[f.t]] ? `<a class="fbtn dlb" href="${STORES[STORE_OF[f.t]]}" data-store="${STORE_OF[f.t]}" target="_blank" rel="noopener">${f.store} <span aria-hidden="true">↗</span></a>` : '<span class="fbtn" aria-disabled="true">Coming soon</span>')
+          : `<a class="fbtn ${i ? 'ghost' : ''} dlb" href="#" data-file="${fileName(f)}">Download <span aria-hidden="true">↓</span></a>`}
+      </li>`).join('')}</ul>
+    <div class="slab-note">${p.note}</div>`;
+  $$('[data-arch]', el).forEach((b) => b.addEventListener('click', (e) => {
+    e.stopPropagation(); arch = b.dataset.arch; paintSlab(k); if (mine === 'linux') paintRec('linux'); paintRelease();
+  }));
+}
+ORDER.forEach(paintSlab);
+let current = null;
+function open(k, scroll, user = true) {
+  if (current === k) return;
+  current = k;
+  $$('.slab').forEach((s) => {
+    const on = s.dataset.k === k;
+    s.classList.toggle('on', on); s.setAttribute('aria-selected', String(on));
+    if (on && matchMedia('(max-width:960px)').matches) s.style.setProperty('--h', ($('.slab-in', s).scrollHeight + 10) + 'px');
+  });
+  paintSteps(k);
+  if (scroll) $('#platforms').scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
+  if (user) { try { history.replaceState(null, '', '#' + k); } catch {} }
+}
+$$('.slab').forEach((s) => {
+  s.addEventListener('click', () => open(s.dataset.k));
+  s.addEventListener('keydown', (e) => {
+    const i = ORDER.indexOf(s.dataset.k);
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(s.dataset.k); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); const n = ORDER[(i + 1) % 4]; open(n); $('#' + n).focus(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); const n = ORDER[(i + 3) % 4]; open(n); $('#' + n).focus(); }
+  });
+});
+
+/* ---------- Steps ---------- */
+function paintSteps(k) {
+  $('#stepsFor').textContent = k === 'browser' ? 'In your browser' : 'On ' + P[k].name;
+  $('#stepsGrid').innerHTML = P[k].steps.map((s, i) => `<div class="step swap" style="--k:${i}"><b>0${i + 1}</b><p>${s}</p></div>`).join('');
+}
+
+/* ---------- Initial selection from hash ---------- */
+const h = location.hash.slice(1);
+open(ORDER.includes(h) ? h : mine, false, false);
+if (ORDER.includes(h)) setTimeout(() => $('#platforms').scrollIntoView({ behavior: 'auto' }), 50);
+addEventListener('hashchange', () => { const k = location.hash.slice(1); if (ORDER.includes(k)) open(k, true); });
+
+/* ---------- Download buttons: real files from the latest GitHub release ---------- */
+const CFG = window.RIFT_CONFIG || { repo: '', stores: {} };
+const repoOK = /^[\w.-]+\/[\w.-]+$/.test(CFG.repo || '') && !/^OWNER\//.test(CFG.repo);
+const releasesPage = repoOK ? `https://github.com/${CFG.repo}/releases` : '';
+let rel = null; // { tag, url, date, assets: [{ name, url, size }] }
+// Our file names carry the version; match any version so the page keeps working after each release.
+const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function findAsset(name) {
+  if (!rel || !name) return null;
+  const rx = new RegExp('^' + esc(name).replace(esc(V), '[0-9][0-9A-Za-z.+-]*') + '$', 'i');
+  return rel.assets.find((x) => rx.test(x.name)) || null;
+}
+async function loadRelease() {
+  if (!repoOK) return;
+  const key = 'rift_rel_' + CFG.repo;
+  try { const c = JSON.parse(sessionStorage.getItem(key) || 'null'); if (c && Date.now() - c.t < 10 * 60e3) { rel = c.rel; return; } } catch {}
+  try {
+    const r = await fetch(`https://api.github.com/repos/${CFG.repo}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return;
+    const j = await r.json();
+    rel = { tag: j.tag_name, url: j.html_url, date: j.published_at, assets: (j.assets || []).map((x) => ({ name: x.name, url: x.browser_download_url, size: x.size })) };
+    try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), rel })); } catch {}
+  } catch {}
+}
+function paintRelease() {
+  // Point buttons at the real files and show real names, sizes and the version.
+  $$('.dlb[data-file]').forEach((btn) => {
+    const f = findAsset(btn.dataset.file);
+    if (!f) return;
+    btn.href = f.url; btn.setAttribute('download', ''); btn.title = `${f.name} · ${(f.size / 1048576).toFixed(1)} MB`;
+    const code = btn.closest('.file')?.querySelector('code');
+    if (code) code.textContent = f.name;
+  });
+  const v = $('#relInfo');
+  if (v) v.innerHTML = rel ? `Latest: <b>${rel.tag}</b> · ${new Date(rel.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })} · <a href="${rel.url}" rel="noopener">release notes</a>`
+    : repoOK ? `<a href="${releasesPage}" rel="noopener">All releases on GitHub</a>` : '';
+}
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.dlb'); if (!btn) return;
+  if (btn.dataset.jump) { e.preventDefault(); open(btn.dataset.jump, true); return; }
+  if (btn.dataset.store) return; // real store link
+  if (findAsset(btn.dataset.file)) return; // href already points at the file
+  e.preventDefault();
+  if (rel) { toast(`That file isn't in ${rel.tag}. Opening the release…`); setTimeout(() => window.open(rel.url, '_blank', 'noopener'), 900); }
+  else if (repoOK) { toast('The first release is on its way. Opening GitHub Releases…'); setTimeout(() => window.open(releasesPage, '_blank', 'noopener'), 900); }
+  else toast('Downloads open with the first release.');
+});
+loadRelease().then(() => { ORDER.forEach(paintSlab); paintRec(mine); paintRelease(); });
+
+/* ---------- Strike list ---------- */
+new IntersectionObserver((es, o) => es.forEach((x) => { if (x.isIntersecting) { x.target.classList.add('in'); o.disconnect(); } }), { threshold: .4 }).observe($('#strike'));
+
+/* ---------- SHA-256 verifier ---------- */
+const drop = $('#drop'), pick = $('#pick'), res = $('#vres'), hin = $('#hashIn');
+let lastHash = '';
+function compare() {
+  const want = hin.value.trim().toLowerCase();
+  if (!lastHash) { res.className = 'vres'; res.textContent = want && !/^[0-9a-f]{64}$/.test(want) ? 'That doesn\'t look like a SHA-256 (64 hex characters).' : 'Waiting for a file.'; return; }
+  if (!want) { res.className = 'vres'; res.textContent = 'SHA-256: ' + lastHash; return; }
+  const ok = want === lastHash;
+  res.className = 'vres ' + (ok ? 'ok' : 'bad');
+  res.textContent = ok ? '✓ Match. This file is exactly what we published.' : '✕ No match. Don\'t run this file; download it again.\nGot ' + lastHash;
+}
+async function hashFile(file) {
+  if (!file) return;
+  if (!crypto?.subtle) { res.textContent = 'Your browser can\'t compute hashes here. Use one of the commands below.'; return; }
+  res.className = 'vres'; res.textContent = `Hashing ${file.name}…`;
+  try {
+    const buf = await file.arrayBuffer();
+    const d = await crypto.subtle.digest('SHA-256', buf);
+    lastHash = [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+    compare();
+  } catch { res.className = 'vres bad'; res.textContent = 'Could not read that file. Try the command line instead.'; }
+}
+pick.addEventListener('change', () => hashFile(pick.files[0]));
+['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', (e) => hashFile(e.dataTransfer.files[0]));
+hin.addEventListener('input', compare);
+$$('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+  const txt = b.previousElementSibling.textContent;
+  try { await navigator.clipboard.writeText(txt); toast('Copied to clipboard'); } catch { toast('Copy failed: select the text instead'); }
+}));
+})();
+</script>
+</body>
+</html>

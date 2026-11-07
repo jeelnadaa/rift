@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift App Design: Search, RSS, Stats, Logs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.win.tall{height:640px}
+.body2{display:grid;grid-template-columns:232px 1fr;flex:1;min-height:0}
+.pane{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--surface)}
+.pane-h{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pane-b{flex:1;overflow:auto;min-height:0}
+.three{display:grid;grid-template-columns:260px minmax(0,1fr) 340px;flex:1;min-height:0}
+.three>*{border-right:1px solid var(--line);min-height:0;overflow:auto}
+.three>*:last-child{border-right:0}
+.art-i{padding:10px 12px;border-bottom:1px solid var(--line-soft);display:grid;grid-template-columns:1fr auto;gap:2px 8px}
+.art-i.sel{background:var(--selection)}
+.art-i b{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.art-i .help{grid-column:1}
+.art-i .badge{grid-row:1/3;grid-column:2;align-self:center}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cap-meter{height:10px;border-radius:99px;background:var(--sunken);overflow:hidden;position:relative}
+.cap-meter i{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:99px}
+.cap-meter b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--warning)}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px}
+.bars span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px}
+.bars span i{display:block;border-radius:2px 2px 0 0}
+.logv{font-family:var(--mono);font-size:12.5px;line-height:20px}
+.logv .r{display:grid;grid-template-columns:150px 56px 110px 1fr;gap:12px;padding:0 12px}
+.logv .r:hover{background:var(--hover)}
+.logv .r.e{background:var(--danger-soft)}
+.diag{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.chk-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line-soft)}
+.chk-row:first-child{border-top:0}
+.chk-row .grow b{display:block;font-weight:600}
+.okc{color:var(--success)}.warnc{color:var(--warning)}.errc{color:var(--danger)}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Screens"></nav>
+  <div class="screens">
+
+  <section class="scr" id="search" data-t="Search">
+    <header><span class="cap">Tab · PLAN §4.9</span><h2>Search</h2><p>Search runs through plugins the user installs. Rift ships with none enabled and says so plainly. Results stream in per plugin; each plugin shows its own progress and errors.</p></header>
+    <div class="win tall">
+      <div class="tb"><div class="ig grow" style="max-width:520px"><i data-i="search"></i><input class="input" value="ubuntu 24.04" aria-label="Search"></div>
+        <select class="select" style="width:150px"><option>All categories</option><option>Software</option><option>Video</option><option>Music</option><option>Books</option></select>
+        <select class="select" style="width:170px"><option>3 plugins enabled</option></select><button class="btn primary">Search</button><span class="grow"></span><button class="btn ghost">Plugins</button></div>
+      <div class="body2">
+        <aside class="sb"><div class="sb-h"><span class="cap">Plugins</span></div>
+          <div class="ni"><i data-i="puzzle"></i><span class="ell">Linux ISOs</span><span class="c">24</span></div>
+          <div class="ni"><i data-i="puzzle"></i><span class="ell">Internet Archive</span><span class="c">11</span></div>
+          <div class="ni"><i data-i="puzzle"></i><span class="ell">Academic Torrents</span><span class="c"><span class="spin-s"></span>…</span></div>
+          <div class="ni" style="color:var(--danger)"><i data-i="alertCircle"></i><span class="ell">Example plugin</span><span class="c" title="Site didn't answer in 10 s">timeout</span></div>
+          <div class="sb-h"><span class="cap">Filters</span></div>
+          <div style="padding:4px 8px;display:flex;flex-direction:column;gap:10px">
+            <div class="field"><label class="lbl">Min seeds</label><input class="range" type="range" value="10"></div>
+            <div class="field"><label class="lbl">Size</label><div class="row-f"><div class="ig grow"><input class="input" placeholder="min"><span class="unit">GB</span></div><div class="ig grow"><input class="input" placeholder="max"><span class="unit">GB</span></div></div></div>
+            <label class="chk"><input type="checkbox" checked>Hide already added</label>
+          </div>
+        </aside>
+        <div class="pane">
+          <div class="pane-h"><b>35 results</b><span class="help">for “ubuntu 24.04” · 2 of 3 plugins done</span><span class="grow"></span><span class="help">Sorted by seeds</span></div>
+          <div class="pane-b"><div class="tbl" style="--cols:minmax(0,1fr) 84px 70px 70px 130px 100px">
+            <div class="th"><span>Name</span><span class="r">Size</span><span class="r sorted">Seeds </span><span class="r">Peers</span><span>Source</span><span></span></div>
+            <div id="sres"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="stage" style="margin-top:20px">
+      <div class="win" style="width:520px"><div class="empty" style="padding:40px"><div class="art"><i data-i="puzzle" class="xl"></i></div><h3>Search needs a plugin</h3><p>Rift doesn't come with search sites. Add plugins you trust; each one is a small script that runs sandboxed and can only reach its own site.</p><div class="acts"><button class="btn primary">Install plugin…</button><button class="btn ghost">How plugins work</button></div></div></div>
+      <div class="dlg" style="width:560px"><div class="dlg-h"><i data-i="puzzle"></i><h3>Search plugins</h3></div><div class="dlg-b">
+        <div class="tbl" style="--cols:28px minmax(0,1fr) 70px 110px 40px"><div class="th"><span></span><span>Plugin</span><span>Version</span><span>Can reach</span><span></span></div>
+          <div class="tr"><label class="sw"><input type="checkbox" checked></label><b>Linux ISOs</b><span class="num">1.2</span><span class="mono t3 ell">linuxtracker.org</span><button class="btn sm ghost icon" aria-label="Remove"><i data-i="trash" class="s"></i></button></div>
+          <div class="tr"><label class="sw"><input type="checkbox" checked></label><b>Internet Archive</b><span class="num">2.0</span><span class="mono t3 ell">archive.org</span><button class="btn sm ghost icon" aria-label="Remove"><i data-i="trash" class="s"></i></button></div>
+          <div class="tr"><label class="sw"><input type="checkbox"></label><b>Example plugin</b><span class="num">0.3</span><span class="mono t3 ell">example.org</span><button class="btn sm ghost icon" aria-label="Remove"><i data-i="trash" class="s"></i></button></div></div>
+        <p class="help">Plugins run in a QuickJS sandbox: no file access, network only to the listed domain, 10 s time limit.</p></div>
+        <div class="dlg-f"><button class="btn ghost">Check for updates</button><span class="grow"></span><button class="btn">Install from file…</button><button class="btn primary">Install from URL…</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="rss" data-t="RSS">
+    <header><span class="cap">Tab · PLAN §4.8</span><h2>RSS</h2><p>Feeds on the left, articles in the middle, the selected article (or the rule editor) on the right. Rules show a live preview of what they'd match in existing articles.</p></header>
+    <div class="win tall">
+      <div class="tb"><button class="btn primary"><i data-i="plus"></i>Add feed</button><button class="btn ghost"><i data-i="refresh"></i>Refresh all</button><span class="sep"></span><div class="seg" data-tabs="rss"><button class="tab" data-tab="art" aria-selected="true" aria-pressed="true">Articles</button><button class="tab" data-tab="rules" aria-pressed="false">Download rules <span class="cnt">3</span></button></div><span class="grow"></span><span class="help">Next check in 12 min</span></div>
+      <div class="three">
+        <div style="background:var(--sidebar)">
+          <div class="sb-h"><span class="cap">Feeds</span></div>
+          <div style="padding:0 8px;display:flex;flex-direction:column;gap:1px">
+            <div class="ni" aria-current="true"><i data-i="rss"></i><span class="ell">All feeds</span><span class="c">42</span></div>
+            <div class="ni"><i data-i="rss"></i><span class="ell">Ubuntu releases</span><span class="c">3</span></div>
+            <div class="ni"><i data-i="rss"></i><span class="ell">Internet Archive · new</span><span class="c">28</span></div>
+            <div class="ni"><i data-i="rss"></i><span class="ell">Blender builds</span><span class="c">11</span></div>
+            <div class="ni" style="color:var(--danger)"><i data-i="alertCircle"></i><span class="ell">Old feed</span><span class="c">410</span></div>
+          </div>
+        </div>
+        <div data-pane="rss:art">
+          <div class="art-i sel"><b>ubuntu-24.10-desktop-amd64.iso</b><span class="badge st-downloading">Downloading</span><span class="help">Ubuntu releases · 2 h ago · 5.7 GB</span></div>
+          <div class="art-i"><b>ubuntu-24.10-live-server-amd64.iso</b><span class="badge st-paused">New</span><span class="help">Ubuntu releases · 2 h ago · 2.6 GB</span></div>
+          <div class="art-i"><b>Blender 4.3 beta 2024-11-05</b><span class="badge st-completed">Added by rule</span><span class="help">Blender builds · yesterday</span></div>
+          <div class="art-i"><b>Public domain films collection 12</b><span class="badge st-paused">New</span><span class="help">Internet Archive · Mon</span></div>
+          <div class="art-i" style="opacity:.55"><b>Lecture recordings · week 9</b><span class="badge st-paused">Read</span><span class="help">Internet Archive · Sun</span></div>
+        </div>
+        <div data-pane="rss:rules" hidden>
+          <div class="art-i sel"><b>Ubuntu desktop ISOs</b><label class="sw"><input type="checkbox" checked></label><span class="help">Matched 3 · last 2 h ago</span></div>
+          <div class="art-i"><b>Blender nightly</b><label class="sw"><input type="checkbox" checked></label><span class="help">Matched 11</span></div>
+          <div class="art-i"><b>Lectures</b><label class="sw"><input type="checkbox"></label><span class="help">Off</span></div>
+          <div style="padding:10px"><button class="btn sm"><i data-i="plus" class="s"></i>New rule</button></div>
+        </div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:12px" data-pane="rss:art">
+          <b style="font-size:15px">ubuntu-24.10-desktop-amd64.iso</b>
+          <dl class="kv"><dt>Feed</dt><dd>Ubuntu releases</dd><dt>Published</dt><dd>today 08:02</dd><dt>Size</dt><dd>5.7 GB</dd><dt>Link</dt><dd class="mono">magnet:?xt=urn:btih:…</dd></dl>
+          <p class="t2" style="margin:0;font-size:13.5px">Ubuntu 24.10 "Oracular Oriole" desktop image for 64-bit PC (AMD64).</p>
+          <div class="row-f"><button class="btn primary sm"><i data-i="download" class="s"></i>Download</button><button class="btn sm"><i data-i="external" class="s"></i>Open page</button></div>
+        </div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:12px" data-pane="rss:rules" hidden>
+          <div class="field"><label class="lbl">Rule name</label><input class="input" value="Ubuntu desktop ISOs"></div>
+          <div class="field"><label class="lbl">Must contain</label><input class="input mono" value="ubuntu desktop amd64"></div>
+          <div class="field"><label class="lbl">Must not contain</label><input class="input mono" value="beta | daily"></div>
+          <label class="chk"><input type="checkbox" checked>Use regular expressions</label>
+          <div class="fgrid"><div class="field"><label class="lbl">Feeds</label><select class="select"><option>Ubuntu releases</option></select></div><div class="field"><label class="lbl">Category</label><select class="select"><option>ISO</option></select></div></div>
+          <div><span class="cap">Preview · matches 3 of 42</span><div class="card" style="margin-top:6px;padding:8px 10px;font-size:13px;display:flex;flex-direction:column;gap:4px"><span class="okc">✓ ubuntu-24.10-desktop-amd64.iso</span><span class="okc">✓ ubuntu-24.04.1-desktop-amd64.iso</span><span class="t3">✗ ubuntu-24.10-live-server-amd64.iso</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="stats" data-t="Statistics">
+    <header><span class="cap">Tab · PLAN §4.11, §4.17</span><h2>Statistics</h2><p>Honest numbers. Every speed here is measured payload; the graph and the status bar read the same samples. History is kept for 90 days in SQLite.</p></header>
+    <div class="win" style="padding:16px;gap:16px;background:var(--surface)">
+      <div class="row-f"><div class="seg"><button aria-pressed="true">Today</button><button>7 days</button><button>30 days</button><button>All time</button></div><span class="grow"></span><button class="btn sm"><i data-i="upload" class="s"></i>Export CSV</button></div>
+      <div class="stats">
+        <div class="stat"><span class="cap">Downloaded</span><span class="v num">48.2<small>GB</small></span><span class="d">Torrents 31.0 · direct 17.2</span></div>
+        <div class="stat"><span class="cap">Uploaded</span><span class="v num">12.9<small>GB</small></span><span class="d">Ratio 0.27 today</span></div>
+        <div class="stat"><span class="cap">Peak ↓ (1 s)</span><span class="v num">22.4<small>MB/s</small></span><span class="d">09:41 · Blender, 16 conn.</span></div>
+        <div class="stat"><span class="cap">Time saved by connections</span><span class="v num">14<small>min</small></span><span class="d">vs 1 connection, measured per file</span></div>
+      </div>
+      <div class="gwrap"><div class="row-f" style="margin-bottom:6px"><b>Speed</b><span class="grow"></span><span class="legend"><span style="--c:var(--down)"><i></i>Download</span><span style="--c:var(--up)"><i></i>Upload</span><span style="--c:var(--text3)"><i></i>Limit 20 MB/s</span></span></div><canvas class="graph" id="sg" style="height:180px"></canvas></div>
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px">
+        <div class="card"><div class="row-f" style="margin-bottom:10px"><b class="grow">Last 14 days</b><span class="legend"><span style="--c:var(--k-bt)"><i></i>Torrents</span><span style="--c:var(--k-http)"><i></i>Direct</span></span></div><div class="bars" id="bars"></div></div>
+        <div class="card" style="display:flex;flex-direction:column;gap:10px"><div class="row-f"><b class="grow">Monthly data cap</b><span class="num">412 / 1000 GB</span></div><div class="cap-meter"><i style="width:41.2%"></i><b style="left:80%" title="Warn at 80 %"></b></div><span class="help">Resets on the 1st · at this pace you'll use ~ 760 GB · warns at 80 %, then pauses</span>
+          <dl class="kv" style="margin-top:6px"><dt>Session</dt><dd>3 h 12 m · 41 GB ↓</dd><dt>All time</dt><dd>4.1 TB ↓ · 2.3 TB ↑ · ratio 0.56</dd><dt>Hash fails</dt><dd>12 pieces (24 MB wasted)</dd><dt>Disk</dt><dd>Read 12 MB/s · write 18 MB/s · cache hits 94 %</dd></dl></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="logs" data-t="Diagnostics & log">
+    <header><span class="cap">Tab · PLAN §4.12</span><h2>Diagnostics &amp; log</h2><p>Opened from Help → Diagnostics. Self-checks first (each with a fix button), then the full log with level filters.</p></header>
+    <div class="win tall">
+      <div class="tabs" data-tabs="dg" style="padding:0 12px"><button class="tab" data-tab="chk" aria-selected="true">Checks</button><button class="tab" data-tab="log">Log <span class="cnt">2,418</span></button><button class="tab" data-tab="net">Network</button></div>
+      <div class="pane-b" data-pane="dg:chk" style="padding:16px">
+        <div class="grp card" style="padding:0">
+          <div class="chk-row"><i data-i="check" class="okc"></i><div class="grow"><b>Port 51413 reachable from the internet</b><span class="help">UPnP mapped on router 192.168.1.1</span></div><button class="btn sm ghost">Test again</button></div>
+          <div class="chk-row"><i data-i="check" class="okc"></i><div class="grow"><b>DHT healthy</b><span class="help">412 nodes · last bootstrap 09:01</span></div></div>
+          <div class="chk-row"><i data-i="alert" class="warnc"></i><div class="grow"><b>Windows Firewall rule missing for µTP</b><span class="help">Incoming µTP may be blocked</span></div><button class="btn sm">Add rule…</button></div>
+          <div class="chk-row"><i data-i="check" class="okc"></i><div class="grow"><b>VPN bound (wg0) · no leak</b><span class="help">Peers see your VPN address</span></div></div>
+          <div class="chk-row"><i data-i="alertCircle" class="errc"></i><div class="grow"><b>Browser extension (Chrome) can't reach Rift</b><span class="help">Native messaging host not registered for Chrome</span></div><button class="btn sm primary">Fix</button></div>
+          <div class="chk-row"><i data-i="check" class="okc"></i><div class="grow"><b>Disk D: writable · 412 GB free</b><span class="help">Write test 1.4 GB/s</span></div></div>
+        </div>
+        <div class="row-f" style="margin-top:12px"><button class="btn"><i data-i="copy"></i>Copy report</button><span class="help">Report contains no file names or IPs unless you tick "include details".</span></div>
+      </div>
+      <div class="pane-b" data-pane="dg:log" hidden>
+        <div class="pane-h"><div class="seg"><button aria-pressed="true">All</button><button>Info</button><button>Warnings</button><button>Errors</button></div><select class="select" style="width:150px"><option>All sources</option><option>Session</option><option>Torrent</option><option>HTTP</option><option>Disk</option><option>Network</option></select><div class="ig grow"><i data-i="search"></i><input class="input" placeholder="Filter log"></div><button class="btn sm ghost" data-toggle aria-pressed="true">Follow</button><button class="btn sm"><i data-i="copy" class="s"></i>Copy</button></div>
+        <div class="logv" id="logv"></div>
+      </div>
+      <div class="pane-b" data-pane="dg:net" hidden style="padding:16px">
+        <div class="diag">
+          <div class="stat"><span class="cap">Connections</span><span class="v num">218<small>/ 500</small></span><span class="d">TCP 79 · µTP 139 · half-open 4</span></div>
+          <div class="stat"><span class="cap">Overhead</span><span class="v num">3.1<small>%</small></span><span class="d">Protocol traffic not counted in speeds</span></div>
+          <div class="stat"><span class="cap">Interface</span><span class="v num" style="font-size:20px">wg0</span><span class="d">10.64.0.2 · MTU 1420</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const R = [['ubuntu-24.04.1-desktop-amd64.iso', 5940, 4120, 312, 'Linux ISOs', 1], ['ubuntu-24.04.1-live-server-amd64.iso', 2690, 1822, 98, 'Linux ISOs'], ['Ubuntu 24.04 LTS (all flavours)', 31200, 210, 44, 'Internet Archive'], ['ubuntu-24.04-desktop-arm64.iso', 3020, 188, 20, 'Linux ISOs'], ['Ubuntu 24.04 install guide (PDF)', 12, 64, 2, 'Internet Archive'], ['kubuntu-24.04-desktop-amd64.iso', 4100, 51, 9, 'Linux ISOs'], ['ubuntu-mate-24.04-desktop-amd64.iso', 4300, 12, 3, 'Linux ISOs'], ['ubuntu-24.04-netboot.tar.gz', 90, 0, 1, 'Internet Archive']];
+  document.getElementById('sres').innerHTML = R.map(([n, mb, s, p, src, added]) => `<div class="tr ${added ? 'dim' : ''}"><div class="nm"><span class="health h${s > 500 ? 3 : s > 20 ? 2 : 1}"><i></i><i></i><i></i></span><b class="ell">${n}</b></div><span class="num r">${fmtBytes(mb)}</span><span class="num r ${s ? 'down' : 'err'}">${s.toLocaleString()}</span><span class="num r">${p}</span><span class="t2 ell" style="font-size:13px">${src}</span>${added ? '<span class="badge st-downloading">Added</span>' : '<button class="btn sm">' + ico('download', 's') + 'Download</button>'}</div>`).join('');
+  const bars = document.getElementById('bars'); let h = '';
+  for (let i = 0; i < 14; i++) { const t = 20 + Math.abs(Math.sin(i * 1.7)) * 60, w = 8 + Math.abs(Math.cos(i * 2.3)) * 40; h += `<span title="Day ${i + 1}"><i style="height:${w}px;background:var(--k-http)"></i><i style="height:${t}px;background:var(--k-bt)"></i></span>`; }
+  bars.innerHTML = h;
+  const n = 300, dn = [], up = []; for (let i = 0; i < n; i++) { const base = i < 60 ? 4 : i < 140 ? 18 + Math.sin(i / 5) * 1.5 : i < 200 ? 9 : 14; dn.push(Math.max(0, Math.min(20, base + (Math.random() - .5) * 2))); up.push(1.5 + Math.random() * .8); }
+  const draw = () => drawGraph(document.getElementById('sg'), [{ data: dn, color: '--down', fill: 1 }, { data: up, color: '--up', width: 1.4 }], { limit: 20, max: 24 });
+  draw(); addEventListener('themechange', draw); addEventListener('resize', draw);
+  const L = [['INFO', 'Session', 'Rift 1.0.2 started · libtorrent 2.0.10 · 32 torrents restored'], ['INFO', 'Network', 'Listening on 0.0.0.0:51413 (TCP, µTP) · bound to wg0'], ['INFO', 'Network', 'UPnP: mapped 51413 on 192.168.1.1'], ['INFO', 'HTTP', 'Blender-4.2…zip: probe ok · 1.20 GB · ranges · ETag'], ['INFO', 'HTTP', 'Blender-4.2…zip: 2 → 4 connections (+87 % speed)'], ['INFO', 'HTTP', 'Blender-4.2…zip: 4 → 8 connections (+41 %)'], ['INFO', 'HTTP', 'Blender-4.2…zip: 8 → 16 connections (+3 %) · reverted to 8'], ['WARN', 'Torrent', 'archlinux…iso: tracker archlinux.org timed out'], ['WARN', 'Disk', 'LibreOffice…msi: low free space on D: (4.2 GB)'], ['ERROR', 'Disk', 'LibreOffice…msi: write failed: There is not enough space on the disk (112)'], ['INFO', 'Torrent', 'Sintel.2010…mkv: ratio 3.2 reached goal 3.0 · keeps seeding (rule "keep-seeding")'], ['INFO', 'Session', 'Kill switch armed on wg0']];
+  document.getElementById('logv').innerHTML = L.map(([lv, src, m], i) => `<div class="r ${lv === 'ERROR' ? 'e' : ''}"><span class="t3">2026-11-07 09:${String(1 + i * 3).padStart(2, '0')}:${String(i * 7 % 60).padStart(2, '0')}</span><span class="${lv === 'WARN' ? 'warnc' : lv === 'ERROR' ? 'errc' : 't3'}" style="font-weight:700">${lv}</span><span class="t2">${src}</span><span>${m}</span></div>`).join('');
+  // seg used as tab group for RSS: keep aria-pressed in sync
+  document.querySelector('[data-tabs="rss"]').addEventListener('tabchange', (e) => e.currentTarget.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tab === e.detail))));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift App Design: System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.type-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+.icons div{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px 10px;border-radius:8px;background:var(--raised);border:1px solid var(--line-soft);font-size:12px;color:var(--text3);font-family:var(--mono)}
+.icons div .ico{width:20px;height:20px;color:var(--text)}
+.demo{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.col{display:flex;flex-direction:column;gap:12px}
+.box{padding:18px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.box h4{margin:0 0 12px;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.two,.three{grid-template-columns:1fr}}
+.mot{display:flex;gap:10px;flex-wrap:wrap}
+.mot div{flex:1;min-width:150px;padding:12px;border-radius:8px;background:var(--raised);border:1px solid var(--line)}
+.mot i{display:block;width:14px;height:14px;border-radius:4px;background:var(--accent);margin-bottom:10px;animation:mv 1.6s infinite alternate}
+@keyframes mv{to{transform:translateX(110px)}}
+.sp{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.sp div{background:var(--accent-soft);border:1px dashed var(--accent);font-family:var(--mono);font-size:11px;color:var(--accent);display:grid;place-items:center}
+.elev{display:flex;gap:20px;flex-wrap:wrap}
+.elev div{width:150px;height:90px;border-radius:10px;background:var(--raised);display:grid;place-items:center;font-family:var(--mono);font-size:12px;color:var(--text2)}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Sections"></nav>
+  <div class="screens">
+
+  <section class="scr" id="principles" data-t="Principles">
+    <header><span class="cap">Rift app design · v1</span><h2>Principles</h2>
+      <p>This is the design the Qt Quick app is built from. Every color, size and motion value here maps to <code class="mono">design/tokens.json</code> and <code class="mono">design/Theme.qml</code>. Use the bar above to switch Stone (light) / Obsidian (dark), density and accent: every screen follows.</p></header>
+    <div class="three">
+      <div class="card rift"><b>Calm list, loud signal.</b><p class="t2" style="margin:6px 0 0">Neutral warm surfaces; color only means something: state, direction (↓ green, ↑ orange), type (torrent cobalt, HTTP orange), or the accent for focus and selection.</p></div>
+      <div class="card rift"><b>Real numbers only.</b><p class="t2" style="margin:6px 0 0">Speeds are measured payload, mono and tabular so they don't jitter. Rows add up to the status-bar total. Limits are shown next to capped speeds (PLAN 4.17).</p></div>
+      <div class="card rift"><b>Keyboard first, mouse friendly.</b><p class="t2" style="margin:6px 0 0">Every action has a menu item, a shortcut and a palette entry. 24 px minimum hit targets, visible focus rings, screen-reader names on every control.</p></div>
+      <div class="card rift"><b>Native, not web.</b><p class="t2" style="margin:6px 0 0">Native window frame and menus on macOS; native file dialogs; system notifications; tray / menu-bar icon. Inside the window, Rift's own components.</p></div>
+      <div class="card rift"><b>One rift signature.</b><p class="t2" style="margin:6px 0 0">Dialogs, cards and empty states use the asymmetric "rift" corner (14 / 4 / 14 / 4). Lists, inputs and menus stay square-ish and dense.</p></div>
+      <div class="card rift"><b>Fast feels fast.</b><p class="t2" style="margin:6px 0 0">Optimistic UI (pause shows instantly), 120–280 ms transitions, no animation on data refresh, and reduced motion honored everywhere.</p></div>
+    </div>
+  </section>
+
+  <section class="scr" id="color" data-t="Color">
+    <header><span class="cap">Tokens</span><h2>Color</h2><p>Surfaces step from <b>window</b> (chrome) → <b>sidebar</b> → <b>surface</b> (lists) → <b>raised</b> (dialogs, menus, cards). Text has three levels. Semantic colors always come with a soft tint for backgrounds.</p></header>
+    <div class="spec" id="swatches"></div>
+    <h4 class="cap" style="margin:22px 0 10px">State colors (torrents and downloads)</h4>
+    <div class="demo" id="states"></div>
+    <h4 class="cap" style="margin:22px 0 10px">Accent choices (Settings → Appearance)</h4>
+    <div class="demo">
+      <span class="chip" style="--c:#B8873A"><i></i>Cobalt (default)</span><span class="chip" style="--c:#2D669E"><i></i>Signal</span><span class="chip" style="--c:#1C7A58"><i></i>Green</span>
+      <span class="chip" style="--c:#7F4BB3"><i></i>Violet</span><span class="chip" style="--c:#2A8A8F"><i></i>Teal</span><span class="chip" style="--c:#B34A6E"><i></i>Rose</span>
+    </div>
+    <div class="notes">
+      <div class="note"><b>Direction:</b> download is always <span class="down">green ↓</span>, upload always <span class="up">orange ↑</span>, in lists, graphs and the tray.</div>
+      <div class="note"><b>Type:</b> <span class="kind bt">TORRENT</span> uses the torrent hue, <span class="kind http">HTTP</span> the signal hue. Never rely on color alone: the label is always present.</div>
+      <div class="note"><b>Contrast:</b> text and text2 meet 4.5:1 on every surface in both themes; text3 is for non-essential metadata only (≥ 3:1).</div>
+    </div>
+  </section>
+
+  <section class="scr" id="type" data-t="Typography">
+    <header><span class="cap">Tokens</span><h2>Typography</h2><p><b>Bricolage Grotesque</b> (variable: weight, width, optical size) for UI and display, <b>JetBrains Mono</b> for numbers, hashes, paths and captions, <b>Instrument Serif</b> italic only for one-word accents in the wizard and empty states. All three are bundled in the app (OFL).</p></header>
+    <div id="typeScale"></div>
+  </section>
+
+  <section class="scr" id="layout" data-t="Space · radius · elevation">
+    <header><span class="cap">Tokens</span><h2>Space, radius, elevation, motion</h2><p>4 px grid. Compact density is the default (30 px rows and controls); Comfortable uses 40 px rows and 34 px controls.</p></header>
+    <div class="two">
+      <div class="box"><h4 class="cap">Spacing</h4><div class="sp" id="spaces"></div></div>
+      <div class="box"><h4 class="cap">Radius</h4><div class="demo">
+        <div style="width:64px;height:44px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:4px;display:grid;place-items:center" class="mono">xs 4</div>
+        <div style="width:64px;height:44px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:6px;display:grid;place-items:center" class="mono">sm 6</div>
+        <div style="width:64px;height:44px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:8px;display:grid;place-items:center" class="mono">md 8</div>
+        <div style="width:64px;height:44px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;display:grid;place-items:center" class="mono">lg 12</div>
+        <div style="width:96px;height:44px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--r-rift);display:grid;place-items:center" class="mono">rift 14/4</div>
+      </div><p class="help" style="margin-top:10px">sm: buttons, inputs · md: cards, menus · rift: dialogs, empty-state art, wizard, KPI cards.</p></div>
+      <div class="box"><h4 class="cap">Elevation</h4><div class="elev">
+        <div style="box-shadow:none;border:1px solid var(--line)">e0 · lists</div><div style="box-shadow:var(--e1)">e1 · tooltip</div><div style="box-shadow:var(--e2)">e2 · menu, toast</div><div style="box-shadow:var(--e3)">e3 · dialog</div>
+      </div></div>
+      <div class="box"><h4 class="cap">Motion</h4><div class="mot">
+        <div><i style="animation-duration:.12s"></i><b>fast 120 ms</b><p class="help">hover, press, checkbox</p></div>
+        <div><i style="animation-duration:.18s"></i><b>base 180 ms</b><p class="help">menus, tabs, switches</p></div>
+        <div><i style="animation-duration:.28s"></i><b>slow 280 ms</b><p class="help">panels, dialogs, progress</p></div>
+        <div><i style="animation-duration:.42s;animation-timing-function:cubic-bezier(.2,1.25,.3,1)"></i><b>emph 420 ms</b><p class="help">toasts, wizard steps</p></div>
+      </div><p class="help" style="margin-top:10px">Standard ease (.2,.8,.2,1); exits (.4,0,1,1); spring (.2,1.25,.3,1) only for toasts and the tray-to-window reveal. Reduced motion: opacity fades only.</p></div>
+    </div>
+  </section>
+
+  <section class="scr" id="icons" data-t="Icons">
+    <header><span class="cap">Assets</span><h2>Icons</h2><p>One custom set on a 24 × 24 grid, 1.75 px stroke, round caps. Rendered at 16 px (default), 14 px (dense), 20 px (toolbar on comfortable) and 32 px (empty states). Ship as SVG in <code class="mono">ui/assets/icons/</code>.</p></header>
+    <div class="icons" id="iconGrid"></div>
+  </section>
+
+  <section class="scr" id="buttons" data-t="Buttons">
+    <header><span class="cap">Components</span><h2>Buttons</h2><p>Primary for the one main action in a view; default for everything else; ghost in toolbars; danger only to confirm destructive actions.</p></header>
+    <div class="two">
+      <div class="box col"><h4 class="cap">Variants</h4>
+        <div class="demo"><button class="btn primary"><i data-i="plus"></i>Add</button><button class="btn">Default</button><button class="btn ghost"><i data-i="pause"></i>Ghost</button><button class="btn danger"><i data-i="trash"></i>Delete files</button><button class="btn danger-ghost">Remove</button></div>
+        <div class="demo"><button class="btn primary sm">Small</button><button class="btn sm"><i data-i="copy" class="s"></i>Copy</button><button class="btn icon" aria-label="Settings"><i data-i="settings"></i></button><button class="btn icon ghost" aria-label="More"><i data-i="more"></i></button><button class="btn" disabled>Disabled</button></div>
+        <div class="demo"><div class="split"><button class="btn primary"><i data-i="plus"></i>Add</button><button class="btn primary" aria-label="More add options"><i data-i="chevD" class="s"></i></button></div>
+          <button class="btn ghost" aria-pressed="true" data-toggle><i data-i="turtle"></i>Alt speed</button><button class="btn">Open <span class="kbd">Ctrl O</span></button></div>
+      </div>
+      <div class="box col"><h4 class="cap">States</h4>
+        <div class="kv"><dt>Rest</dt><dd>raised, 1 px line</dd><dt>Hover</dt><dd>surface + stronger line (fast)</dd><dt>Pressed</dt><dd>pressed overlay, 0.5 px down</dd><dt>Focus</dt><dd>2 px accent ring, 2 px offset</dd><dt>Disabled</dt><dd>42 % opacity, no pointer</dd><dt>Loading</dt><dd>label stays, 14 px spinner replaces icon</dd><dt>Heights</dt><dd>30 / 34 (comfortable) · small 24 / 28</dd></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="inputs" data-t="Inputs & toggles">
+    <header><span class="cap">Components</span><h2>Inputs, selects, toggles</h2><p>Labels sit above fields (12 px, text2). Help text below (12 px, text3). Errors replace help text and turn the field border danger.</p></header>
+    <div class="two">
+      <div class="box col">
+        <div class="field"><label for="i1">Save to</label><div class="ig"><i data-i="folder"></i><input class="input" id="i1" value="D:\Downloads\Rift"><span class="tail"><button class="btn sm">Browse…</button></span></div><span class="help">Free space: 412 GB</span></div>
+        <div class="field"><label for="i2">Download limit</label><div class="ig unit"><input class="input mono" id="i2" value="5000"><span class="u">KB/s</span></div></div>
+        <div class="field"><label for="i3">Magnet link</label><input class="input mono err" id="i3" value="magnet:?xt=urn:btih:zz"><span class="help err">That's not a valid magnet link: the info-hash must be 40 hex or 32 base32 characters.</span></div>
+        <div class="field"><label for="i4">Category</label><select class="select" id="i4"><option>Movies</option><option>Media / TV</option><option>Software</option></select></div>
+        <div class="ig"><i data-i="search"></i><input class="input" placeholder="Filter downloads  (Ctrl F)"><span class="tail"><button class="btn sm ghost" aria-label="Regex" title="Regex">.*</button></span></div>
+      </div>
+      <div class="box col">
+        <label class="chk"><input type="checkbox" checked> Start download</label>
+        <label class="chk"><input type="checkbox" data-indet> Some files selected</label>
+        <label class="chk"><input type="checkbox"> Skip hash check</label>
+        <label class="rad"><input type="radio" name="r" checked> Original layout</label>
+        <label class="rad"><input type="radio" name="r"> Create subfolder</label>
+        <label class="sw"><input type="checkbox" checked> Sequential download</label>
+        <label class="sw"><input type="checkbox"> First and last pieces first</label>
+        <div class="seg" role="group"><button aria-pressed="true">Prefer</button><button aria-pressed="false">Require</button><button aria-pressed="false">Disable</button></div>
+        <div class="field"><label>Connections <span class="mono t3">8</span></label><input class="range" type="range" min="1" max="32" value="8"></div>
+        <div class="drop"><i data-i="download" class="l"></i><div><b>Drop .torrent files or links here</b><div class="help">or paste with Ctrl V</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="status" data-t="Badges & chips">
+    <header><span class="cap">Components</span><h2>Status, type, tags</h2><p>Status badges are the only place state color fills a background. Type chip on every row. Tags are user-colored pills.</p></header>
+    <div class="box col">
+      <div class="demo" id="badgeRow"></div>
+      <div class="demo"><span class="kind bt">TORRENT</span><span class="kind http">HTTP</span><span class="kind http">FTP</span><span class="priv">PRIVATE</span><span class="flag">DE</span><span class="flag">JP</span>
+        <span class="health h3" title="Healthy"><i></i><i></i><i></i></span><span class="health h2" title="Slow"><i></i><i></i><i></i></span><span class="health h1" title="Dead"><i></i><i></i><i></i></span></div>
+      <div class="demo"><span class="chip" style="--c:#B8873A"><i></i>linux</span><span class="chip" style="--c:#1C7A58"><i></i>keep-seeding</span><span class="chip" style="--c:#2D669E"><i></i>4k<span class="x">✕</span></span><span class="chip" style="--c:#7F4BB3"><i></i>dead-tracker</span></div>
+    </div>
+  </section>
+
+  <section class="scr" id="progress" data-t="Progress & pieces">
+    <header><span class="cap">Components</span><h2>Progress, segments, pieces</h2><p>Bar color follows state. HTTP downloads show one segment per connection. Torrents show a piece strip in Overview and a piece grid in the Pieces tab.</p></header>
+    <div class="two">
+      <div class="box col">
+        <div class="row-f"><div class="prog grow"><i style="width:62%"></i></div><span class="mono t2">62.0%</span></div>
+        <div class="row-f"><div class="prog grow"><i style="width:100%;--pc:var(--success)"></i></div><span class="mono t2">100%</span></div>
+        <div class="row-f"><div class="prog grow"><i style="width:40%;--pc:var(--text3)"></i></div><span class="mono t2">Paused</span></div>
+        <div class="row-f"><div class="prog grow"><i style="width:33%;--pc:var(--warning)"></i></div><span class="mono t2">Stalled</span></div>
+        <div class="row-f"><div class="prog grow"><i style="width:71%;--pc:var(--violet)"></i></div><span class="mono t2">Checking</span></div>
+        <div class="row-f"><div class="prog grow indet"><i style="--pc:var(--violet)"></i></div><span class="mono t2">Metadata</span></div>
+        <div class="row-f"><div class="segbar grow" id="segDemo"></div><span class="mono t2">8 conn.</span></div>
+      </div>
+      <div class="box col">
+        <div class="pbar" id="pbarDemo"></div>
+        <div class="pgrid" id="pgridDemo"></div>
+        <div class="legend"><span style="--c:var(--piece-have)"><i></i>Have</span><span style="--c:var(--piece-active)"><i></i>Downloading</span><span style="--c:var(--piece-prio)"><i></i>Streaming priority</span><span style="--c:var(--piece-missing)"><i></i>Missing</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="lists" data-t="List rows">
+    <header><span class="cap">Components</span><h2>List rows</h2><p>Virtualized rows. Hover = hover overlay; selected = selection tint; focused row gets the focus ring inside. Dimmed rows = paused. Right-aligned mono numbers.</p></header>
+    <div class="win" style="max-width:980px">
+      <div class="tbl" style="--cols:minmax(0,2.6fr) 80px 120px 92px 92px 70px">
+        <div class="th"><span class="sorted">Name <i data-i="chevD" class="s"></i></span><span class="r">Size</span><span>Progress</span><span class="r">Down</span><span class="r">Up</span><span class="r">ETA</span></div>
+        <div class="tr"><div class="nm"><span class="kind bt">TORRENT</span><b>ubuntu-24.04.1-desktop-amd64.iso</b></div><span class="num r">5.8 GB</span><div class="prog"><i style="width:62%"></i></div><span class="num r down">6.1 MB/s</span><span class="num r up">920 KB/s</span><span class="num r">6m 10s</span></div>
+        <div class="tr sel"><div class="nm"><span class="kind http">HTTP</span><b>Blender-4.2-windows-x64.zip</b></div><span class="num r">1.2 GB</span><div class="segbar"><span><i style="width:80%"></i></span><span><i style="width:60%"></i></span><span><i style="width:90%"></i></span><span><i style="width:50%"></i></span></div><span class="num r down">9.4 MB/s</span><span class="num r">—</span><span class="num r">1m 17s</span></div>
+        <div class="tr dim"><div class="nm"><span class="kind bt">TORRENT</span><b>debian-12.7.0-amd64-DVD-1.iso</b></div><span class="num r">3.7 GB</span><div class="prog"><i style="width:21%;--pc:var(--text3)"></i></div><span class="num r">—</span><span class="num r">—</span><span class="num r">Paused</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="overlays" data-t="Menus · tips · toasts">
+    <header><span class="cap">Components</span><h2>Menus, tooltips, toasts, notifications, banners</h2><p>Context menus are native on macOS (same items); Rift-drawn elsewhere so they match the theme.</p></header>
+    <div class="stage center">
+      <div class="menu" role="menu">
+        <div class="mi"><i data-i="play"></i>Resume<span class="sc">Space</span></div>
+        <div class="mi hl"><i data-i="pause"></i>Pause<span class="sc">Space</span></div>
+        <div class="mi"><i data-i="zap"></i>Force start</div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="folderOpen"></i>Open folder<span class="sc">Ctrl ⏎</span></div>
+        <div class="mi"><i data-i="copy"></i>Copy<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Sequential download</div>
+        <div class="mi dis"><i data-i="stream"></i>Stream (no video files)</div>
+        <div class="ms"></div>
+        <div class="mi danger"><i data-i="trash"></i>Remove…<span class="sc">Del</span></div>
+      </div>
+      <div class="col" style="gap:20px">
+        <span class="tip"><b>Stalled:</b> no seeds connected for 4 min. 2 trackers unreachable; DHT found 0 peers.</span>
+        <span class="tip">Speed is capped: <b>4.9 of 5 MB/s</b> global limit.</span>
+        <div class="toast" style="position:relative">Removed “debian-12.7.0-amd64-DVD-1.iso” <button class="btn sm"><i data-i="undo" class="s"></i>Undo</button><span class="tbar"><i></i></span></div>
+        <div class="notif"><div class="ap"><svg class="ico" viewBox="0 0 24 24" style="stroke:#fff">${''}</svg></div><b>Download complete</b><p>ubuntu-24.04.1-desktop-amd64.iso · 5.8 GB</p><div class="acts"><button class="btn sm">Open</button><button class="btn sm">Show in folder</button></div></div>
+      </div>
+      <div class="col" style="min-width:380px">
+        <div class="banner danger" style="border:1px solid var(--line);border-radius:8px"><i data-i="shieldOff"></i><span class="grow"><b>VPN disconnected.</b> All downloads paused by the kill switch.</span><button class="btn sm">Resume anyway</button></div>
+        <div class="banner warn" style="border:1px solid var(--line);border-radius:8px"><i data-i="disk"></i><span class="grow"><b>Low disk space</b> on D: (4.2 GB left). Downloads paused.</span><button class="btn sm">Change folder</button></div>
+        <div class="banner info" style="border:1px solid var(--line);border-radius:8px"><i data-i="magnet"></i><span class="grow">Magnet link on the clipboard.</span><button class="btn sm primary">Add</button><button class="btn sm ghost" aria-label="Dismiss"><i data-i="x" class="s"></i></button></div>
+        <div class="banner ok" style="border:1px solid var(--line);border-radius:8px"><i data-i="check"></i><span class="grow">Rift 1.1.0 is ready to install.</span><button class="btn sm">Restart now</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="numbers" data-t="Numbers & speed">
+    <header><span class="cap">Rules</span><h2>Numbers, units and speed</h2><p>From PLAN 4.17. These rules apply everywhere a number appears: list, details, tray tooltip, mini mode, notifications.</p></header>
+    <div class="two">
+      <div class="box"><dl class="kv">
+        <dt>Speed</dt><dd class="mono">0 B/s · 820 KB/s · 9.4 MB/s · 112 MB/s (or 75.2 Mbit/s in bits mode)</dd>
+        <dt>Capped</dt><dd class="mono">4.9 MB/s <span class="t3">of 5 MB/s</span></dd>
+        <dt>Size</dt><dd class="mono">912 KB · 48.2 MB · 5.82 GB · 1.4 TB (1 decimal ≥ 10)</dd>
+        <dt>Progress</dt><dd class="mono">0.0% · 62.4% · 99.9% · 100% (never 100% until verified)</dd>
+        <dt>ETA</dt><dd class="mono">42s · 6m 10s · 3h 05m · 2d 4h · ∞ (speed 0) · Unknown (no size)</dd>
+        <dt>Ratio</dt><dd class="mono">0.00 · 1.37 · 12.0 · ∞</dd>
+        <dt>Dates</dt><dd>“3 min ago”, “Yesterday 21:40”; absolute date on hover</dd>
+        <dt>Peers</dt><dd class="mono">84 <span class="t3">(412)</span> = connected (swarm)</dd>
+      </dl></div>
+      <div class="box col"><div class="row-f"><div class="stat grow"><span class="cap">Download</span><span class="v down">18.4<small>MB/s</small></span><span class="d">smoothed 5 s · of 20 MB/s limit</span></div><div class="stat grow"><span class="cap">Upload</span><span class="v up">2.1<small>MB/s</small></span><span class="d">no limit</span></div></div>
+        <p class="help">Smoothed value (5 s EMA) in lists and tray; current value (1 s) in graphs. Drops to 0 within 2 s of no data. Payload only; overhead shown in Statistics.</p></div>
+    </div>
+  </section>
+
+  <section class="scr" id="empty" data-t="Empty states">
+    <header><span class="cap">Components</span><h2>Empty, loading, error states</h2><p>Every view has all four. Empty states teach the next action and show its shortcut.</p></header>
+    <div class="three">
+      <div class="win" style="height:300px"><div class="empty"><div class="art"><i data-i="download" class="xl"></i></div><h3>Nothing downloading <span class="serif" style="color:var(--accent)">yet.</span></h3><p>Drop a .torrent here, or press <span class="kbd">Ctrl V</span> to paste a magnet or link.</p><div class="acts"><button class="btn primary"><i data-i="plus"></i>Add</button></div></div></div>
+      <div class="win" style="height:300px"><div class="empty"><div class="art" style="background:var(--hover);color:var(--text3)"><i data-i="filter" class="xl"></i></div><h3>No matches</h3><p>Nothing in “Seeding” matches “bunny”.</p><div class="acts"><button class="btn">Clear filter</button></div></div></div>
+      <div class="win" style="height:300px"><div class="empty"><div class="art" style="background:var(--danger-soft);color:var(--danger)"><i data-i="alertCircle" class="xl"></i></div><h3>Couldn't load trackers</h3><p>The torrent's metadata hasn't arrived yet. Rift will retry automatically.</p><div class="acts"><button class="btn">Retry now</button></div></div></div>
+    </div>
+  </section>
+
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sw = [['window','App chrome'],['sidebar','Sidebar, status bar'],['surface','Lists, panels'],['raised','Dialogs, menus, cards'],['sunken','Wells, segmented'],['input','Text fields'],
+    ['text','Primary text'],['text2','Secondary text'],['text3','Metadata'],['accent','Focus, selection, primary'],['signal','HTTP, streaming, upload'],['success','Seeding, done, download'],
+    ['warning','Stalled, alt speed'],['danger','Errors, kill switch'],['violet','Checking, moving, metadata'],['line','Borders']];
+  const cs = getComputedStyle(document.documentElement);
+  const paintSw = () => { document.getElementById('swatches').innerHTML = sw.map(([k, d]) => `<div class="swatch" style="--c:var(--${k})"><i></i><div><span><b>${k}</b><br><span class="t3">${d}</span></span><code>${getComputedStyle(document.documentElement).getPropertyValue('--' + k).trim()}</code></div></div>`).join(''); };
+  paintSw(); document.addEventListener('themechange', paintSw);
+  const st = ['downloading','seeding','completed','streaming','paused','queued','stalled','checking','moving','metadata','error','killswitch','scheduled'];
+  const lab = { metadata: 'Fetching metadata', killswitch: 'Paused by kill switch' };
+  const b = st.map((s) => `<span class="badge st-${s}">${lab[s] || s[0].toUpperCase() + s.slice(1)}</span>`).join('');
+  document.getElementById('states').innerHTML = b; document.getElementById('badgeRow').innerHTML = b;
+  const ts = [['hero 56/52','display','<span class="display" style="font-size:56px;line-height:52px">18.4 MB/s</span>'],['display 44','display','<span class="display" style="font-size:44px;line-height:44px">Welcome to <span class="serif" style="color:var(--accent)">Rift.</span></span>'],
+    ['page 28','page title','<span class="display" style="font-size:28px;line-height:30px">Settings</span>'],['section 20','section','<b style="font-size:20px;letter-spacing:-.02em">Connection</b>'],['title 15','dialog title','<b style="font-size:15px">Add torrent</b>'],
+    ['body 13','default','The quick brown fox downloads the whole swarm.'],['bodyStrong 13','names in lists','<b style="font-weight:650">ubuntu-24.04.1-desktop-amd64.iso</b>'],['small 12','help, secondary','<span style="font-size:13px" class="t2">Free space: 412 GB on D:</span>'],
+    ['num 12 mono','numbers','<span class="mono">9.4 MB/s · 62.4% · 6m 10s · 4f1e…9a0c</span>'],['caption 11 mono','labels','<span class="cap">Trackers · 12</span>']];
+  document.getElementById('typeScale').innerHTML = ts.map(([a, b2, c]) => `<div class="type-row"><div><b class="mono" style="font-size:12.5px">${a}</b><div class="help">${b2}</div></div><div>${c}</div></div>`).join('');
+  document.getElementById('spaces').innerHTML = [2,4,6,8,12,16,20,24,32,40,48].map((v) => `<div style="width:${v}px;height:${v}px">${v >= 16 ? v : ''}</div>`).join('') + '<span class="help">2 · 4 · 6 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48</span>';
+  document.getElementById('iconGrid').innerHTML = Object.keys(ICON).map((k) => `<div>${ico(k)}<span>${k}</span></div>`).join('');
+  const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+  document.getElementById('segDemo').innerHTML = segc.map((c, i) => `<span><i style="--c:${c};width:${[90,70,100,55,80,40,95,62][i]}%"></i></span>`).join('');
+  let p = ''; for (let i = 0; i < 120; i++) { const r = Math.sin(i * 12.9898) * 43758.5; const f = r - Math.floor(r); p += `<i class="${i < 40 || f < .5 ? 'h' : f < .58 ? 'a' : (i > 60 && i < 68) ? 'p' : ''}"></i>`; }
+  document.getElementById('pbarDemo').innerHTML = p; document.getElementById('pgridDemo').innerHTML = p;
+  document.querySelector('.notif .ap').innerHTML = `<svg class="ico" viewBox="0 0 24 24" style="stroke:#fff;width:18px;height:22px">${ICON.logo}</svg>`;
+});
+</script>
+</body>
+</html>

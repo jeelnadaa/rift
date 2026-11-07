@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift App Design: Main Window</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+#mw{height:920px;min-height:680px}
+#list{--cols:minmax(150px,2fr) 72px 110px 136px 82px 76px 64px 84px}
+#list .th,#list .tr{gap:0 14px}
+.statectl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.ctxwrap{position:absolute;z-index:30}
+.dgrid{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:18px 28px}
+.dgrid h5{margin:0 0 8px;font-size:12px}
+.accel{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:8px;background:var(--raised);border:1px solid var(--line)}
+.accel b{font-size:20px;font-weight:700;letter-spacing:-.02em;font-variation-settings:"wdth" 85}
+.accel .arr{flex:1;height:1.5px;background:linear-gradient(90deg,var(--text3),var(--signal));max-width:120px}
+.bigseg{display:flex;gap:2px;height:14px}
+.bigseg span{flex:var(--w);border-radius:3px;background:var(--piece-missing);position:relative;overflow:hidden}
+.bigseg span i{position:absolute;inset:0 auto 0 0;background:var(--c)}
+.logl{font-family:var(--mono);font-size:12.5px;display:grid;grid-template-columns:70px 54px 1fr;gap:4px 12px}
+.logl .lv{font-weight:700}
+.dtool{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.statusdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.specgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Screens"></nav>
+  <div class="screens">
+
+  <section class="scr" id="main" data-t="Main window">
+    <header><span class="cap">Screen 1 · PLAN §5.1</span><h2>Main window</h2>
+      <p>Interactive. Click rows (Ctrl/Shift for multi-select), right-click for the context menu, switch sidebar filters, sort columns, type in the filter box, and open every details tab. Use the switches to see the window states.</p></header>
+    <div class="statectl">
+      <span class="cap">Window state</span>
+      <div class="seg" id="stateSeg"><button aria-pressed="true" data-s="normal">Normal</button><button data-s="empty">First launch (empty)</button><button data-s="kill">Kill switch</button><button data-s="disk">Low disk</button><button data-s="clip">Magnet on clipboard</button><button data-s="update">Update ready</button></div>
+    </div>
+    <div class="win" id="mw">
+      <div class="wt"><span class="wlogo"><svg class="logo-mark" viewBox="13 0 38 64" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>Rift</span><span class="t3" id="wtSum">↓ 18.4 MB/s · ↑ 2.1 MB/s</span>
+        <span class="wctl"><span><i data-i="minimize" class="s"></i></span><span><i data-i="winMax" class="s"></i></span><span class="x"><i data-i="x" class="s"></i></span></span></div>
+      <div class="tb" role="toolbar" aria-label="Main toolbar">
+        <div class="split"><button class="btn primary" id="addBtn" data-tip="Add a link, magnet or torrent file" data-kbd="Ctrl L"><i data-i="plus"></i>Add</button><button class="btn primary" aria-label="Add options" id="addMore"><i data-i="chevD" class="s"></i></button></div>
+        <span class="sep"></span>
+        <button class="btn ghost icon" data-tip="Resume selected" data-kbd="Space" aria-label="Resume"><i data-i="play"></i></button>
+        <button class="btn ghost icon" data-tip="Pause selected" data-kbd="Space" aria-label="Pause"><i data-i="pause"></i></button>
+        <button class="btn ghost icon" data-tip="Remove selected…" data-kbd="Del" aria-label="Remove"><i data-i="trash"></i></button>
+        <span class="sep"></span>
+        <button class="btn ghost icon" title="Move up in queue" aria-label="Move up"><i data-i="arrowUp2"></i></button>
+        <button class="btn ghost icon" title="Move down in queue" aria-label="Move down"><i data-i="arrowD"></i></button>
+        <span class="sep"></span>
+        <button class="btn ghost" data-toggle aria-pressed="false" data-tip="Alternative speed limits (1 MB/s ↓ · 200 KB/s ↑)" data-kbd="Ctrl Shift A"><i data-i="turtle"></i>Alt speed</button>
+        <div class="grow"></div>
+        <div class="ig search"><i data-i="search"></i><input class="input" id="q" placeholder="Filter  (Ctrl F)" aria-label="Filter downloads"><span class="tail"><button class="btn sm ghost" data-toggle aria-pressed="false" title="Regular expression">.*</button></span></div>
+        <button class="btn ghost" data-tip="Command palette: run any action"><i data-i="cmd"></i><span class="kbd">Ctrl K</span></button>
+        <button class="btn ghost icon" aria-label="Columns and view" title="View options" id="viewBtn"><i data-i="sliders"></i></button>
+        <button class="btn ghost icon" aria-label="Settings" data-tip="Settings" data-kbd="Ctrl ,"><i data-i="settings"></i></button>
+      </div>
+      <div id="bannerSlot"></div>
+      <div class="app" style="position:relative">
+        <aside class="sb" aria-label="Filters" id="sb"></aside>
+        <div class="mainc" id="center">
+          <div id="bulkSlot"></div>
+          <div class="tbl" id="list" style="flex:1;min-height:0;overflow:auto"></div>
+          <div class="split-h" aria-label="Resize details panel" role="separator"></div>
+          <section class="details" id="details" style="height:340px" aria-label="Details"></section>
+        </div>
+      </div>
+      <footer class="sbar" id="sbar"></footer>
+      <div class="ctxwrap" id="ctx" hidden></div>
+    </div>
+    <div class="notes">
+      <div class="note"><b>Layout:</b> sidebar 232 px (184–360, collapsible with Ctrl B). Details panel default 300 px, drag to resize, double-click divider to collapse, or dock right (View → Details on the right).</div>
+      <div class="note"><b>Refresh:</b> rows update in place every 500 ms (1 s when minimized). No row animation on data refresh; only progress width eases (280 ms).</div>
+      <div class="note"><b>Selection:</b> click, Ctrl/Cmd-click, Shift-range, Ctrl A. Multi-select swaps the toolbar for the blue bulk bar. Esc clears.</div>
+      <div class="note"><b>Keyboard:</b> ↑↓ move, Space pause/resume, Del remove, Enter open folder, Ctrl C copy magnet, F2 rename, Ctrl 1–8 details tabs.</div>
+      <div class="note"><b>Drag & drop:</b> dropping files/links anywhere shows a full-window drop overlay ("Drop to add"). Rows can be dragged to reorder the queue or onto a category/tag in the sidebar.</div>
+      <div class="note"><b>Window title & taskbar:</b> title shows total speeds; taskbar/dock shows overall progress; tray tooltip shows ↓/↑ and active count.</div>
+    </div>
+  </section>
+
+  <section class="scr" id="menus" data-t="Menus & column chooser">
+    <header><span class="cap">Screen 1 · menus</span><h2>Add menu, view menu, context menus</h2><p>Every item has an icon, shortcut and a palette entry. Items that don't apply to the selection are disabled with a reason in the tooltip, never hidden.</p></header>
+    <div class="stage center">
+      <div class="menu"><div class="mh cap">Add</div>
+        <div class="mi"><i data-i="link"></i>Link or magnet…<span class="sc">Ctrl L</span></div>
+        <div class="mi"><i data-i="fileTorrent"></i>Torrent file…<span class="sc">Ctrl O</span></div>
+        <div class="mi"><i data-i="list"></i>Many links…<span class="sc">Ctrl Shift L</span></div>
+        <div class="mi"><i data-i="archive"></i>Metalink (.meta4)…</div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="wand"></i>Create torrent…<span class="sc">Ctrl N</span></div>
+        <div class="mi"><i data-i="upload"></i>Import from another app…</div>
+      </div>
+      <div class="menu"><div class="mh cap">View</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Sidebar<span class="sc">Ctrl B</span></div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Details panel<span class="sc">Ctrl D</span></div>
+        <div class="mi"><span class="chkm"></span>Details on the right</div>
+        <div class="mi"><span class="chkm"></span>Group by category</div>
+        <div class="ms"></div><div class="mh cap">Columns</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Size</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Progress</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Status</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Down / Up speed</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>ETA</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Seeds / Peers · Connections</div>
+        <div class="mi"><span class="chkm"></span>Availability · Health</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Ratio</div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Category · Tags</div>
+        <div class="mi"><span class="chkm"></span>Added · Completed · Save path · Tracker · Source</div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="star"></i>Save as smart view…</div>
+        <div class="mi"><i data-i="refresh"></i>Reset columns</div>
+      </div>
+      <div class="menu"><div class="mh cap">Torrent</div>
+        <div class="mi"><i data-i="pause"></i>Pause<span class="sc">Space</span></div>
+        <div class="mi"><i data-i="zap"></i>Force start</div>
+        <div class="mi"><i data-i="recheck"></i>Force recheck</div>
+        <div class="mi"><i data-i="refresh"></i>Force reannounce</div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="stream"></i>Stream…<span class="sc">Ctrl P</span></div>
+        <div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Sequential download</div>
+        <div class="mi"><span class="chkm"></span>First and last pieces first</div>
+        <div class="mi"><span class="chkm"></span>Super seeding</div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="layers"></i>Category<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+        <div class="mi"><i data-i="tag"></i>Tags<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+        <div class="mi"><i data-i="speed"></i>Limits…</div>
+        <div class="mi"><i data-i="sort"></i>Queue<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+        <div class="ms"></div>
+        <div class="mi"><i data-i="folderOpen"></i>Open folder<span class="sc">Enter</span></div>
+        <div class="mi"><i data-i="move"></i>Move files…</div>
+        <div class="mi"><i data-i="edit"></i>Rename…<span class="sc">F2</span></div>
+        <div class="mi"><i data-i="copy"></i>Copy<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+        <div class="mi"><i data-i="fileTorrent"></i>Export .torrent…</div>
+        <div class="ms"></div>
+        <div class="mi danger"><i data-i="trash"></i>Remove…<span class="sc">Del</span></div>
+      </div>
+      <div class="col" style="display:flex;flex-direction:column;gap:16px">
+        <div class="menu"><div class="mh cap">HTTP download</div>
+          <div class="mi"><i data-i="pause"></i>Pause<span class="sc">Space</span></div>
+          <div class="mi"><i data-i="refresh"></i>Restart from zero</div>
+          <div class="mi"><i data-i="link"></i>Refresh link…</div>
+          <div class="mi"><i data-i="server"></i>Connections<span class="sub"><i data-i="chevR" class="s"></i></span></div>
+          <div class="mi"><i data-i="globe"></i>Add mirror…</div>
+          <div class="mi"><i data-i="hash"></i>Verify checksum…</div>
+          <div class="ms"></div>
+          <div class="mi"><i data-i="folderOpen"></i>Open folder<span class="sc">Enter</span></div>
+          <div class="mi"><i data-i="copy"></i>Copy link</div>
+          <div class="ms"></div>
+          <div class="mi danger"><i data-i="trash"></i>Remove…<span class="sc">Del</span></div>
+        </div>
+        <div class="menu"><div class="mh cap">Copy</div>
+          <div class="mi">Magnet link<span class="sc">Ctrl C</span></div><div class="mi">Name</div><div class="mi">Info-hash v1</div><div class="mi">Info-hash v2</div><div class="mi">Save path</div><div class="mi">Comment</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="sbarspec" data-t="Status bar & tray tooltip">
+    <header><span class="cap">Screen 1 · status bar</span><h2>Status bar states</h2><p>Left: speeds (with limit when capped). Middle: connection health. Right: disk, VPN, alt-speed toggle. Every item has a tooltip explaining itself; clicking opens the related settings page.</p></header>
+    <div class="specgrid">
+      <div class="win"><div class="sbar"><span class="it"><span class="statusdot" style="background:var(--success)"></span>Connected · port 51413 open</span></div><div style="padding:10px 12px" class="help">Port reachable (UPnP mapped or tested). DHT &gt; 50 nodes.</div></div>
+      <div class="win"><div class="sbar"><span class="it"><span class="statusdot" style="background:var(--warning)"></span>Firewalled · incoming blocked</span></div><div style="padding:10px 12px" class="help">Works, but slower. Tooltip: "Forward port 51413 or enable UPnP. [Test port]".</div></div>
+      <div class="win"><div class="sbar"><span class="it"><span class="statusdot" style="background:var(--danger)"></span>Offline · no network</span></div><div style="padding:10px 12px" class="help">No interface / bound VPN down. Rift retries quietly; torrents are not marked as errors.</div></div>
+      <div class="win"><div class="sbar"><span class="it num">↓ <b>4.9 MB/s</b> <span class="t3">of 5 MB/s</span></span><span class="it" style="color:var(--warning)"><i data-i="turtle" class="s"></i>Alt speed</span></div><div style="padding:10px 12px" class="help">Alternative limits on (manual, schedule, battery or game mode). Click to toggle.</div></div>
+      <div class="win"><div class="sbar"><span class="it"><i data-i="calendar" class="s"></i>Scheduler: paused until 07:00</span></div><div style="padding:10px 12px" class="help">Shown only while the scheduler overrides the normal state.</div></div>
+      <div class="win"><div class="sbar"><span class="it"><i data-i="shield" class="s"></i>VPN wg0</span><span class="it"><i data-i="disk" class="s"></i>D: 412 GB free</span><span class="it"><i data-i="chart" class="s"></i>412 GB / 1 TB this month</span></div><div style="padding:10px 12px" class="help">VPN binding, free space of the default folder, and the monthly data cap (if set).</div></div>
+    </div>
+  </section>
+
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const TAGC = { linux: '#B8873A', '4k': '#2D669E', 'keep-seeding': '#1C7A58', 'dead-tracker': '#7F4BB3', work: '#2A8A8F' };
+const D = [
+  { id: 1, k: 'bt', n: 'ubuntu-24.04.1-desktop-amd64.iso', mb: 5940, p: .624, s: 'downloading', d: 6.1, u: .92, sp: [84, 412], r: .21, cat: 'ISO', tags: ['linux'], added: 'Today 09:12', tr: 'torrent.ubuntu.com', h: 3, files: 1 },
+  { id: 2, k: 'http', n: 'Blender-4.2-windows-x64.zip', mb: 1230, p: .41, s: 'downloading', d: 9.4, u: 0, conn: 8, cat: 'Programs', tags: [], added: 'Today 09:40', tr: 'download.blender.org', h: 3 },
+  { id: 3, k: 'bt', n: 'bbb-4k-sunflower-60fps.mkv', mb: 3480, p: .332, s: 'streaming', d: 2.3, u: .4, sp: [32, 88], r: .05, cat: 'Video', tags: ['4k'], added: 'Today 10:02', tr: 'tracker.opentrackr.org', h: 3, files: 3 },
+  { id: 4, k: 'bt', n: 'Sintel.2010.1080p.mkv', mb: 1130, p: 1, s: 'seeding', d: 0, u: 1.2, sp: [0, 118], r: 3.2, cat: 'Video', tags: ['keep-seeding'], added: 'Mon 21:40', tr: 'tracker.opentrackr.org', h: 3, files: 2 },
+  { id: 5, k: 'http', n: 'fedora-workstation-41-x86_64.iso', mb: 2350, p: 0, s: 'scheduled', d: 0, u: 0, conn: 0, cat: 'ISO', tags: ['linux'], added: 'Today 10:15', tr: 'download.fedoraproject.org', h: 0, note: 'Starts 02:00' },
+  { id: 6, k: 'bt', n: 'archlinux-2024.11.01-x86_64.iso', mb: 1180, p: .12, s: 'stalled', d: 0, u: 0, sp: [0, 3], r: 0, cat: 'ISO', tags: ['linux'], added: 'Yesterday', tr: 'archlinux.org', h: 1, files: 1 },
+  { id: 7, k: 'bt', n: 'debian-12.7.0-amd64-DVD-1.iso', mb: 3790, p: .21, s: 'paused', d: 0, u: 0, sp: [0, 0], r: 0, cat: 'ISO', tags: [], added: 'Sun 18:03', tr: 'bttracker.debian.org', h: 2, files: 1 },
+  { id: 8, k: 'bt', n: 'Creative Commons Music Pack 2024', mb: 812, p: .71, s: 'checking', d: 0, u: 0, sp: [0, 0], r: 0, cat: 'Music', tags: [], added: 'Today 08:30', tr: 'tracker.files.fm', h: 2, files: 48 },
+  { id: 9, k: 'bt', n: 'magnet: 3b8f2a1c0d4e9f5a…', mb: 0, p: 0, s: 'metadata', d: 0, u: 0, sp: [6, 6], r: 0, cat: '—', tags: [], added: 'Just now', tr: 'DHT', h: 2 },
+  { id: 10, k: 'http', n: 'OBS-Studio-30.2-Full-Installer-x64.exe', mb: 142, p: 1, s: 'completed', d: 0, u: 0, conn: 0, cat: 'Programs', tags: ['work'], added: 'Mon 14:22', tr: 'cdn-fastly.obsproject.com', h: 3 },
+  { id: 11, k: 'bt', n: 'LibreOffice_24.8.2_Win_x86-64.msi', mb: 344, p: .58, s: 'error', d: 0, u: 0, sp: [0, 22], r: 0, cat: 'Programs', tags: [], added: 'Today 07:50', tr: 'tracker.documentfoundation.org', h: 2, err: 'Disk full on D:' },
+  { id: 12, k: 'bt', n: 'Big Buck Bunny Soundtrack (FLAC)', mb: 486, p: 1, s: 'queued', d: 0, u: 0, sp: [0, 0], r: 1.02, cat: 'Music', tags: ['dead-tracker'], added: 'Fri 12:00', tr: 'tracker.example.net', h: 1, files: 14, note: 'Queued #1' },
+];
+const LBL = { metadata: 'Fetching metadata', scheduled: 'Scheduled', killswitch: 'Paused by kill switch' };
+const PC = { downloading: 'var(--accent)', seeding: 'var(--success)', completed: 'var(--success)', streaming: 'var(--signal)', stalled: 'var(--warning)', checking: 'var(--violet)', metadata: 'var(--violet)', error: 'var(--danger)', paused: 'var(--text3)', queued: 'var(--text3)', scheduled: 'var(--text3)', killswitch: 'var(--danger)' };
+const LIMIT = 20;
+let animRows = true, filter = 'all', sel = new Set([2]), anchor = 2, sortK = 'id', sortDir = 1, q = '', state = 'normal', tab = null;
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+
+/* ---------- Sidebar ---------- */
+const filters = [
+  ['h', 'Status'], ['all', 'All', 'list'], ['downloading', 'Downloading', 'arrowD'], ['seeding', 'Seeding', 'arrowU'], ['completed', 'Completed', 'check'], ['paused', 'Paused', 'pause'],
+  ['active', 'Active', 'zap'], ['inactive', 'Inactive', 'clock'], ['stalled', 'Stalled', 'alert'], ['checking', 'Checking · moving', 'recheck'], ['error', 'Errors', 'alertCircle'],
+  ['h', 'Type'], ['k:bt', 'Torrents', 'magnet'], ['k:http', 'Direct links', 'link'],
+  ['h', 'Categories', 1], ['cat:ISO', 'ISO', 'disc'], ['cat:Video', 'Video', 'film'], ['cat:Music', 'Music', 'music'], ['cat:Programs', 'Programs', 'app'],
+  ['h', 'Tags', 1], ...Object.keys(TAGC).map((t) => ['tag:' + t, t, null, TAGC[t]]),
+  ['h', 'Trackers & sites'], ['tr:tracker.opentrackr.org', 'opentrackr.org', 'server'], ['tr:download.blender.org', 'blender.org', 'globe'], ['tr:torrent.ubuntu.com', 'ubuntu.com', 'server'], ['tr:none', 'Errors (1)', 'alert'],
+  ['h', 'Smart views', 1], ['v:big', 'Big & slow', 'star'], ['v:week', 'Added this week', 'star'],
+];
+const match = (it, f) => {
+  if (f === 'all') return true;
+  if (f === 'downloading') return ['downloading', 'streaming', 'stalled', 'metadata'].includes(it.s);
+  if (f === 'active') return it.d > 0 || it.u > 0;
+  if (f === 'inactive') return !(it.d > 0 || it.u > 0);
+  if (f === 'checking') return it.s === 'checking';
+  if (f === 'paused') return ['paused', 'queued', 'scheduled', 'killswitch'].includes(it.s);
+  if (f.startsWith('k:')) return it.k === f.slice(2);
+  if (f.startsWith('cat:')) return it.cat === f.slice(4);
+  if (f.startsWith('tag:')) return it.tags.includes(f.slice(4));
+  if (f.startsWith('tr:')) return f === 'tr:none' ? it.s === 'error' : it.tr === f.slice(3);
+  if (f === 'v:big') return it.mb > 2000 && it.p < 1;
+  if (f === 'v:week') return true;
+  return it.s === f;
+};
+function renderSb() {
+  $('#sb').innerHTML = `<div class="nav-top" role="tablist" aria-label="Sections">
+      <button aria-current="true">${ico('download')}Transfers</button><button onclick="location.href='tabs.html#search'">${ico('search')}Search</button>
+      <button onclick="location.href='tabs.html#rss'">${ico('rss')}RSS</button><button onclick="location.href='tabs.html#stats'">${ico('chart')}Stats</button></div>` +
+    filters.map((f) => f[0] === 'h'
+      ? `<div class="sb-h"><span class="cap">${f[1]}</span>${f[2] ? `<button class="btn icon sm ghost" aria-label="New ${f[1]}">${ico('plus', 's')}</button>` : ''}</div>`
+      : `<div class="ni" tabindex="0" data-f="${f[0]}" aria-current="${filter === f[0]}">${f[3] ? `<span class="sw8" style="--c:${f[3]}"></span>` : ico(f[2])}<span class="ell">${f[1]}</span><span class="c">${D.filter((it) => match(it, f[0])).length}</span></div>`).join('');
+}
+$('#sb').addEventListener('click', (e) => { const n = e.target.closest('.ni'); if (!n) return; filter = n.dataset.f; animRows = true; renderSb(); renderList(); });
+
+/* ---------- List ---------- */
+const COLS = [['n', 'Name'], ['mb', 'Size', 'r'], ['p', 'Progress'], ['s', 'Status'], ['d', 'Down', 'r'], ['u', 'Up', 'r'], ['eta', 'ETA', 'r'], ['sp', 'Seeds/Peers', 'r']];
+function eta(it) { if (it.p >= 1) return '—'; if (it.s === 'metadata' || !it.mb) return 'Unknown'; if (!it.d) return '∞'; return fmtEta((1 - it.p) * it.mb / it.d); }
+function visible() {
+  const rx = (() => { try { return q && new RegExp(q, 'i'); } catch { return null; } })();
+  const regexOn = $('.search [data-toggle]').getAttribute('aria-pressed') === 'true';
+  return D.filter((it) => match(it, filter) && (!q || (regexOn && rx ? rx.test(it.n) : it.n.toLowerCase().includes(q.toLowerCase()))))
+    .sort((a, b) => { const k = sortK === 'eta' ? 'p' : sortK === 'sp' ? 'd' : sortK; const x = a[k], y = b[k]; return (x > y ? 1 : x < y ? -1 : 0) * sortDir * (k === 'added' ? -1 : 1) || a.id - b.id; });
+}
+function progCell(it) {
+  if (it.k === 'http' && it.s === 'downloading') {
+    const ws = [1.2, .8, 1, .9, 1.1, .7, 1, .9];
+    return `<div class="segbar" title="${it.conn} connections">${ws.slice(0, it.conn).map((w, i) => `<span style="--w:${w}"><i style="width:${Math.min(100, it.p * 100 + Math.sin(i * 7.1) * 30 + 10)}%;--c:${['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'][i]}"></i></span>`).join('')}</div>`;
+  }
+  return `<div class="row-f"><div class="prog grow ${it.s === 'metadata' ? 'indet' : ''} ${['downloading', 'streaming'].includes(it.s) && state !== 'kill' ? 'live' : ''}"><i style="width:${it.p * 100}%;--pc:${PC[it.s]}"></i></div><span class="num" style="width:38px;text-align:right">${it.s === 'metadata' ? '' : (it.p >= 1 ? '100%' : (it.p * 100).toFixed(1) + '%')}</span></div>`;
+}
+function rowHTML(it, idx = 0) {
+  const st = state === 'kill' && ['downloading', 'streaming', 'seeding', 'stalled', 'metadata'].includes(it.s) ? 'killswitch' : it.s;
+  const tagdots = it.tags.map((t) => `<span class="sw8 dot" style="--c:${TAGC[t]};width:7px;height:7px" title="${t}"></span>`).join('');
+  const d = state === 'kill' ? 0 : it.d, u = state === 'kill' ? 0 : it.u;
+  return `<div style="--i:${idx}" class="tr ${animRows ? 'enter' : ''} ${sel.has(it.id) ? 'sel' : ''} ${['paused', 'queued', 'scheduled'].includes(st) || st === 'killswitch' ? 'dim' : ''}" data-id="${it.id}" role="row" aria-selected="${sel.has(it.id)}" tabindex="-1">
+    <div class="nm"><span class="kind ${it.k}">${it.k === 'bt' ? 'TORRENT' : 'HTTP'}</span><b title="${it.n}">${it.n}</b>${tagdots}${it.err ? `<span title="${it.err}" class="err">${ico('alertCircle', 's')}</span>` : ''}</div>
+    <span class="num r">${it.mb ? fmtBytes(it.mb) : '—'}</span>
+    ${progCell(it)}
+    <span><span class="badge st-${st} ${['downloading', 'streaming', 'checking', 'metadata'].includes(st) ? 'pulse' : ''}" title="${it.err || it.note || ''}">${LBL[st] || cap(st)}</span></span>
+    <span class="num r ${d ? 'down' : ''}">${d ? fmtSpeed(d) : '—'}</span>
+    <span class="num r ${u ? 'up' : ''}">${u ? fmtSpeed(u) : '—'}</span>
+    <span class="num r">${state === 'kill' && st === 'killswitch' ? '—' : eta(it)}</span>
+    <span class="num r">${it.k === 'bt' ? `${it.sp[0]} <span class="t3">(${it.sp[1]})</span>` : it.conn ? it.conn + ' conn.' : '—'}</span>
+</div>`;
+}
+function renderList() {
+  const rows = visible();
+  $('#list').innerHTML = `<div class="th" role="row">${COLS.map(([k, l, a]) => `<span class="${a || ''} ${sortK === k ? 'sorted' : ''}" data-k="${k}">${l}${sortK === k ? ico(sortDir > 0 ? 'chevU' : 'chevD', 's') : ''}</span>`).join('')}</div>` +
+    (state === 'empty' ? '' : rows.length ? rows.map((r, i) => rowHTML(r, i)).join('') : `<div class="empty" style="height:auto;padding:60px 20px"><div class="art" style="background:var(--hover);color:var(--text3)">${ico('filter', 'xl')}</div><h3>No matches</h3><p>Nothing here matches “${q || filter}”.</p><div class="acts"><button class="btn" id="clearF">Clear filter</button></div></div>`);
+  if (state === 'empty') $('#list').insertAdjacentHTML('beforeend', `<div class="empty" style="height:auto;padding:70px 20px"><div class="art">${ico('download', 'xl')}</div><h3>Nothing downloading <span class="serif" style="color:var(--accent)">yet.</span></h3><p>Drop a .torrent file anywhere in this window, or press <span class="kbd">Ctrl V</span> to paste a magnet or any download link.</p><div class="acts"><button class="btn primary">${ico('plus')}Add link or magnet</button><button class="btn">${ico('fileTorrent')}Open torrent file</button><button class="btn ghost">${ico('ext')}Get the browser extension</button></div></div>`);
+  $('#clearF')?.addEventListener('click', () => { q = ''; $('#q').value = ''; filter = 'all'; renderSb(); renderList(); });
+  renderBulk(); renderStatus(); animRows = false;
+}
+$('#list').addEventListener('click', (e) => {
+  const h = e.target.closest('.th>span'); if (h) { const k = h.dataset.k; sortDir = sortK === k ? -sortDir : 1; sortK = k; animRows = true; renderList(); return; }
+  const r = e.target.closest('.tr'); if (!r) return; const id = +r.dataset.id;
+  if (e.ctrlKey || e.metaKey) { sel.has(id) ? sel.delete(id) : sel.add(id); anchor = id; }
+  else if (e.shiftKey) { const ids = visible().map((x) => x.id); const [a, b] = [ids.indexOf(anchor), ids.indexOf(id)].sort((x, y) => x - y); sel = new Set(ids.slice(a, b + 1)); }
+  else { sel = new Set([id]); anchor = id; }
+  renderList(); renderDetails();
+});
+$('#list').addEventListener('contextmenu', (e) => {
+  const r = e.target.closest('.tr'); if (!r) return; e.preventDefault();
+  const id = +r.dataset.id; if (!sel.has(id)) { sel = new Set([id]); anchor = id; renderList(); renderDetails(); }
+  const it = D.find((x) => x.id === id), mw = $('#mw').getBoundingClientRect();
+  const multi = sel.size > 1;
+  $('#ctx').innerHTML = `<div class="menu" role="menu">${multi ? `<div class="mh cap">${sel.size} selected</div>` : ''}
+    <div class="mi">${ico(it.s === 'paused' ? 'play' : 'pause')}${it.s === 'paused' ? 'Resume' : 'Pause'}<span class="sc">Space</span></div>
+    ${it.k === 'bt' ? `<div class="mi">${ico('zap')}Force start</div><div class="mi">${ico('recheck')}Force recheck</div><div class="mi">${ico('refresh')}Force reannounce</div>` : `<div class="mi">${ico('link')}Refresh link…</div><div class="mi">${ico('server')}Connections<span class="sub">${ico('chevR', 's')}</span></div><div class="mi">${ico('hash')}Verify checksum…</div>`}
+    <div class="ms"></div>
+    ${it.k === 'bt' ? `<div class="mi ${/mkv|mp4/.test(it.n) ? '' : 'dis'}">${ico('stream')}Stream…<span class="sc">Ctrl P</span></div><div class="mi"><span class="chkm">${it.s === 'streaming' ? ico('check', 's') : ''}</span>Sequential download</div>` : ''}
+    <div class="mi">${ico('layers')}Category<span class="sub">${ico('chevR', 's')}</span></div><div class="mi">${ico('tag')}Tags<span class="sub">${ico('chevR', 's')}</span></div><div class="mi">${ico('speed')}Limits…</div>
+    <div class="ms"></div><div class="mi">${ico('folderOpen')}Open folder<span class="sc">Enter</span></div><div class="mi">${ico('move')}Move files…</div><div class="mi">${ico('copy')}Copy${it.k === 'bt' ? ' magnet' : ' link'}<span class="sc">Ctrl C</span></div>
+    <div class="ms"></div><div class="mi danger">${ico('trash')}Remove${multi ? ' ' + sel.size : ''}…<span class="sc">Del</span></div></div>`;
+  const x = Math.min(e.clientX - mw.left, mw.width - 250), y = Math.min(e.clientY - mw.top, mw.height - 420);
+  Object.assign($('#ctx').style, { left: x + 'px', top: y + 'px' }); $('#ctx').hidden = false;
+});
+document.addEventListener('click', (e) => { if (!e.target.closest('#ctx')) $('#ctx').hidden = true; });
+$('#q').addEventListener('input', (e) => { q = e.target.value; animRows = true; renderList(); });
+
+function renderBulk() {
+  $('#bulkSlot').innerHTML = sel.size > 1 ? `<div class="bulk" role="toolbar"><b>${sel.size} selected</b><span class="sep" style="background:color-mix(in srgb,var(--on-accent) 30%,transparent)"></span>
+    <button class="btn ghost sm">${ico('play', 's')}Resume</button><button class="btn ghost sm">${ico('pause', 's')}Pause</button><button class="btn ghost sm">${ico('layers', 's')}Category</button><button class="btn ghost sm">${ico('tag', 's')}Tags</button><button class="btn ghost sm">${ico('speed', 's')}Limits</button><button class="btn ghost sm">${ico('move', 's')}Move</button><button class="btn ghost sm">${ico('recheck', 's')}Recheck</button><button class="btn ghost sm">${ico('trash', 's')}Remove</button>
+    <span class="grow"></span><button class="btn ghost sm" id="clearSel">${ico('x', 's')}Clear  <span class="kbd" style="background:transparent;color:var(--on-accent);border-color:currentColor;opacity:.7">Esc</span></button></div>` : '';
+  $('#clearSel')?.addEventListener('click', () => { sel = new Set([anchor]); renderList(); renderDetails(); });
+}
+
+/* ---------- Status bar ---------- */
+function renderStatus() {
+  const k = state === 'kill';
+  const dn = k ? 0 : D.reduce((a, x) => a + x.d, 0), up = k ? 0 : D.reduce((a, x) => a + x.u, 0);
+  $('#wtSum').textContent = `↓ ${fmtSpeed(dn)} · ↑ ${fmtSpeed(up)}`;
+  $('#sbar').innerHTML = `<span class="it num" title="Sum of all rows. Payload only.">↓ <b class="down">${fmtSpeed(dn)}</b> <span class="t3">of ${LIMIT} MB/s</span></span>
+    <span class="it num">↑ <b class="up">${fmtSpeed(up)}</b></span>
+    <span class="it"><span class="statusdot" style="background:${k ? 'var(--danger)' : 'var(--success)'}"></span>${k ? 'VPN down · all paused' : 'Connected · port 51413 open'}</span>
+    <span class="it num t3">DHT 412 nodes</span>
+    <span class="r it">${ico('shield', 's')}VPN ${k ? '<b class="err">wg0 down</b>' : '<b>wg0</b>'}</span>
+    <span class="it">${ico('disk', 's')}D: ${state === 'disk' ? '<b class="warn">4.2 GB free</b>' : '412 GB free'}</span>
+    <span class="it num">${D.filter((x) => x.d > 0 || x.u > 0).length} active · ${D.length} total</span>`;
+}
+
+/* ---------- Banners ---------- */
+function renderBanner() {
+  const B = {
+    kill: ['danger', 'shieldOff', '<b>VPN disconnected (wg0).</b> The kill switch paused 4 transfers in 0.4 s. Rift resumes when the tunnel is back.', '<button class="btn sm">Resume anyway…</button><button class="btn sm ghost">Settings</button>'],
+    disk: ['warn', 'disk', '<b>Low disk space on D:</b> 4.2 GB left (minimum 10 GB). New downloads are paused.', '<button class="btn sm">Change folder…</button><button class="btn sm ghost">Free space</button>'],
+    clip: ['info', 'magnet', 'Magnet link on the clipboard: <span class="mono">3b8f2a1c… · ubuntu-24.10-desktop</span>', '<button class="btn sm primary">Add</button><button class="btn sm ghost" aria-label="Dismiss">' + ico('x', 's') + '</button>'],
+    update: ['ok', 'sparkle', '<b>Rift 1.1.0 is ready.</b> Signature verified. Restart to update.', '<button class="btn sm">What\'s new</button><button class="btn sm primary">Restart now</button>'],
+  }[state];
+  $('#bannerSlot').innerHTML = B ? `<div class="banner ${B[0]}" role="status">${ico(B[1])}<span class="grow">${B[2]}</span>${B[3]}</div>` : '';
+}
+$('#stateSeg').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state = b.dataset.s; animRows = true; renderBanner(); renderList(); renderDetails(); });
+
+/* ---------- Details ---------- */
+const TABS_BT = [['ov', 'Overview'], ['files', 'Files'], ['peers', 'Peers'], ['trk', 'Trackers'], ['web', 'HTTP sources'], ['speed', 'Speed'], ['pieces', 'Pieces'], ['log', 'Log']];
+const TABS_HTTP = [['ov', 'Overview'], ['conn', 'Connections'], ['mir', 'Mirrors'], ['speed', 'Speed'], ['log', 'Log']];
+function renderDetails() {
+  const det = $('#details');
+  if (state === 'empty') { det.innerHTML = `<div class="empty"><p class="t3">Select a download to see its details.</p></div>`; return; }
+  if (sel.size !== 1) { det.innerHTML = `<div class="empty"><h3>${sel.size} downloads selected</h3><p>${fmtBytes(D.filter((x) => sel.has(x.id)).reduce((a, x) => a + x.mb, 0))} in total · use the blue bar for bulk actions.</p></div>`; return; }
+  const it = D.find((x) => sel.has(x.id));
+  const tabs = it.k === 'bt' ? TABS_BT : TABS_HTTP;
+  if (!tab || !tabs.some((t) => t[0] === tab)) tab = 'ov';
+  det.innerHTML = `<div class="tabs" role="tablist"><span class="row-f" style="padding-right:10px;max-width:280px"><span class="kind ${it.k}">${it.k === 'bt' ? 'TORRENT' : 'HTTP'}</span><b class="ell">${it.n}</b></span>
+    ${tabs.map(([k, l], i) => `<button class="tab" role="tab" data-t="${k}" aria-selected="${tab === k}" title="Ctrl ${i + 1}">${l}${k === 'peers' ? `<span class="cnt">${it.sp[0]}</span>` : k === 'files' ? `<span class="cnt">${it.files || 0}</span>` : k === 'conn' ? `<span class="cnt">${it.conn}</span>` : ''}</button>`).join('')}
+    <span class="grow"></span><button class="btn ghost icon sm" aria-label="Dock right" title="Dock on the right">${ico('window', 's')}</button><button class="btn ghost icon sm" aria-label="Collapse details">${ico('chevD', 's')}</button></div>
+    <div class="dpane">${pane(it, tab)}</div>`;
+  det.querySelector('.tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (!b) return; tab = b.dataset.t; renderDetails(); });
+  const cv = det.querySelector('canvas.graph');
+  if (cv) { const n = 90, dn = [], up = []; for (let i = 0; i < n; i++) { dn.push(Math.max(0, it.d + Math.sin(i / 6) * it.d * .2 + (Math.random() - .5) * it.d * .3)); up.push(Math.max(0, it.u + (Math.random() - .5) * it.u * .4)); } drawGraph(cv, [{ data: dn, color: '--down', fill: 1 }, { data: up, color: '--up', width: 1.4 }], { limit: 12 }); }
+}
+function pieces(n, p, seed = 1) { let s = ''; for (let i = 0; i < n; i++) { const r = Math.sin(i * 12.9898 * seed) * 43758.5; const f = r - Math.floor(r); s += `<i class="${f < p ? 'h' : f < p + .04 ? 'a' : ''}"></i>`; } return s; }
+function pane(it, t) {
+  if (t === 'ov' && it.k === 'bt') return `
+    ${it.s === 'error' ? `<div class="banner danger" style="border-radius:8px;border:1px solid var(--line);margin-bottom:12px">${ico('alertCircle')}<span class="grow"><b>${it.err}.</b> Free some space or move the download, then resume.</span><button class="btn sm">Move…</button><button class="btn sm primary">Retry</button></div>` : ''}
+    ${it.s === 'stalled' ? `<div class="banner warn" style="border-radius:8px;border:1px solid var(--line);margin-bottom:12px">${ico('alert')}<span class="grow"><b>Why is it stalled?</b> No seeds connected for 12 min · 2 of 3 trackers unreachable · DHT found 3 peers, none with missing pieces.</span><button class="btn sm">Reannounce</button></div>` : ''}
+    <div class="row-f" style="margin-bottom:6px"><span class="cap">Pieces</span><span class="grow"></span><span class="num t3">${Math.round(it.p * 368)} / 368 · 16 MB each</span></div>
+    <div class="pbar" style="margin-bottom:16px">${pieces(160, it.p)}</div>
+    <div class="dgrid">
+      <div><h5 class="cap">Transfer</h5><dl class="kv"><dt>Downloaded</dt><dd class="num">${fmtBytes(it.mb * it.p)} of ${fmtBytes(it.mb)}</dd><dt>Uploaded</dt><dd class="num">${fmtBytes(it.mb * it.r)}</dd><dt>Ratio</dt><dd class="num">${it.r.toFixed(2)}</dd><dt>Speed</dt><dd class="num"><span class="down">↓ ${fmtSpeed(it.d)}</span> · <span class="up">↑ ${fmtSpeed(it.u)}</span></dd><dt>Average ↓</dt><dd class="num">5.4 MB/s over 11m 02s active</dd><dt>ETA</dt><dd class="num">${eta(it)}</dd><dt>Wasted</dt><dd class="num">0 B (0 hash fails)</dd></dl></div>
+      <div><h5 class="cap">Swarm</h5><dl class="kv"><dt>Seeds</dt><dd class="num">${it.sp[0]} connected · ${it.sp[1]} in swarm</dd><dt>Peers</dt><dd class="num">18 connected · 160 in swarm</dd><dt>Availability</dt><dd class="num">${it.h === 1 ? '0.42' : '38.7'}</dd><dt>Health</dt><dd><span class="health h${it.h}"><i></i><i></i><i></i></span> ${['Dead', 'Dead', 'Slow', 'Healthy'][it.h]}</dd><dt>Connections</dt><dd class="num">102 / 200 · uTP 64 % · encrypted 100 %</dd><dt>Next announce</dt><dd class="num">in 14m 20s</dd></dl></div>
+      <div><h5 class="cap">Info</h5><dl class="kv"><dt>Save path</dt><dd class="mono" title="D:\\Downloads\\ISO">D:\\Downloads\\ISO ${ico('folderOpen', 's')}</dd><dt>Hash v1</dt><dd class="mono">4f1e8a…9a0c ${ico('copy', 's')}</dd><dt>Hash v2</dt><dd class="mono">1220b7…f31d ${ico('copy', 's')}</dd><dt>Added</dt><dd>${it.added}</dd><dt>Completed</dt><dd>${it.p >= 1 ? 'Mon 23:58' : '—'}</dd><dt>Created by</dt><dd>mktorrent 1.1 · 2024-09-12</dd><dt>Comment</dt><dd>Ubuntu CD releases.ubuntu.com</dd><dt>Category · tags</dt><dd>${it.cat} ${it.tags.map((x) => `<span class="chip" style="--c:${TAGC[x]};height:18px"><i></i>${x}</span>`).join(' ')}</dd></dl></div>
+    </div>
+    <div class="row-f" style="margin-top:14px">${/mkv|mp4/.test(it.n) ? `<button class="btn primary sm">${ico('stream', 's')}Stream</button>` : ''}<button class="btn sm">${ico('folderOpen', 's')}Open folder</button><button class="btn sm">${ico('magnet', 's')}Copy magnet</button><button class="btn sm">${ico('speed', 's')}Limits…</button></div>`;
+  if (t === 'ov') {
+    const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+    return `
+    <div class="row-f" style="margin-bottom:6px"><span class="cap">Ranges · one color per connection</span><span class="grow"></span><span class="num t3">${(it.p * 100).toFixed(1)}% · ${it.conn || 0} active · split ≥ 1 MiB</span></div>
+    <div class="bigseg" style="margin-bottom:14px">${it.conn ? segc.map((c, i) => `<span style="--w:${[1.2, .8, 1, .9, 1.1, .7, 1, .9][i]}"><i style="--c:${c};width:${Math.min(100, it.p * 100 + Math.sin(i * 7.1) * 30 + 10)}%"></i></span>`).join('') : `<span style="--w:1"><i style="--c:var(--success);width:${it.p * 100}%"></i></span>`}</div>
+    <div class="dgrid">
+      <div><h5 class="cap">Speed</h5>${it.conn ? `<div class="accel"><div><div class="cap">1 connection</div><b>1.2 MB/s</b></div><span class="arr"></span><div><div class="cap">${it.conn} connections</div><b style="color:var(--signal)">${fmtSpeed(it.d)}</b></div></div><p class="help">Measured. Auto added connections while each one made it ≥ 5 % faster; stopped at ${it.conn}.</p>` : `<p class="help">${it.s === 'scheduled' ? 'Starts at 02:00 (Night queue).' : 'Finished. Average 8.7 MB/s over 16 s.'}</p>`}
+        <div class="row-f" style="margin-top:8px"><span class="lbl">Connections</span><select class="select inlinesel"><option>Auto (max 16)</option><option>1</option><option>4</option><option>8</option><option>16</option><option>32</option></select><span class="lbl">Limit</span><select class="select inlinesel"><option>No limit</option><option>1 MB/s</option><option>5 MB/s</option></select></div></div>
+      <div><h5 class="cap">Source</h5><dl class="kv"><dt>URL</dt><dd class="mono" title="https://download.blender.org/release/Blender4.2/blender-4.2.3-windows-x64.zip">download.blender.org/release/…zip</dd><dt>Final URL</dt><dd class="mono">mirror.clarkson.edu/blender/…</dd><dt>Server</dt><dd>nginx · HTTP/1.1 · ranges ✓</dd><dt>Resume</dt><dd><span class="ok">Supported</span> · ETag "66f1c-4994a3b2"</dd><dt>Referrer</dt><dd class="mono">blender.org/download</dd><dt>Added via</dt><dd>${ico('ext', 's')} Browser extension (Firefox)</dd></dl></div>
+      <div><h5 class="cap">File</h5><dl class="kv"><dt>Save as</dt><dd class="mono">D:\\Downloads\\Programs\\${it.n}</dd><dt>Size</dt><dd class="num">${fmtBytes(it.mb)} (1,289,748,480 bytes)</dd><dt>Checksum</dt><dd>${it.p >= 1 ? '<span class="ok">SHA-256 matches ✓</span>' : 'SHA-256 from sha256.txt · checked on finish'}</dd><dt>Category</dt><dd>${it.cat} (by file type)</dd><dt>Security</dt><dd>Marked as downloaded from the internet</dd></dl></div>
+    </div>
+    <div class="row-f" style="margin-top:14px"><button class="btn sm">${ico('folderOpen', 's')}Open folder</button><button class="btn sm">${ico('link', 's')}Refresh link…</button><button class="btn sm">${ico('globe', 's')}Add mirror…</button><button class="btn sm">${ico('hash', 's')}Verify…</button></div>`;
+  }
+  if (t === 'files') return `<div class="dtool"><button class="btn sm">${ico('check', 's')}Select all</button><button class="btn sm">None</button><span class="sep"></span><button class="btn sm">${ico('folderOpen', 's')}Open</button><button class="btn sm">${ico('edit', 's')}Rename</button><span class="grow"></span><div class="ig" style="width:200px">${ico('search')}<input class="input" placeholder="Filter files" style="height:24px"></div></div>
+    <div class="tbl" style="--cols:minmax(0,1fr) 80px 140px 110px"><div class="th"><span>Name</span><span class="r">Size</span><span>Progress</span><span>Priority</span></div>
+    ${[['bbb-4k-sunflower-60fps', 0, 1, 3480, .33, 'Normal', 1], ['bbb-4k-sunflower-60fps.mkv', 1, 0, 3410, .33, 'High'], ['subs', 1, 1, 1, 1, 'Normal', 1], ['en.srt', 2, 0, .06, 1, 'Normal'], ['de.srt', 2, 0, .05, 0, 'Skip'], ['poster.jpg', 1, 0, .8, 1, 'Normal']]
+      .map(([n, lvl, dir, mb, p, pr, open]) => `<div class="tr" style="${pr === 'Skip' ? 'opacity:.55' : ''}"><div class="nm" style="padding-left:${lvl * 18}px">${dir ? `<span class="tree-tw ${open ? 'open' : ''}">${ico('chevR', 's')}</span>` : '<span class="tree-tw"></span>'}<label class="chk"><input type="checkbox" ${pr === 'Skip' ? '' : 'checked'} ${dir && n === 'subs' ? 'data-indet' : ''}></label>${ico(dir ? 'folder' : /mkv/.test(n) ? 'film' : /srt/.test(n) ? 'subtitles' : 'file', 's')}<span class="ell">${n}</span></div><span class="num r">${fmtBytes(mb)}</span><div class="row-f"><div class="prog grow"><i style="width:${p * 100}%;--pc:${p >= 1 ? 'var(--success)' : 'var(--accent)'}"></i></div><span class="num">${Math.round(p * 100)}%</span></div><select class="select inlinesel"><option ${pr === 'Skip' ? 'selected' : ''}>Skip</option><option ${pr === 'Normal' ? 'selected' : ''}>Normal</option><option ${pr === 'High' ? 'selected' : ''}>High</option><option>Maximum</option></select></div>`).join('')}</div>
+    <p class="help" style="margin-top:8px">Large torrents (100k+ files) load folders lazily. Double-click opens a file; Stream appears on video files.</p>`;
+  if (t === 'peers') return `<div class="dtool"><button class="btn sm">${ico('plus', 's')}Add peer…</button><span class="grow"></span><span class="help">Flags: D downloading · U uploading · E encrypted · X from PEX · H from DHT · L local · P uTP</span></div>
+    <div class="tbl" style="--cols:170px 44px minmax(0,1fr) 70px 62px 120px 84px 84px"><div class="th"><span>Address</span><span>Cty</span><span>Client</span><span>Flags</span><span>Conn.</span><span>Progress</span><span class="r">Down</span><span class="r">Up</span></div>
+    ${[['144.76.82.112:51413', 'DE', 'libtorrent 2.0.10', 'D U E H', 'uTP', 1, 1.84, .12], ['185.220.101.5:6881', 'SE', 'qBittorrent 5.0.1', 'D E X', 'TCP', 1, 1.41, .08], ['104.244.76.13:58220', 'US', 'Transmission 4.0.6', 'D U P', 'uTP', .82, .82, .06], ['133.242.180.44:49152', 'JP', 'Rift 1.0.0', 'D U E P', 'uTP', .4, .68, .42], ['[2a01:4f8::2]:6881', 'FI', 'Deluge 2.1.1', 'U E', 'TCP', .12, 0, .24], ['192.168.1.20:51413', 'LAN', 'Rift 1.0.0', 'U L', 'TCP', .05, 0, .02]]
+      .map(([a, c, cl, f, cn, p, d, u]) => `<div class="tr"><span class="mono ell">${a}</span><span class="flag">${c}</span><span class="ell">${cl}</span><span class="mono t2">${f}</span><span class="row-f num">${cn}${f.includes('E') ? ico('lock', 's') : ''}</span><div class="row-f"><div class="prog grow"><i style="width:${p * 100}%"></i></div><span class="num">${Math.round(p * 100)}%</span></div><span class="num r down">${d ? fmtSpeed(d) : '—'}</span><span class="num r up">${fmtSpeed(u)}</span></div>`).join('')}</div>`;
+  if (t === 'trk') return `<div class="dtool"><button class="btn sm">${ico('plus', 's')}Add trackers…</button><button class="btn sm">${ico('refresh', 's')}Reannounce all</button></div>
+    <div class="tbl" style="--cols:28px minmax(0,1.6fr) 110px 56px 56px 86px 96px minmax(0,1fr)"><div class="th"><span>Tier</span><span>URL</span><span>Status</span><span class="r">Seeds</span><span class="r">Peers</span><span class="r">Downloaded</span><span class="r">Next</span><span>Message</span></div>
+    ${[['', '** DHT **', 'Working', 64, 210, '—', '—', ''], ['', '** PEX **', 'Working', 12, 40, '—', '—', ''], ['', '** LSD **', 'Working', 0, 1, '—', '—', ''], ['0', 'https://torrent.ubuntu.com/announce', 'Working', 412, 1883, '96,113', '14m 20s', ''], ['1', 'udp://tracker.opentrackr.org:1337/announce', 'Updating…', 380, 1610, '—', 'now', ''], ['2', 'udp://tracker.example.org:6969/announce', 'Not working', 0, 0, '—', '28m', 'Connection timed out (3 retries)']]
+      .map(([tr, u, s, se, pe, dl, nx, m]) => `<div class="tr"><span class="num">${tr}</span><span class="mono ell ${u.startsWith('**') ? 't3' : ''}">${u}</span><span class="badge ${s === 'Working' ? 'st-seeding' : s === 'Not working' ? 'st-error' : 'st-checking'}">${s}</span><span class="num r">${se}</span><span class="num r">${pe}</span><span class="num r">${dl}</span><span class="num r">${nx}</span><span class="ell t2" style="font-size:13px">${m}</span></div>`).join('')}</div>`;
+  if (t === 'web') return `<div class="dtool"><button class="btn sm">${ico('plus', 's')}Add HTTP source…</button><span class="help">Web seeds (BEP 19): Rift also downloads pieces from these servers.</span></div>
+    <div class="tbl" style="--cols:minmax(0,1fr) 100px 90px 90px"><div class="th"><span>URL</span><span>Status</span><span class="r">Down</span><span class="r">Pieces</span></div>
+    <div class="tr"><span class="mono ell">https://releases.ubuntu.com/24.04.1/</span><span class="badge st-seeding">Working</span><span class="num r down">2.4 MB/s</span><span class="num r">61</span></div>
+    <div class="tr"><span class="mono ell">https://mirror.example.edu/ubuntu-releases/24.04.1/</span><span class="badge st-error">403</span><span class="num r">—</span><span class="num r">0</span></div></div>`;
+  if (t === 'speed') return `<div class="dtool"><div class="seg"><button aria-pressed="true">5 min</button><button>1 hour</button><button>24 hours</button></div><span class="grow"></span><span class="legend"><span style="--c:var(--down)"><i></i>Download</span><span style="--c:var(--up)"><i></i>Upload</span><span style="--c:var(--text3)"><i></i>Limit</span></span></div>
+    <div class="gwrap"><canvas class="graph" style="height:170px"></canvas></div><p class="help">Current values (1 s). Hover shows time + exact values. Totals: ↓ ${fmtBytes(it.mb * it.p)} · ↑ ${fmtBytes(it.mb * it.r)}.</p>`;
+  if (t === 'pieces') return `<div class="dtool"><span class="num">${Math.round(it.p * 368)} of 368 pieces · 16 MB · 4 in flight</span><span class="grow"></span><div class="legend"><span style="--c:var(--piece-have)"><i></i>Have</span><span style="--c:var(--piece-active)"><i></i>Downloading</span><span style="--c:var(--piece-prio)"><i></i>Priority / deadline</span><span style="--c:var(--piece-missing)"><i></i>Missing</span></div></div><div class="pgrid">${pieces(368, it.p, 2)}</div>`;
+  if (t === 'conn') {
+    const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+    return `<div class="dtool"><span class="help">Each connection fetches its own byte range. When one finishes it takes half of the largest range left.</span></div>
+    <div class="tbl" style="--cols:34px 220px 130px 84px 140px 70px 64px 90px"><div class="th"><span>#</span><span>Range</span><span>Progress</span><span class="r">Speed</span><span>Server IP</span><span>HTTP</span><span class="r">Retries</span><span>State</span></div>
+    ${segc.slice(0, it.conn || 1).map((c, i) => { const sp = [1.24, 1.19, 1.22, 1.08, 1.25, .91, 1.2, 1.15][i]; const p = Math.min(1, it.p + Math.sin(i * 7.1) * .3 + .1); return `<div class="tr"><span class="row-f num"><span class="dot" style="--c:${c}"></span>${i + 1}</span><span class="mono t2">${(i * 153).toLocaleString()}–${((i + 1) * 153).toLocaleString()} MB</span><div class="row-f"><div class="prog grow"><i style="width:${p * 100}%;--pc:${c}"></i></div><span class="num">${Math.round(p * 100)}%</span></div><span class="num r down">${it.conn ? fmtSpeed(sp) : '—'}</span><span class="mono t2">128.153.${i}.${20 + i}</span><span class="num">1.1</span><span class="num r">${i === 5 ? 1 : 0}</span><span class="badge ${i === 5 ? 'st-stalled' : 'st-downloading'}">${i === 5 ? 'Slow' : 'Active'}</span></div>`; }).join('')}</div>
+    <p class="help" style="margin-top:8px">Sum of connection speeds = row speed (${fmtSpeed(it.d)}).</p>`;
+  }
+  if (t === 'mir') return `<div class="dtool"><button class="btn sm">${ico('plus', 's')}Add mirror…</button><button class="btn sm">${ico('archive', 's')}Import Metalink…</button></div>
+    <div class="tbl" style="--cols:minmax(0,1fr) 90px 90px 70px 90px"><div class="th"><span>Mirror</span><span>Score</span><span class="r">Speed</span><span class="r">Errors</span><span>Share</span></div>
+    <div class="tr"><span class="mono ell">https://mirror.clarkson.edu/blender/release/…</span><div class="prog"><i style="width:92%;--pc:var(--success)"></i></div><span class="num r down">6.1 MB/s</span><span class="num r">0</span><span class="num">5 conn.</span></div>
+    <div class="tr"><span class="mono ell">https://ftp.halifax.rwth-aachen.de/blender/…</span><div class="prog"><i style="width:64%;--pc:var(--warning)"></i></div><span class="num r down">3.3 MB/s</span><span class="num r">1</span><span class="num">3 conn.</span></div></div>
+    <p class="help" style="margin-top:8px">Mirrors must agree on size (and ETag when present). Faster, error-free mirrors get more ranges.</p>`;
+  if (t === 'log') return `<div class="dtool"><div class="seg"><button aria-pressed="true">All</button><button>Warnings</button><button>Errors</button></div><span class="grow"></span><button class="btn sm">${ico('copy', 's')}Copy</button></div>
+    <div class="logl">${[['10:02:14', 'INFO', 'Added from magnet link (clipboard)'], ['10:02:16', 'INFO', 'Metadata received · 3 files · 3.4 GB'], ['10:02:40', 'WARN', 'Tracker udp://tracker.example.org:6969 timed out'], ['10:05:02', 'INFO', 'Streaming started · sequential on · deadline window 64 MB'], ['10:07:31', 'WARN', 'Hash check failed for piece 211 · banned 0 peers (1 strike)'], ['10:09:10', 'INFO', 'Seek to 41:20 · re-prioritized 12 pieces']]
+      .map(([t2, l, m]) => `<span class="t3">${t2}</span><span class="lv ${l === 'WARN' ? 'warn' : l === 'ERROR' ? 'err' : 't2'}">${l}</span><span>${m}</span>`).join('')}</div>`;
+  return '';
+}
+
+renderSb(); renderList(); renderDetails();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not found · Rift</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/rift.css">
+<style>
+.nf{min-height:100vh;min-height:100svh;display:grid;place-items:center;padding:var(--gut);text-align:center}
+.nf .code{font-family:var(--mono);font-size:.8rem;letter-spacing:.14em;color:var(--mute)}
+.nf h1{margin:.3em 0 .2em;font-size:clamp(3rem,10vw,7rem);line-height:.95;letter-spacing:-.06em;font-weight:800;font-variation-settings:"wdth" 78,"opsz" 96}
+.nf h1 em{font-family:var(--serif);font-weight:400;color:var(--cobalt)}
+.nf p{color:var(--mute);margin:0 auto 28px;max-width:38ch}
+.nf .mk{width:38px;height:64px;margin-bottom:18px;color:var(--ink);overflow:visible}
+.nf .mk .lh,.nf .mk .rh{transition:transform .9s var(--spring)}
+.nf:hover .mk .lh{transform:translate(-3px,-9px)}.nf:hover .mk .rh{transform:translate(3px,9px)}
+.nf .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main class="nf">
+  <div>
+    <svg class="mk" viewBox="13 0 38 64" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>
+    <div class="code">404 · NOT FOUND</div>
+    <h1>This page fell <em>through.</em></h1>
+    <p>The link may be old, or the page moved. Everything Rift has is on the two pages below.</p>
+    <div class="acts"><a class="pill hot" href="/download">Download Rift</a><a class="pill" href="/">Home</a></div>
+  </div>
+</main>
+</body>
+</html>

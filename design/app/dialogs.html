@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift App Design: Dialogs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.dlg.w420{width:420px}.dlg.w560{width:560px}.dlg.w760{width:760px}
+.pal{width:640px}
+.pal .pin{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.pal .pin input{flex:1;border:0;background:transparent;font:inherit;font-size:16px;color:var(--text);outline:none}
+.pal .grp{padding:6px 8px}
+.pal .grp .cap{padding:6px 8px 4px;display:block}
+.pal .it{display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:6px;color:var(--text)}
+.pal .it .ico{color:var(--text3)}
+.pal .it.hl{background:var(--accent);color:var(--on-accent)}
+.pal .it.hl .ico,.pal .it.hl .t3,.pal .it.hl .kbd{color:var(--on-accent)}
+.pal .it.hl .kbd{background:transparent;border-color:rgba(255,255,255,.4)}
+.pal .it mark{background:none;color:inherit;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.pal .it .r{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pal .foot{display:flex;gap:16px;padding:8px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--text3);background:var(--surface)}
+.countdown{font-size:56px;line-height:1;font-weight:700;letter-spacing:-.04em;font-variation-settings:"wdth" 80,"opsz" 96;color:var(--accent)}
+.shk{display:grid;grid-template-columns:repeat(3,1fr);gap:18px 28px}
+.shk h5{margin:0 0 6px}
+.shk dl{display:grid;grid-template-columns:1fr auto;gap:5px 10px;margin:0;font-size:13.5px}
+.shk dd{margin:0;display:flex;gap:3px}
+.prev{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;font-size:13px;align-items:center}
+.diffrow{display:grid;grid-template-columns:120px 1fr 1fr;gap:4px 12px;font-size:13.5px}
+.diffrow b{font-weight:600;color:var(--text3)}
+.about-logo{width:72px;height:72px;border-radius:18px;background:#0B0A09;box-shadow:inset 0 0 0 1px rgba(255,244,225,.07);display:grid;place-items:center;color:#EDE8DF}
+.about-logo .rh{fill:#C9A15E}
+.about-logo svg{width:26px;height:44px}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Screens"></nav>
+  <div class="screens">
+
+  <section class="scr" id="dlg-rules" data-t="Dialog rules">
+    <header><span class="cap">Dialogs · rules</span><h2>How every dialog behaves</h2><p>Dialogs are in-window sheets over a scrim (not OS windows), except Settings and Create torrent, which are real windows. Three widths: 420 (confirm), 560 (form), 760 (rich).</p></header>
+    <div class="notes">
+      <div class="note"><b>Open:</b> scrim fades 180 ms; dialog scales 0.97 → 1 and fades with the spring curve (280 ms). Close: 120 ms exit curve. Reduced motion: fade only.</div>
+      <div class="note"><b>Keys:</b> Enter = primary button, Esc = cancel, Tab cycles inside (focus trapped). First field focused on open.</div>
+      <div class="note"><b>Buttons:</b> primary on the right, cancel left of it, extra options far left. Destructive primary uses the danger style and never gets default focus.</div>
+      <div class="note"><b>Memory:</b> every "Don't ask again" is listed in Settings → General → Confirmations so it can be undone.</div>
+      <div class="note"><b>Validation:</b> inline under the field, red text and border, shown after blur or submit, never while typing the first characters.</div>
+      <div class="note"><b>Corner:</b> dialogs use the Rift corner (14 / 4 / 14 / 4). Menus and popovers use 8.</div>
+    </div>
+  </section>
+
+  <section class="scr" id="addt" data-t="Add torrent">
+    <header><span class="cap">Dialog · PLAN §4.1</span><h2>Add torrent</h2><p>Opens for .torrent files and magnets (after metadata arrives; until then the tree area shows the fetching state). Settings for many torrents at once apply to all.</p></header>
+    <div class="stage center">
+      <div class="dlg w760" role="dialog" aria-labelledby="addt-h">
+        <div class="dlg-h"><span class="kind bt">TORRENT</span><div><h3 id="addt-h">ubuntu-24.04.1-desktop-amd64</h3><div class="sub">5.9 GB · 1 file · v1 + v2 hybrid · private: no</div></div><span class="grow"></span><button class="btn ghost icon" aria-label="Close"><i data-i="x"></i></button></div>
+        <div class="dlg-b">
+          <div class="fgrid">
+            <div class="field full"><label class="lbl" for="sp">Save to</label><div class="row-f"><select class="select grow" id="sp"><option>D:\Downloads\ISO  (category: ISO)</option><option>D:\Downloads</option><option>E:\Media\Linux</option><option>Browse…</option></select><button class="btn icon" aria-label="Browse"><i data-i="folderOpen"></i></button></div><span class="help">412 GB free on D: · needs 5.9 GB</span></div>
+            <div class="field"><label class="lbl">Category</label><select class="select"><option>ISO</option><option>Video</option><option>None</option><option>New category…</option></select></div>
+            <div class="field"><label class="lbl">Tags</label><div class="input row-f" style="height:auto;min-height:var(--ctl);flex-wrap:wrap;padding:3px 6px"><span class="chip" style="--c:#B8873A"><i></i>linux<span aria-label="Remove tag">×</span></span><input style="border:0;background:none;outline:none;flex:1;min-width:60px;font:inherit;color:var(--text)" placeholder="Add tag"></div></div>
+            <div class="field"><label class="lbl">Rename</label><input class="input" value="ubuntu-24.04.1-desktop-amd64"></div>
+            <div class="field"><label class="lbl">Content layout</label><select class="select"><option>Original</option><option>Create subfolder</option><option>Don't create subfolder</option></select></div>
+          </div>
+          <div class="row-f" style="flex-wrap:wrap;gap:8px 20px">
+            <label class="chk"><input type="checkbox" checked>Start download</label>
+            <label class="chk"><input type="checkbox">Sequential</label>
+            <label class="chk"><input type="checkbox">First &amp; last pieces first</label>
+            <label class="chk"><input type="checkbox">Skip hash check</label>
+            <label class="chk"><input type="checkbox">Add to top of queue</label>
+          </div>
+          <div>
+            <div class="row-f" style="margin-bottom:6px"><span class="cap">Files</span><span class="grow"></span><button class="btn sm ghost">Select all</button><button class="btn sm ghost">None</button><div class="ig" style="width:180px"><i data-i="search"></i><input class="input" placeholder="Filter" style="height:24px"></div></div>
+            <div class="tbl" style="--cols:minmax(0,1fr) 90px 110px;border:1px solid var(--line);border-radius:8px">
+              <div class="th"><span>Name</span><span class="r">Size</span><span>Priority</span></div>
+              <div class="tr"><div class="nm"><label class="chk"><input type="checkbox" checked></label><i data-i="disc" class="s"></i><span class="ell">ubuntu-24.04.1-desktop-amd64.iso</span></div><span class="num r">5.80 GB</span><select class="select inlinesel" style="height:22px;font-size:12.5px"><option>Normal</option><option>High</option><option>Skip</option></select></div>
+            </div>
+            <p class="help" style="margin-top:6px">Selected: 5.80 GB of 5.80 GB · Free after download: 406 GB</p>
+          </div>
+          <details><summary class="lbl" style="cursor:pointer">More: limits, trackers, comment</summary>
+            <div class="fgrid" style="margin-top:10px"><div class="field"><label class="lbl">Download limit</label><div class="ig"><input class="input" placeholder="No limit"><span class="unit">MB/s</span></div></div><div class="field"><label class="lbl">Upload limit</label><div class="ig"><input class="input" placeholder="No limit"><span class="unit">MB/s</span></div></div><div class="field full"><label class="lbl">Extra trackers</label><textarea class="input" rows="2" placeholder="One per line"></textarea></div></div>
+          </details>
+        </div>
+        <div class="dlg-f"><label class="chk"><input type="checkbox">Don't show again</label><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Add</button></div>
+      </div>
+      <div class="dlg w420"><div class="dlg-h"><span class="kind bt">TORRENT</span><div><h3>Fetching metadata…</h3><div class="sub mono">magnet: 3b8f2a1c0d4e9f5a…</div></div></div>
+        <div class="dlg-b"><div class="prog indet"><i></i></div><p class="help">Asking DHT and 4 trackers. 6 peers found. You can add now: Rift will start when the file list arrives.</p></div>
+        <div class="dlg-f"><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Add without waiting</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="addl" data-t="Add link (HTTP)">
+    <header><span class="cap">Dialog · PLAN §4.14</span><h2>Add link</h2><p>One field takes magnets, http(s), ftp and .meta4 URLs. Rift probes the URL while you look (HEAD + range test) and shows what it found before you press Download.</p></header>
+    <div class="stage center">
+      <div class="dlg w560">
+        <div class="dlg-h"><i data-i="link"></i><h3>Add link</h3><span class="grow"></span><button class="btn ghost icon" aria-label="Close"><i data-i="x"></i></button></div>
+        <div class="dlg-b">
+          <div class="field"><label class="lbl">Link</label><input class="input mono" value="https://download.blender.org/release/Blender4.2/blender-4.2.3-windows-x64.zip"></div>
+          <div class="card" style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center">
+            <span class="kind http">HTTP</span><b class="ell">blender-4.2.3-windows-x64.zip</b>
+            <span></span><span class="help">1.20 GB · application/zip · <span class="ok">resume supported</span> · <span class="ok">ranges supported → up to 16 connections</span></span>
+          </div>
+          <div class="fgrid">
+            <div class="field full"><label class="lbl">Save as</label><div class="row-f"><input class="input grow mono" value="D:\Downloads\Programs\blender-4.2.3-windows-x64.zip"><button class="btn icon" aria-label="Browse"><i data-i="folderOpen"></i></button></div></div>
+            <div class="field"><label class="lbl">Connections</label><select class="select"><option>Auto (up to 16)</option><option>1</option><option>4</option><option>8</option><option>16</option><option>32</option></select></div>
+            <div class="field"><label class="lbl">Speed limit</label><div class="ig"><input class="input" placeholder="No limit"><span class="unit">MB/s</span></div></div>
+            <div class="field"><label class="lbl">Category</label><select class="select"><option>Programs (by .zip)</option><option>None</option></select></div>
+            <div class="field"><label class="lbl">When</label><select class="select"><option>Now</option><option>Night queue (02:00)</option><option>Add paused</option></select></div>
+            <div class="field full"><label class="lbl">Checksum (optional)</label><div class="row-f"><select class="select" style="width:110px"><option>SHA-256</option><option>SHA-1</option><option>MD5</option></select><input class="input grow mono" placeholder="Paste hash, or Rift looks for a .sha256 next to the file"></div><span class="help ok">Found sha256sums.txt on the server · will verify on finish</span></div>
+          </div>
+          <details><summary class="lbl" style="cursor:pointer">Advanced: mirrors, headers, login</summary>
+            <div class="fgrid" style="margin-top:10px"><div class="field full"><label class="lbl">Mirrors</label><textarea class="input mono" rows="2" placeholder="One URL per line · must be the same file"></textarea></div><div class="field"><label class="lbl">Referrer</label><input class="input mono" value="https://www.blender.org/download/"></div><div class="field"><label class="lbl">User agent</label><select class="select"><option>Rift (default)</option><option>Browser's (from extension)</option><option>Custom…</option></select></div><div class="field"><label class="lbl">Username</label><input class="input"></div><div class="field"><label class="lbl">Password</label><input class="input" type="password"><span class="help">Stored in the OS keychain</span></div></div>
+          </details>
+        </div>
+        <div class="dlg-f"><button class="btn ghost">More links…</button><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Download</button></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="dlg w420"><div class="dlg-h"><i data-i="link"></i><h3>Add link</h3></div><div class="dlg-b"><div class="field"><label class="lbl">Link</label><input class="input mono" value="https://files.example.com/big.iso" style="border-color:var(--danger)"><span class="help err">Server answered 404 Not Found. Check the link or refresh it from the page.</span></div></div><div class="dlg-f"><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary" disabled>Download</button></div></div>
+        <div class="dlg w420"><div class="dlg-h"><i data-i="link"></i><h3>Add link</h3></div><div class="dlg-b"><div class="card" style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px"><span class="kind http">HTTP</span><b>stream.bin</b><span></span><span class="help"><span class="warn">No range support</span> · 1 connection · can't resume if interrupted</span></div><div class="row-f help"><span class="spin" style="width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;display:inline-block"></span>Checking link…</div></div><div class="dlg-f"><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Download</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="batch" data-t="Many links / pattern">
+    <header><span class="cap">Dialog · PLAN §4.14</span><h2>Many links</h2><p>Paste a list, a page's links (from the extension), or a numbered pattern. Each line gets probed; duplicates and failures are marked before you add.</p></header>
+    <div class="stage center">
+      <div class="dlg w760">
+        <div class="dlg-h"><i data-i="list"></i><h3>Add many links</h3><span class="grow"></span><div class="seg"><button aria-pressed="true">Paste list</button><button>Pattern</button></div></div>
+        <div class="dlg-b">
+          <div class="field"><label class="lbl">Pattern</label><input class="input mono" value="https://archive.example.org/lectures/week[01-12].mp4"><span class="help">[01-12] numbers with padding · [a-f] letters · {x,y} choices → 12 links</span></div>
+          <div class="tbl" style="--cols:28px minmax(0,1fr) 90px 120px;border:1px solid var(--line);border-radius:8px;max-height:220px;overflow:auto">
+            <div class="th"><span></span><span>File</span><span class="r">Size</span><span>Check</span></div>
+            <div class="tr"><label class="chk"><input type="checkbox" checked></label><span class="mono ell">week01.mp4</span><span class="num r">412 MB</span><span class="badge st-seeding">OK · ranges</span></div>
+            <div class="tr"><label class="chk"><input type="checkbox" checked></label><span class="mono ell">week02.mp4</span><span class="num r">398 MB</span><span class="badge st-seeding">OK · ranges</span></div>
+            <div class="tr"><label class="chk"><input type="checkbox"></label><span class="mono ell">week03.mp4</span><span class="num r">—</span><span class="badge st-stalled">Already added</span></div>
+            <div class="tr"><label class="chk"><input type="checkbox"></label><span class="mono ell">week04.mp4</span><span class="num r">—</span><span class="badge st-error">404</span></div>
+            <div class="tr"><label class="chk"><input type="checkbox" checked></label><span class="mono ell">week05.mp4</span><span class="num r">—</span><span class="badge st-checking">Checking…</span></div>
+          </div>
+          <div class="fgrid"><div class="field"><label class="lbl">Save to</label><select class="select"><option>D:\Downloads\Video\Lectures</option></select></div><div class="field"><label class="lbl">Run</label><select class="select"><option>2 at a time (queue)</option><option>All at once</option><option>Night queue</option></select></div></div>
+        </div>
+        <div class="dlg-f"><span class="help">10 selected · 3.9 GB</span><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Add 10</button></div>
+      </div>
+      <div class="dlg w560">
+        <div class="dlg-h"><i data-i="magnet"></i><h3>Add many magnets</h3></div>
+        <div class="dlg-b"><textarea class="input mono" rows="5">magnet:?xt=urn:btih:3b8f2a1c…&dn=ubuntu-24.10
+magnet:?xt=urn:btih:9a0cf33e…&dn=fedora-41
+magnet:?xt=urn:btih:4f1e8a… (already in Rift)</textarea><p class="help">3 found · 1 already added (trackers will be merged) · metadata is fetched in the background</p></div>
+        <div class="dlg-f"><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Add 2</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="dup" data-t="Duplicate">
+    <header><span class="cap">Dialog · PLAN §4.16</span><h2>Already in Rift</h2><p>Same info-hash, same URL, or a file with the same name and size already in the save folder.</p></header>
+    <div class="stage center">
+      <div class="dlg w420"><div class="dlg-h"><i data-i="layers"></i><h3>This torrent is already added</h3></div>
+        <div class="dlg-b"><div class="card"><b>ubuntu-24.04.1-desktop-amd64.iso</b><div class="help">Downloading · 62.4 % · added today 09:12</div></div><p style="margin:0">The new link has 3 trackers the existing one doesn't.</p></div>
+        <div class="dlg-f"><button class="btn ghost">Show it</button><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Merge trackers</button></div></div>
+      <div class="dlg w420"><div class="dlg-h"><i data-i="file"></i><h3>A file with this name exists</h3></div>
+        <div class="dlg-b"><div class="diffrow"><b></b><b>Existing</b><b>New</b><span class="t3">Size</span><span class="num">1.20 GB</span><span class="num">1.20 GB</span><span class="t3">Modified</span><span>Mon 14:22</span><span>Server: 2 Nov</span></div>
+          <label class="rad"><input type="radio" name="dup" checked>Rename new: blender-4.2.3 (1).zip</label><label class="rad"><input type="radio" name="dup">Overwrite</label><label class="rad"><input type="radio" name="dup">Resume into existing (checks ranges)</label><label class="rad"><input type="radio" name="dup">Skip</label></div>
+        <div class="dlg-f"><label class="chk"><input type="checkbox">Always do this</label><span class="grow"></span><button class="btn primary">Continue</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="remove" data-t="Remove">
+    <header><span class="cap">Dialog · PLAN §5</span><h2>Remove</h2><p>Removing from the list is undoable for 10 seconds via the toast. Deleting files sends them to the Recycle Bin / Trash, never permanent by default.</p></header>
+    <div class="stage center">
+      <div class="dlg w420"><div class="dlg-h"><i data-i="trash"></i><h3>Remove 3 downloads?</h3></div>
+        <div class="dlg-b"><p style="margin:0" class="t2">ubuntu-24.04.1…iso, Blender-4.2…zip and 1 more · 8.4 GB on disk</p>
+          <label class="chk"><input type="checkbox">Also move downloaded files to the Recycle Bin</label>
+          <p class="help">Seeding torrents stop sharing. Partial files are always cleaned up when you delete files.</p></div>
+        <div class="dlg-f"><label class="chk"><input type="checkbox">Don't ask again</label><span class="grow"></span><button class="btn">Cancel</button><button class="btn danger">Remove</button></div></div>
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+        <div class="toast" style="position:relative">3 downloads removed<button class="btn sm">Undo <span class="kbd" style="background:transparent;color:inherit;border-color:currentColor;opacity:.6">Ctrl Z</span></button><span class="tbar"><i></i></span></div>
+        <div class="toast" style="position:relative">Moved 2 files to the Recycle Bin<button class="btn sm">Show</button></div>
+        <p class="help" style="max-width:40ch">Toast: bottom-center, 10 s with a shrinking bar. Hover pauses the timer. Stacks up to 3.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="move" data-t="Move storage">
+    <header><span class="cap">Dialog · PLAN §4.6</span><h2>Move files</h2></header>
+    <div class="stage center">
+      <div class="dlg w560"><div class="dlg-h"><i data-i="move"></i><h3>Move 2 downloads</h3></div>
+        <div class="dlg-b"><div class="field"><label class="lbl">New location</label><div class="row-f"><input class="input grow mono" value="E:\Archive\ISO"><button class="btn icon" aria-label="Browse"><i data-i="folderOpen"></i></button></div><span class="help">E: has 1.2 TB free · needs 9.7 GB · different drive: files are copied then deleted</span></div>
+          <label class="rad"><input type="radio" name="mv" checked>Move the files</label><label class="rad"><input type="radio" name="mv">Files are already there (just point Rift at them, then recheck)</label>
+          <div class="card"><div class="row-f"><b class="grow">Moving ubuntu-24.04.1…iso</b><span class="num">2.1 / 5.9 GB</span></div><div class="prog" style="margin:8px 0 4px"><i style="width:36%"></i></div><span class="help">Downloads continue after the move. Seeding pauses for this torrent only.</span></div></div>
+        <div class="dlg-f"><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Move</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="palette" data-t="Command palette">
+    <header><span class="cap">Dialog · PLAN §4.16</span><h2>Command palette</h2><p>Ctrl K / Cmd K. Fuzzy search over every action, setting, download and filter. Prefix &gt; for actions only, # for tags, / for settings, @ for downloads.</p></header>
+    <div class="stage center">
+      <div class="dlg pal">
+        <div class="pin"><i data-i="search" class="l"></i><input value="pau" aria-label="Command"><span class="kbd">Esc</span></div>
+        <div class="grp"><span class="cap">Actions</span>
+          <div class="it hl"><i data-i="pause"></i><span><mark>Pau</mark>se selected</span><span class="r"><span class="kbd">Space</span></span></div>
+          <div class="it"><i data-i="pause"></i><span><mark>Pau</mark>se all</span><span class="r"><span class="kbd">Ctrl Shift P</span></span></div>
+          <div class="it"><i data-i="clock"></i><span><mark>Pau</mark>se all for 1 hour…</span></div></div>
+        <div class="grp"><span class="cap">Downloads</span>
+          <div class="it"><i data-i="magnet"></i><span>debian-12.7.0-amd64-DVD-1.iso</span><span class="r t3">Paused · 21 %</span></div></div>
+        <div class="grp"><span class="cap">Settings</span>
+          <div class="it"><i data-i="settings"></i><span><mark>Pau</mark>se torrents when on battery</span><span class="r t3">Power &amp; network</span></div>
+          <div class="it"><i data-i="settings"></i><span><mark>Pau</mark>se when VPN disconnects</span><span class="r t3">Privacy &amp; VPN</span></div></div>
+        <div class="foot"><span><span class="kbd">↑↓</span> move</span><span><span class="kbd">Enter</span> run</span><span><span class="kbd">Tab</span> open details</span><span style="margin-left:auto">Recent first · learns what you use</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scr" id="refresh" data-t="Refresh expired link">
+    <header><span class="cap">Dialog · PLAN §4.14</span><h2>Refresh link</h2><p>When a server returns 403/410 or the signed URL expired, Rift keeps the downloaded ranges and asks for a fresh link. The extension can capture it automatically.</p></header>
+    <div class="stage center">
+      <div class="dlg w560"><div class="dlg-h"><i data-i="link"></i><div><h3>This link expired</h3><div class="sub">Blender-4.2-windows-x64.zip · 41 % kept (504 MB)</div></div></div>
+        <div class="dlg-b"><div class="banner warn" style="border-radius:8px"><i data-i="alert"></i><span>Server answered <b>403 Forbidden</b> at 10:42. The link probably had a time limit.</span></div>
+          <div class="field"><label class="lbl">New link for the same file</label><input class="input mono" placeholder="Paste the new link"><span class="help">Rift checks size and ETag match before continuing. Or start the download again in your browser: the extension hands the new link to this download.</span></div>
+          <label class="chk"><input type="checkbox" checked>Wait for the browser (2 min)</label></div>
+        <div class="dlg-f"><button class="btn ghost">Open original page</button><span class="grow"></span><button class="btn">Later</button><button class="btn primary">Continue download</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="create" data-t="Create torrent">
+    <header><span class="cap">Window · PLAN §4.10</span><h2>Create torrent</h2></header>
+    <div class="stage center">
+      <div class="dlg w760"><div class="dlg-h"><i data-i="wand"></i><h3>Create torrent</h3><span class="grow"></span><button class="btn ghost icon" aria-label="Close"><i data-i="x"></i></button></div>
+        <div class="dlg-b">
+          <div class="drop over"><i data-i="folder" class="l"></i><div class="grow"><b>D:\Projects\rift-wallpapers</b><div class="help">212 files · 1.4 GB</div></div><button class="btn sm">File…</button><button class="btn sm">Folder…</button></div>
+          <div class="fgrid">
+            <div class="field"><label class="lbl">Torrent format</label><div class="seg"><button>v1</button><button>v2</button><button aria-pressed="true">Hybrid</button></div></div>
+            <div class="field"><label class="lbl">Piece size</label><select class="select"><option>Auto (2 MB · 718 pieces)</option><option>1 MB</option><option>4 MB</option><option>16 MB</option></select></div>
+            <div class="field full"><label class="lbl">Trackers</label><textarea class="input mono" rows="3">udp://tracker.opentrackr.org:1337/announce
+
+udp://open.demonii.com:1337/announce</textarea><span class="help">Blank line = new tier</span></div>
+            <div class="field full"><label class="lbl">Web seeds</label><input class="input mono" placeholder="https://… (optional)"></div>
+            <div class="field"><label class="lbl">Comment</label><input class="input" value="CC-BY wallpapers"></div>
+            <div class="field"><label class="lbl">Source tag</label><input class="input" placeholder="For private trackers"></div>
+          </div>
+          <div class="row-f" style="gap:8px 20px;flex-wrap:wrap"><label class="chk"><input type="checkbox">Private torrent</label><label class="chk"><input type="checkbox" checked>Start seeding</label><label class="chk"><input type="checkbox">Optimize alignment (pad files)</label><label class="chk"><input type="checkbox">Skip hidden files</label></div>
+          <div class="card"><div class="row-f"><b class="grow">Hashing…</b><span class="num">412 / 718 pieces · 380 MB/s</span></div><div class="prog thick" style="margin-top:8px"><i style="width:57%"></i></div></div>
+        </div>
+        <div class="dlg-f"><button class="btn ghost">Copy magnet</button><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Create &amp; save…</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="limits" data-t="Per-download limits">
+    <header><span class="cap">Dialog · PLAN §4.4</span><h2>Limits</h2></header>
+    <div class="stage center">
+      <div class="dlg w420"><div class="dlg-h"><i data-i="speed"></i><h3>Limits · 2 downloads</h3></div>
+        <div class="dlg-b"><div class="fgrid">
+          <div class="field"><label class="lbl">Download</label><div class="ig"><input class="input" value="5"><span class="unit">MB/s</span></div></div>
+          <div class="field"><label class="lbl">Upload</label><div class="ig"><input class="input" placeholder="Global"><span class="unit">MB/s</span></div></div>
+          <div class="field full"><label class="lbl">Stop seeding at</label><div class="row-f"><div class="ig grow"><input class="input" value="2.0"><span class="unit">ratio</span></div><div class="ig grow"><input class="input" placeholder="—"><span class="unit">hours</span></div></div><span class="help">Whichever comes first. Empty = use global.</span></div>
+          <div class="field full"><label class="lbl">Max connections</label><input class="range" type="range" value="40"><span class="help num">80 of 500</span></div></div></div>
+        <div class="dlg-f"><button class="btn ghost">Reset to global</button><span class="grow"></span><button class="btn">Cancel</button><button class="btn primary">Apply</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="shutdown" data-t="When done / shutdown">
+    <header><span class="cap">Dialog · PLAN §4.16</span><h2>When everything finishes</h2><p>Set from the status-bar menu or the palette. A 60 s countdown always appears before the computer sleeps or shuts down.</p></header>
+    <div class="stage center">
+      <div class="menu"><div class="mh cap">When all downloads finish</div><div class="mi"><span class="chkm"><i data-i="check" class="s"></i></span>Do nothing</div><div class="mi"><span class="chkm"></span>Quit Rift</div><div class="mi"><span class="chkm"></span>Sleep</div><div class="mi"><span class="chkm"></span>Hibernate</div><div class="mi"><span class="chkm"></span>Shut down</div><div class="ms"></div><div class="mi"><span class="chkm"></span>Also wait for seeding goals</div></div>
+      <div class="dlg w420" style="text-align:center"><div class="dlg-b" style="padding:24px 18px;align-items:center"><span class="cap">All downloads finished</span><div class="countdown num">0:42</div><p style="margin:0">Your computer will <b>shut down</b>.</p><div class="prog" style="width:100%"><i style="width:70%;--pc:var(--warning)"></i></div></div>
+        <div class="dlg-f" style="justify-content:center"><button class="btn primary">Cancel shutdown</button><button class="btn">Shut down now</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="update" data-t="Update available">
+    <header><span class="cap">Dialog · PLAN §9</span><h2>Update</h2><p>Updates are checked daily, downloaded in the background, signature-verified, and installed on restart. Never forced; never during an active stream.</p></header>
+    <div class="stage center">
+      <div class="dlg w560"><div class="dlg-h"><i data-i="sparkle"></i><div><h3>Rift 1.1.0 is ready</h3><div class="sub">You have 1.0.2 · 18 MB · signature verified ✓</div></div></div>
+        <div class="dlg-b"><div class="card" style="max-height:160px;overflow:auto;font-size:13.5px"><b>New</b><ul style="margin:4px 0 8px;padding-left:18px"><li>Mirrors from Metalink files are used automatically</li><li>Peer country flags</li></ul><b>Fixed</b><ul style="margin:4px 0 0;padding-left:18px"><li>Speed graph gap after waking from sleep</li><li>Rare crash when removing 1,000+ torrents</li></ul></div>
+          <label class="sw"><input type="checkbox" checked>Install updates automatically on quit</label></div>
+        <div class="dlg-f"><button class="btn ghost">Skip this version</button><span class="grow"></span><button class="btn">Later</button><button class="btn primary">Restart now</button></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="keys" data-t="Keyboard shortcuts">
+    <header><span class="cap">Dialog · Ctrl /</span><h2>Keyboard shortcuts</h2><p>macOS uses Cmd for Ctrl and Option for Alt. All shortcuts are rebindable in Settings → Advanced → Shortcuts.</p></header>
+    <div class="stage center">
+      <div class="dlg w760"><div class="dlg-h"><i data-i="keyboard"></i><h3>Keyboard shortcuts</h3><span class="grow"></span><div class="ig" style="width:220px"><i data-i="search"></i><input class="input" placeholder="Search shortcuts"></div></div>
+        <div class="dlg-b"><div class="shk" id="shk"></div></div></div>
+    </div>
+  </section>
+
+  <section class="scr" id="about" data-t="About">
+    <header><span class="cap">Dialog</span><h2>About</h2></header>
+    <div class="stage center">
+      <div class="dlg w420" style="text-align:center"><div class="dlg-b" style="align-items:center;padding:28px 18px 18px">
+        <div class="about-logo"><svg class="logo-mark" viewBox="13 0 38 64" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg></div>
+        <h3 style="margin:0;font-size:28px;letter-spacing:-.04em">Rift <span class="serif" style="font-weight:400;color:var(--accent)">1.0.2</span></h3>
+        <p class="t2" style="margin:0">Fast, honest downloads. No ads, no tracking.</p>
+        <dl class="kv" style="text-align:left;margin-top:8px"><dt>libtorrent</dt><dd>2.0.10</dd><dt>Qt</dt><dd>6.8.1</dd><dt>libcurl</dt><dd>8.11.0</dd><dt>OpenSSL</dt><dd>3.4.0</dd><dt>Build</dt><dd class="mono">a91f3c2 · 2026-11-02</dd></dl></div>
+        <div class="dlg-f" style="justify-content:center"><button class="btn ghost">Licenses</button><button class="btn ghost">Source code</button><button class="btn">Copy info</button></div></div>
+    </div>
+  </section>
+
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const k = (s) => s.split(' ').map((x) => `<span class="kbd">${x}</span>`).join('');
+  const G = {
+    General: [['Command palette', 'Ctrl K'], ['Add link or magnet', 'Ctrl L'], ['Open torrent file', 'Ctrl O'], ['Create torrent', 'Ctrl N'], ['Settings', 'Ctrl ,'], ['Shortcuts', 'Ctrl /'], ['Hide to tray', 'Ctrl W'], ['Quit', 'Ctrl Q']],
+    Downloads: [['Pause / resume', 'Space'], ['Pause all', 'Ctrl Shift P'], ['Resume all', 'Ctrl Shift R'], ['Remove', 'Del'], ['Remove + files', 'Shift Del'], ['Open folder', 'Enter'], ['Rename', 'F2'], ['Copy magnet / link', 'Ctrl C'], ['Paste link', 'Ctrl V'], ['Undo', 'Ctrl Z']],
+    View: [['Filter', 'Ctrl F'], ['Sidebar', 'Ctrl B'], ['Details panel', 'Ctrl D'], ['Details tab 1–8', 'Ctrl 1'], ['Alt speed', 'Ctrl Shift A'], ['Mini mode', 'Ctrl M'], ['Select all', 'Ctrl A'], ['Clear selection', 'Esc'], ['Stream', 'Ctrl P']],
+  };
+  document.getElementById('shk').innerHTML = Object.entries(G).map(([g, l]) => `<div><h5 class="cap">${g}</h5><dl>${l.map(([a, b]) => `<dt>${a}</dt><dd>${k(b)}</dd>`).join('')}</dl></div>`).join('');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift App Design: Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+#sw{height:720px}
+.set{display:grid;grid-template-columns:220px 1fr;flex:1;min-height:0}
+.set-nav{background:var(--sidebar);border-right:1px solid var(--line);padding:10px 8px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.set-nav .ig{margin-bottom:8px}
+.set-nav .ni[aria-selected="true"]{background:var(--accent);color:var(--on-accent)}
+.set-nav .ni[aria-selected="true"] .ico{color:var(--on-accent)}
+.set-body{overflow:auto;padding:24px 32px 40px;background:var(--surface)}
+.set-body h2{margin:0 0 4px;font-size:22px;letter-spacing:-.03em;font-variation-settings:"wdth" 85}
+.set-body>section>p.lead{margin:0 0 18px;color:var(--text2)}
+.grp{margin-bottom:22px}
+.grp>h4{margin:0 0 6px;font-size:12px}
+.grp>.rows{border:1px solid var(--line);border-radius:10px;background:var(--raised)}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,auto);gap:6px 24px;align-items:center;padding:11px 14px;border-top:1px solid var(--line-soft)}
+.srow:first-child{border-top:0}
+.srow .l b{font-weight:600;display:block}
+.srow .l .help{display:block;margin-top:2px}
+.srow .c{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.srow.wide{grid-template-columns:1fr}
+.srow.wide .c{justify-content:flex-start}
+.srow.sub{padding-left:38px}
+.srow .changed{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;margin-left:6px;vertical-align:middle}
+.c .select,.c .ig{width:220px}
+.c .ig.n{width:130px}
+.applybar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line);background:var(--raised)}
+.ruleed{display:grid;grid-template-columns:auto 1fr 1fr auto;gap:8px;align-items:center}
+.adv .tr{--cols:minmax(0,1.5fr) 120px 110px 60px}
+.themepick{display:flex;gap:12px}
+.themepick button{width:150px;border-radius:10px;border:2px solid var(--line);padding:6px;text-align:left;font-weight:600;font-size:13px;background:var(--surface)}
+.themepick button[aria-pressed="true"]{border-color:var(--accent)}
+.themepick .mini{height:70px;border-radius:6px;display:grid;grid-template-columns:30% 1fr;overflow:hidden;margin-bottom:6px;border:1px solid rgba(0,0,0,.1)}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Screens"></nav>
+  <div class="screens">
+
+  <section class="scr" id="settings" data-t="Settings window">
+    <header><span class="cap">Window · PLAN §8</span><h2>Settings</h2><p>A separate 960 × 680 window. Changes apply instantly (no OK button) except the few that need a restart, which collect in a bar at the bottom. Search filters every option across all pages. A blue dot marks values changed from the default; right-click → "Reset to default".</p></header>
+    <div class="win" id="sw">
+      <div class="wt"><span class="wlogo"><i data-i="settings" class="s"></i>Rift Settings</span><span class="wctl"><span><i data-i="minimize" class="s"></i></span><span class="x"><i data-i="x" class="s"></i></span></span></div>
+      <div class="set">
+        <nav class="set-nav" data-tabs="s" id="snav"></nav>
+        <div class="set-body" id="sbody"></div>
+      </div>
+      <div class="applybar"><i data-i="info" class="s"></i><span class="help grow">1 change needs a restart: <b class="t2">Listening port</b></span><button class="btn sm ghost">Undo</button><button class="btn sm primary">Restart Rift</button></div>
+    </div>
+    <div class="notes">
+      <div class="note"><b>Search:</b> typing filters to matching rows across all pages; pages without matches hide; match text highlighted.</div>
+      <div class="note"><b>Locked:</b> options set by portable mode or command line show a lock and a tooltip with the source.</div>
+      <div class="note"><b>Import / export:</b> Advanced → "Export settings…" writes a JSON file; never includes passwords.</div>
+    </div>
+  </section>
+
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+const ICO = (n) => ico(n);
+const sw = (l, on, h) => ['sw', l, on, h];
+const sel = (l, opts, h) => ['sel', l, opts, h];
+const num = (l, v, u, h) => ['num', l, v, u, h];
+const txt = (l, v, h, btn) => ['txt', l, v, h, btn];
+const seg = (l, opts, h) => ['seg', l, opts, h];
+const raw = (html, wide = 1) => ['raw', html, wide];
+const subOf = (r) => (r.sub = 1, r);
+
+const PAGES = [
+['general', 'General', 'settings', 'Language, startup and confirmations.', [
+  ['Startup', [sel('Language', ['System (English)', 'Deutsch', 'Español', 'Français', '日本語', 'Português (Brasil)', 'Русский', '中文 (简体)']), sw('Start Rift when I sign in', 1), subOf(sw('Start minimized to tray', 1)), sw('Close button hides to tray', 1, 'Rift keeps downloading in the background. Quit from the tray menu.'), sw('Check for updates automatically', 1), sel('Update channel', ['Stable', 'Beta'])]],
+  ['Default app', [raw(`<div class="row-f"><span class="grow"><b>Open magnet links and .torrent files with Rift</b><span class="help">Currently: Rift handles both.</span></span><button class="btn sm">Set as default…</button></div>`)]],
+  ['Confirmations', [sw('Confirm before removing', 1), sw('Confirm before deleting files', 1), sw('Confirm on quit with active downloads', 1), sw('Show "Add torrent" dialog', 1, 'Off: add instantly with defaults.')]],
+  ['Privacy of Rift itself', [sw('Send crash reports', 0, 'Off by default. Reports contain no file names, hashes or IPs. Preview before sending.'), sw('Remember recent folders and searches', 1)]],
+]],
+['downloads', 'Downloads', 'download', 'Where files go and what happens to them.', [
+  ['Saving', [txt('Default save folder', 'D:\\Downloads', '412 GB free', 'Browse…'), sw('Keep incomplete files in another folder', 1), subOf(txt('Incomplete folder', 'D:\\Downloads\\.incomplete', '', 'Browse…')), sw('Add .!rift to unfinished files', 0), sw('Pre-allocate disk space', 0, 'Prevents fragmentation. Slower to start on HDDs.'), num('Keep at least this much free', 10, 'GB', 'New downloads pause below this.')]],
+  ['Categories', [raw(`<div class="tbl" style="--cols:24px 140px minmax(0,1fr) 160px 60px;width:100%"><div class="th"><span></span><span>Category</span><span>Folder</span><span>Auto when</span><span></span></div>${[['ISO', 'disc', 'D:\\Downloads\\ISO', '.iso .img'], ['Video', 'film', 'D:\\Media\\Video', '.mkv .mp4 .avi'], ['Music', 'music', 'D:\\Media\\Music', '.flac .mp3'], ['Programs', 'app', 'D:\\Downloads\\Programs', '.exe .msi .zip .dmg']].map(([n, i, f, w]) => `<div class="tr">${ico(i, 's')}<b>${n}</b><span class="mono ell t2">${f}</span><span class="mono t3 ell">${w}</span><button class="btn sm ghost icon" aria-label="Edit">${ico('edit', 's')}</button></div>`).join('')}</div><button class="btn sm" style="margin-top:8px">${ico('plus', 's')}New category</button>`)]],
+  ['When a download finishes', [sw('Check checksum if available', 1), sw('Move to category folder', 1), sel('Run a program', ['Nothing', 'Custom command…']), sw('Mark files as downloaded from the internet', 1, 'Windows Mark-of-the-Web / macOS quarantine. Strongly recommended.'), sw('Scan with Windows Defender', 0), sw('Delete .torrent files after adding', 0)]],
+]],
+['http', 'HTTP downloader', 'link', 'Direct links: connections, retries and mirrors.', [
+  ['Connections', [sel('Connections per download', ['Auto (adds while it helps)', '1', '4', '8', '16', '32']), subOf(num('Auto maximum', 16, 'per file')), num('Max connections per server', 16, '', 'Some servers ban clients above 4–8. Rift backs off automatically on 429/503.'), num('Smallest piece to split', 1, 'MiB'), num('Downloads at the same time', 4, '')]],
+  ['Retries', [num('Retry failed connections', 10, 'times'), num('Wait between retries', 5, 's', 'Doubles each time, up to 2 min.'), num('Connection timeout', 30, 's'), sw('Ask for a fresh link when one expires', 1)]],
+  ['Requests', [sel('User agent', ['Rift/1.0 (default)', 'Same as browser (via extension)', 'Custom…']), sw('Use mirrors from Metalink files', 1), sw('Look for checksum files next to the download', 1), sw('Accept invalid HTTPS certificates', 0, 'Never recommended. Shown with a warning on each download.')]],
+  ['Site logins', [raw(`<div class="tbl" style="--cols:minmax(0,1fr) 160px 70px;width:100%"><div class="th"><span>Site</span><span>Username</span><span></span></div><div class="tr"><span class="mono">files.example.edu</span><span>jdoe</span><button class="btn sm ghost">Remove</button></div></div><p class="help" style="margin-top:6px">Passwords are kept in the OS keychain, never in Rift's files.</p>`)]],
+]],
+['conn', 'Connection', 'wifi', 'Ports, protocols and proxies.', [
+  ['Listening', [num('Port', 51413, '', 'Used for incoming peers. Needs restart.'), raw(`<div class="row-f"><button class="btn sm">Random port</button><button class="btn sm">${ico('check', 's')}Test port</button><span class="badge st-seeding">Open from the internet</span></div>`), sw('UPnP / NAT-PMP port mapping', 1), sel('Protocol', ['TCP and µTP', 'TCP only', 'µTP only']), sel('Bind to network interface', ['Any', 'Ethernet', 'Wi-Fi', 'wg0 (WireGuard)']), sw('IPv6', 1)]],
+  ['Connection limits', [num('Global max connections', 500, ''), num('Per torrent', 100, ''), num('Upload slots global', 40, ''), num('Upload slots per torrent', 8, '')]],
+  ['Proxy', [sel('Proxy type', ['None', 'SOCKS5', 'HTTP', 'SOCKS4']), subOf(txt('Host : port', '', '')), subOf(sw('Use for peer connections', 1)), subOf(sw('Use for trackers and DHT', 1)), subOf(sw('Use for HTTP downloads', 1))]],
+]],
+['speed', 'Speed', 'speed', 'Limits, alternative limits and the schedule.', [
+  ['Global limits', [num('Download', '', 'MB/s', 'Empty = no limit. Applies to torrents and direct links together.'), num('Upload', 2, 'MB/s'), sw('Apply limits to local network (LAN) peers', 0), sw('Include protocol overhead in limits', 0)]],
+  ['Alternative limits', [num('Download', 1, 'MB/s'), num('Upload', .2, 'MB/s'), sw('Turn on when on battery', 1), sw('Turn on when a game is fullscreen', 1), sw('Turn on on metered connections', 1)]],
+  ['Schedule', [raw(`<div style="width:100%"><div class="legend" style="margin-bottom:8px"><span style="--c:var(--success)"><i></i>Normal</span><span style="--c:var(--warning)"><i></i>Alternative</span><span style="--c:var(--danger)"><i></i>Paused</span><span class="help">Click or drag cells to change</span></div><div class="sched" id="sched"></div></div>`)]],
+  ['Data cap', [sw('Monthly data cap', 1), subOf(num('Cap', 1000, 'GB')), subOf(sel('When reached', ['Pause everything', 'Switch to alternative limits', 'Only warn'])), subOf(num('Resets on day', 1, 'of month'))]],
+]],
+['bt', 'BitTorrent', 'magnet', 'Peer discovery, encryption and seeding goals.', [
+  ['Discovery', [sw('DHT (find peers without trackers)', 1), sw('Peer exchange (PEX)', 1), sw('Local peer discovery', 1), sw('Add these trackers to new public torrents', 0), subOf(raw('<textarea class="input mono" rows="3" style="width:100%" placeholder="udp://…"></textarea>'))]],
+  ['Encryption', [sel('Encryption', ['Prefer encrypted', 'Require encrypted', 'Allow unencrypted']), sw('Anonymous mode', 0, 'Hides client name and version. May reduce speeds on private trackers.')]],
+  ['Seeding', [num('Stop at ratio', 2, ''), num('Or after seeding for', '', 'hours'), sel('Then', ['Pause', 'Remove', 'Remove with files', 'Enable super seeding'])]],
+  ['Safety', [sw('Ban peers who send bad data', 1), sw('IP blocklist', 0), subOf(txt('Blocklist URL', '', 'Updated weekly')), sw('Check hashes on completion', 1)]],
+]],
+['vpn', 'Privacy & VPN', 'shield', 'Bind to your VPN and stop the instant it drops.', [
+  ['Kill switch', [sw('Only use this interface', 1), subOf(sel('Interface', ['wg0 (WireGuard) · up', 'tun0 · down', 'Any'])), sw('Pause everything when it goes down', 1, 'Rift pauses within 0.5 s and resumes when the interface returns. Includes direct links.'), sw('Also block DNS lookups outside the VPN', 1)]],
+  ['Leak check', [raw(`<div class="row-f" style="width:100%"><span class="grow"><b>Last check: today 09:01</b><span class="help">Peers see 185.213.x.x (VPN provider). No leak.</span></span><button class="btn sm">Check now</button></div>`)]],
+]],
+['queue', 'Queueing', 'sort', 'How many run at once and in what order.', [
+  ['Queue', [sw('Use queueing', 1), num('Active downloads', 5, ''), num('Active uploads', 5, ''), num('Active total', 8, ''), sw("Don't count slow torrents", 1), subOf(num('Slow means below', 10, 'KB/s'))]],
+  ['Order', [sel('New downloads go', ['To the bottom', 'To the top']), sw('Direct links share the queue with torrents', 1)]],
+]],
+['auto', 'Automation', 'wand', 'Watch folders, rules and RSS.', [
+  ['Watch folders', [raw(`<div class="tbl" style="--cols:minmax(0,1fr) 140px 100px 40px;width:100%"><div class="th"><span>Folder</span><span>Category</span><span>Then</span><span></span></div><div class="tr"><span class="mono ell">C:\\Users\\me\\Downloads</span><span>Auto</span><span>Delete file</span><button class="btn sm ghost icon" aria-label="Remove">${ico('x', 's')}</button></div></div><button class="btn sm" style="margin-top:8px">${ico('plus', 's')}Add folder</button>`)]],
+  ['Rules', [raw(`<div style="width:100%"><div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="row-f"><label class="sw"><input type="checkbox" checked></label><b class="grow">Linux ISOs keep seeding</b><span class="help">Matched 4 times</span></div>
+    <div class="ruleed"><span class="lbl">When</span><select class="select"><option>Name</option><option>Tracker</option><option>Size</option><option>Source site</option><option>File type</option></select><select class="select"><option>matches regex</option><option>contains</option><option>is larger than</option></select><input class="input mono" value="(ubuntu|fedora|debian).*\\.iso"></div>
+    <div class="ruleed"><span class="lbl">Then</span><select class="select"><option>Set category</option><option>Add tag</option><option>Set limit</option><option>Set ratio goal</option><option>Move when done</option></select><input class="input" value="ISO"><span></span></div>
+    <div class="ruleed"><span class="lbl">And</span><select class="select"><option>Add tag</option></select><input class="input" value="keep-seeding"><button class="btn sm ghost icon" aria-label="Add action">${ico('plus', 's')}</button></div></div>
+    <button class="btn sm" style="margin-top:8px">${ico('plus', 's')}New rule</button></div>`)]],
+  ['RSS', [num('Check feeds every', 30, 'min'), num('Keep articles', 100, 'per feed'), sw('Download matching items automatically', 1), sw('Smart episode filter (skip repeats)', 1)]],
+]],
+['stream', 'Streaming', 'stream', 'Watch while downloading.', [
+  ['Player', [sel('Play with', ['Rift player', 'VLC (found)', 'mpv', 'System default']), num('Buffer before playing', 16, 'MB'), sw('Prefer subtitles in', 1), subOf(sel('Language', ['English', 'Deutsch', 'Español'])), sw('Remember position', 1)]],
+  ['Sharing', [sw('Stream to other devices on my network (DLNA)', 0), sw('Local stream URL (http://127.0.0.1)', 1, 'Only reachable from this computer.')]],
+]],
+['browser', 'Browser integration', 'ext', 'The extension hands downloads to Rift over Native Messaging. No network port is opened.', [
+  ['Extensions', [raw(`<div class="tbl" style="--cols:minmax(0,1fr) 120px 120px;width:100%"><div class="th"><span>Browser</span><span>Extension</span><span></span></div><div class="tr"><span>Firefox</span><span class="badge st-seeding">Connected</span><span></span></div><div class="tr"><span>Chrome</span><span class="badge st-paused">Not installed</span><button class="btn sm">Get it</button></div><div class="tr"><span>Edge</span><span class="badge st-paused">Not installed</span><button class="btn sm">Get it</button></div></div>`)]],
+  ['Take over', [sw('Catch downloads from the browser', 1), num('Only files larger than', 2, 'MB'), txt('File types', 'zip 7z rar iso exe msi dmg pkg mp4 mkv pdf', 'Empty = everything'), txt('Never from these sites', 'mail.google.com, *.bank', ''), sw('Hold Alt while clicking to skip Rift', 1), sw('Send cookies and referrer for this download', 1, 'Needed for links behind a login. Only for that download, never stored.')]],
+]],
+['power', 'Power & network', 'battery', 'Sleep, battery and metered networks.', [
+  ['Power', [sw('Keep computer awake while downloading', 1), subOf(sw('Also while seeding', 0)), sw('Pause on battery below', 1), subOf(num('Battery', 20, '%')), sel('When everything finishes', ['Do nothing', 'Quit', 'Sleep', 'Hibernate', 'Shut down'])]],
+  ['Network', [sw('Pause on metered connections', 1), sw('Pause on these Wi-Fi networks', 0), subOf(txt('Networks', 'Airport-Free, Hotel-Guest', ''))]],
+]],
+['notify', 'Notifications', 'bell', 'Native notifications, sound and taskbar.', [
+  ['Notify me when', [sw('A download finishes', 1), sw('A download fails', 1), sw('The kill switch pauses everything', 1), sw('An RSS rule adds something', 1), sw('Disk is almost full', 1), sw('An update is ready', 1)]],
+  ['Style', [sw('Play a sound', 0), sw('Show progress on the taskbar / dock', 1), sw('Show speed in tray tooltip', 1), sw('Do not disturb while fullscreen', 1)]],
+]],
+['look', 'Appearance', 'sun', 'Theme, accent and density. Previews live.', [
+  ['Theme', [raw(`<div class="themepick seg"><button aria-pressed="true" data-th="system"><div class="mini" style="background:linear-gradient(90deg,#E6E6E0 50%,#0D0F12 50%)"></div>System</button><button data-th="stone"><div class="mini"><i style="background:#DDDED6"></i><i style="background:#F2F2ED"></i></div>Stone (light)</button><button data-th="obsidian"><div class="mini"><i style="background:#111318"></i><i style="background:#15181D"></i></div>Obsidian (dark)</button></div>`)]],
+  ['Details', [raw(`<div class="row-f" style="width:100%"><span class="grow"><b>Accent</b></span><div class="acc" id="accp"></div></div>`), seg('Density', ['Compact', 'Comfortable']), sel('Font size', ['Small (12)', 'Default (13)', 'Large (14)', 'Larger (16)']), sw('Reduce motion', 0, 'Follows the OS setting by default.'), sw('Show speed in the window title', 1), sw('Color peer flags', 1), sel('Units', ['MB/s (bytes)', 'Mbit/s (bits)'])]],
+]],
+['adv', 'Advanced', 'terminal', 'For experts. Every libtorrent setting, with search.', [
+  ['Diagnostics', [sel('Log level', ['Normal', 'Verbose', 'Debug']), raw(`<div class="row-f"><button class="btn sm">${ico('folderOpen', 's')}Open log folder</button><button class="btn sm">${ico('bug', 's')}Copy diagnostics</button><button class="btn sm">${ico('upload', 's')}Export settings…</button><button class="btn sm">Import…</button><button class="btn sm danger-ghost">Reset all settings…</button></div>`)]],
+  ['Disk', [num('Disk cache', 256, 'MB'), sel('Disk I/O', ['Memory-mapped (default)', 'Positional (pread)']), num('Disk threads', 4, '')]],
+  ['libtorrent settings', [raw(`<div style="width:100%"><div class="row-f" style="margin-bottom:8px"><div class="ig grow">${ico('search')}<input class="input" placeholder="Search 180 settings"></div><label class="chk"><input type="checkbox">Changed only</label></div><div class="tbl adv"><div class="th"><span>Name</span><span>Value</span><span>Default</span><span></span></div>${[['active_checking', '1', '1'], ['connection_speed', '30', '30'], ['send_buffer_watermark', '1024', '500'], ['mixed_mode_algorithm', 'peer_proportional', 'peer_proportional'], ['request_timeout', '60', '60'], ['suggest_mode', 'no_piece_suggestions', 'no_piece_suggestions']].map(([n, v, d]) => `<div class="tr"><span class="mono ell">${n}${v !== d ? '<span class="changed"></span>' : ''}</span><input class="input mono" value="${v}" style="height:22px"><span class="mono t3 ell">${d}</span><button class="btn sm ghost icon" aria-label="Reset">${ico('undo', 's')}</button></div>`).join('')}</div></div>`)]],
+  ['Shortcuts', [raw(`<button class="btn sm">${ico('keyboard', 's')}Edit keyboard shortcuts…</button>`)]],
+]],
+];
+
+function ctl(r) {
+  const [t] = r;
+  if (t === 'sw') return `<label class="sw"><input type="checkbox" ${r[2] ? 'checked' : ''} aria-label="${r[1]}"></label>`;
+  if (t === 'sel') return `<select class="select" aria-label="${r[1]}">${r[2].map((o) => `<option>${o}</option>`).join('')}</select>`;
+  if (t === 'num') return `<div class="ig n"><input class="input" value="${r[2]}" placeholder="No limit" aria-label="${r[1]}">${r[3] ? `<span class="unit">${r[3]}</span>` : ''}</div>`;
+  if (t === 'txt') return `<input class="input mono" style="width:260px" value="${r[2]}" aria-label="${r[1]}">${r[4] ? `<button class="btn sm">${r[4]}</button>` : ''}`;
+  if (t === 'seg') return `<div class="seg">${r[2].map((o, i) => `<button aria-pressed="${!i}">${o}</button>`).join('')}</div>`;
+  return '';
+}
+function rowHTML(r) {
+  if (r[0] === 'raw') return `<div class="srow wide"><div class="c">${r[1]}</div></div>`;
+  const help = r[0] === 'num' ? r[4] : r[3];
+  return `<div class="srow ${r.sub ? 'sub' : ''}"><div class="l"><b>${r[1]}</b>${help ? `<span class="help">${help}</span>` : ''}</div><div class="c">${ctl(r)}</div></div>`;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('snav').innerHTML = `<div class="ig">${ico('search')}<input class="input" placeholder="Search settings" aria-label="Search settings"></div>` +
+    PAGES.map(([id, l, i], n) => `<button class="ni" data-tab="${id}" aria-selected="${!n}">${ico(i)}<span>${l}</span></button>`).join('');
+  document.getElementById('sbody').innerHTML = PAGES.map(([id, l, i, lead, groups], n) => `<section data-pane="s:${id}" ${n ? 'hidden' : ''}><h2>${l}</h2><p class="lead">${lead}</p>${groups.map(([g, rows]) => `<div class="grp"><h4 class="cap">${g}</h4><div class="rows">${rows.map(rowHTML).join('')}</div></div>`).join('')}</section>`).join('');
+  // Scheduler grid
+  const sc = document.getElementById('sched');
+  sc.innerHTML = '<span></span>' + Array.from({ length: 24 }, (_, h) => `<span class="hd">${h % 3 ? '' : h}</span>`).join('') +
+    ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, di) => `<span class="dy">${d}</span>` + Array.from({ length: 24 }, (_, h) => `<i class="${h >= 9 && h < 18 && di < 5 ? 'alt' : h >= 1 && h < 6 && di === 2 ? 'off' : ''}" title="${d} ${h}:00"></i>`).join('')).join('');
+  // Accent picker mirrors the prototype toolbar picker
+  const accs = { cobalt: '#B8873A', signal: '#2D669E', green: '#1C7A58', violet: '#7F4BB3', teal: '#2A8A8F', rose: '#B34A6E' };
+  document.getElementById('accp').innerHTML = Object.entries(accs).map(([k, v], i) => `<button style="--c:${v}" aria-label="${k}" aria-pressed="${!i}"></button>`).join('');
+  hydrate(document.getElementById('sw')); behaviors(document.getElementById('sw'));
+});
+</script>
+</body>
+</html>

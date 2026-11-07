@@ -1,0 +1,4 @@
+# Old preview file names -> clean URLs
+/index-v3.html     /            301
+/download-v3.html  /download    301
+/get               /download    302

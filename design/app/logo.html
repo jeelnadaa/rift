@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rift Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.opt{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;padding:28px;border-radius:16px;background:var(--raised);border:1px solid var(--line)}
+.opt h3{margin:0 0 4px;font-size:22px;letter-spacing:-.03em}
+.opt p{margin:0 0 16px;color:var(--text2);max-width:60ch}
+.tile{width:160px;height:160px;border-radius:36px;display:grid;place-items:center;position:relative;overflow:hidden;
+  background:#0B0A09;box-shadow:0 24px 50px -24px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,244,225,.07)}
+.tile svg{width:96px;height:96px}
+.tile.light{background:#F4F1EA;box-shadow:inset 0 0 0 1px rgba(23,20,15,.08)}
+.row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.sm{border-radius:9px;width:40px;height:40px}.sm svg{width:26px;height:26px}
+.xs{border-radius:5px;width:20px;height:20px}.xs svg{width:14px;height:14px}
+.word{display:flex;align-items:center;gap:12px;font-size:44px;font-weight:800;letter-spacing:-.05em;font-variation-settings:"wdth" 85,"opsz" 96;color:var(--text)}
+.word svg{width:44px;height:44px}
+.mono-mark{color:var(--text)}
+.mono-mark svg{width:40px;height:40px}
+.pick{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.08em}
+</style>
+</head>
+<body class="proto">
+<main class="pmain">
+  <nav class="pidx" aria-label="Options"></nav>
+  <div class="screens">
+  <section class="scr" id="intro" data-t="Logo options">
+    <header><span class="cap">Brand</span><h2>Logo</h2><p>The Rift mark: a slim disc split by one curve. Shown as the app icon (dark and light), taskbar and favicon sizes, a one-color mark, and the wordmark.</p></header>
+  </section>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <!-- Split orb: a tall ellipse (rx 17, ry 28) cut once on a steep diagonal through its center; the halves slide apart along the cut. Two flat colors. -->
+      <symbol id="E" viewBox="0 0 64 64">
+        <path transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z" style="fill:var(--l,currentColor)"/>
+        <path transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z" style="fill:var(--r,currentColor)"/>
+      </symbol>
+    </defs>
+  </svg>
+  <div id="opts" style="display:flex;flex-direction:column;gap:22px"></div>
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const m = (st, sz = '') => `<svg viewBox="0 0 64 64" style="${st}${sz}"><use href="#E"/></svg>`;
+  document.getElementById('opts').innerHTML = `<section class="scr" id="orb" data-t="Split orb"><div class="opt">
+    <div class="tile">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
+    <div><span class="pick">CHOSEN</span><h3>Split orb</h3><p>A tall, slim disc cut once on a steep diagonal; the two halves slide apart along the cut, like ground shifting along a fault. Two flat colors, no gradients or glow: warm ivory and muted brass on near-black, or ink and bronze on paper. The mark is 17 × 28 units, so it stays crisp from a 16 px favicon to a 512 px app icon.</p>
+      <div class="row">
+        <div class="tile light" style="width:96px;height:96px;border-radius:22px">${m('--l:#17140F;--r:#8E6119;', 'width:58px;height:58px')}</div>
+        <div class="tile sm">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
+        <div class="tile xs">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
+        <span class="mono-mark">${m('--l:currentColor;--r:currentColor;opacity:1;')}</span>
+        <span class="word">${m('--l:var(--text);--r:var(--accent);')}Rift</span>
+      </div>
+      <dl class="kv" style="margin-top:18px"><dt>Geometry</dt><dd class="mono">ellipse rx 17 ry 28 · cut (39.24, 6.66)→(24.76, 57.34) · halves offset ∓(1.1, 4.6)</dd><dt>Dark</dt><dd class="mono">ivory #EDE8DF + brass #C9A15E on #0B0A09</dd><dt>Light</dt><dd class="mono">ink #17140F + bronze #8E6119 on #F4F1EA</dd><dt>In the UI</dt><dd class="mono">left = currentColor (text), right = accent</dd></dl>
+    </div></div></section>`;
+});
+</script>
+</body>
+</html>

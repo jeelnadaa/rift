@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rift: Torrents and Direct Downloads, Native</title>
+<meta name="description" content="Rift is a native download manager for Windows, macOS and Linux: a tuned BitTorrent client and a multi-connection HTTP downloader in one fast app that runs entirely on your device.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Rift: Torrents. Direct links. One rift.">
+<meta property="og:description" content="A native download manager for Windows, macOS and Linux, with browser extensions for Chrome, Edge, Brave and Firefox.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0A09'/%3E%3Cg transform='translate(32 32) scale(.7) translate(-32 -32)'%3E%3Cpath transform='translate(-1.1 -4.6)' d='M39.24 6.66A17 28 0 1 0 24.76 57.34Z' fill='%23EDE8DF'/%3E%3Cpath transform='translate(1.1 4.6)' d='M39.24 6.66A17 28 0 1 1 24.76 57.34Z' fill='%23C9A15E'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/rift.css">
+<style>
+/* ================= HERO: the tear ================= */
+.hero{position:relative;height:270vh}
+.pin{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.stage{position:absolute;inset:0;background:var(--void)}
+#riftfx{position:absolute;inset:0;width:100%;height:100%}
+.half{position:absolute;inset:0;background:var(--stone);display:flex;flex-direction:column;justify-content:center;
+  will-change:transform;transition:background-color .4s var(--ease)}
+.half.L{clip-path:polygon(0 0,54% 0,46% 38%,55% 52%,47% 74%,52% 100%,0 100%)}
+.half.R{clip-path:polygon(54% 0,100% 0,100% 100%,52% 100%,47% 74%,55% 52%,46% 38%)}
+.hl{margin:0;padding:0 var(--gut);text-align:center;font-weight:600;font-size:clamp(3.6rem,13.4vw,16rem);line-height:.86;
+  letter-spacing:-.055em;font-variation-settings:"wght" 600,"wdth" 82,"opsz" 96;transform:translateY(-6vh)}
+.hl .ln{display:block}
+.hl .s{font-size:1.04em;letter-spacing:-.02em;color:var(--cobalt)}
+.hl .s .ch{font-variation-settings:normal!important}
+.crack{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.crack polyline{fill:none;stroke:var(--cobalt);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;
+  stroke-dasharray:var(--len,2000);stroke-dashoffset:var(--len,2000);
+  animation:draw 1.6s .5s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;
+  padding:0 var(--gut) clamp(22px,4vh,44px);pointer-events:none}
+.hero-foot>*{pointer-events:auto}
+.lede{max-width:46ch;margin:0;font-size:clamp(1.05rem,1.35vw,1.3rem);line-height:1.45}
+.lede b{font-weight:700}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tag{font-family:var(--mono);font-size:.74rem;font-weight:600;padding:5px 11px;border-radius:99px;border:1px solid var(--hair);background:var(--stone2);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.tag i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(31,168,90,.6);animation:ping 2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 7px rgba(31,168,90,0)}100%{box-shadow:0 0 0 0 rgba(31,168,90,0)}}
+.scrollhint{position:absolute;left:50%;bottom:clamp(22px,4vh,44px);transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:.72rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:8px}
+.scrollhint span{width:1.5px;height:38px;background:linear-gradient(var(--signal),transparent);animation:drip 1.8s infinite var(--ease);transform-origin:top}
+@keyframes drip{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+/* ================= App window (inside the rift) ================= */
+.reveal{position:absolute;left:50%;top:50%;width:min(1240px,94vw);transform:translate(-50%,-50%) scale(.7);opacity:0;z-index:1;pointer-events:none}
+.reveal.live{pointer-events:auto}
+.win-top{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--void-line);background:rgba(255,255,255,.02)}
+.dots{display:flex;gap:7px}.dots i{width:11px;height:11px;border-radius:50%;background:#2a2824}
+.dots i:nth-child(1){background:#FF5F56}.dots i:nth-child(2){background:#FFBD2E}.dots i:nth-child(3){background:#27C93F}
+.win-title{font-family:var(--mono);font-size:.8rem;color:var(--void-mute);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.win-title b{color:var(--void-text)}
+.win-grid{display:grid;grid-template-columns:200px 1fr;min-height:430px}
+.side{border-right:1px solid var(--void-line);padding:14px 10px;display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.side h6{margin:12px 10px 6px;font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--void-mute);font-weight:600}
+.side button{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:7px 10px;border-radius:8px;color:var(--void-mute);font-weight:600;transition:background .2s,color .2s}
+.side button:hover{background:rgba(255,255,255,.05);color:var(--void-text)}
+.side button[aria-pressed="true"]{background:var(--cobalt);color:var(--on-accent)}
+.side button em{font-style:normal;font-family:var(--mono);font-size:.72rem;opacity:.75}
+.list{display:flex;flex-direction:column;min-width:0}
+.thead,.row{display:grid;grid-template-columns:minmax(0,2.4fr) 92px minmax(120px,1.3fr) 150px 108px;gap:14px;align-items:center;padding:0 18px}
+.thead{height:38px;font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--void-mute);border-bottom:1px solid var(--void-line)}
+.rows{flex:1}
+.row{min-height:60px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.86rem;transition:background .2s,opacity .35s,transform .35s var(--ease)}
+.row:hover{background:rgba(255,255,255,.03)}
+.row.sel{background:rgba(214,176,114,.13)}
+.row.gone{display:none}
+.nm{min-width:0}
+.nm b{display:block;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm small{display:block;font-family:var(--mono);font-size:.7rem;color:var(--void-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kind{font-family:var(--mono);font-size:.66rem;font-weight:700;padding:3px 7px;border-radius:5px;justify-self:start;letter-spacing:.04em}
+.kind.bt{background:rgba(214,176,114,.18);color:var(--cobalt)}
+.kind.http{background:rgba(229,138,87,.16);color:var(--steel)}
+.bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;position:relative}
+.bar>i{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:var(--cobalt)}
+.bar.done>i{background:var(--green)}
+.bar.segs{display:flex;gap:2px;background:none}
+.bar.segs span{flex:1;background:rgba(255,255,255,.08);border-radius:2px;position:relative;overflow:hidden}
+.bar.segs span i{position:absolute;inset:0 auto 0 0;background:var(--signal)}
+.pm{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.68rem;color:var(--void-mute);margin-top:5px}
+.sp{font-family:var(--mono);font-size:.8rem;white-space:nowrap}
+.sp .d{color:var(--green)}.sp .u{color:var(--steel);margin-left:6px}
+.st{font-family:var(--mono);font-size:.68rem;font-weight:600;padding:3px 8px;border-radius:99px;border:1px solid var(--void-line);justify-self:start;white-space:nowrap}
+.st.seed{color:var(--green);border-color:rgba(75,217,138,.3)}
+.st.stream{color:var(--steel);border-color:rgba(255,148,102,.35)}
+.st.q{color:var(--void-mute)}
+.statusbar{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;padding:10px 18px;border-top:1px solid var(--void-line);font-family:var(--mono);font-size:.74rem;color:var(--void-mute);background:rgba(255,255,255,.02)}
+.statusbar b{color:var(--void-text);font-weight:600}
+.statusbar .ok{display:inline-flex;gap:6px;align-items:center}
+.statusbar .ok::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+.statusbar .sum{margin-left:auto;color:var(--green)}
+
+/* ================= Sections ================= */
+section.blk{padding:clamp(80px,12vw,180px) 0;position:relative}
+.h2{margin:18px 0 0;font-weight:300;font-size:clamp(2.8rem,7.4vw,8rem);line-height:.9;letter-spacing:-.05em;font-variation-settings:"wght" 300,"wdth" 85,"opsz" 96}
+.h2 .s{font-size:1.06em;color:var(--cobalt)}
+.copy{max-width:52ch;color:var(--mute);font-size:1.15rem;margin:26px 0 0}
+.copy b{color:var(--ink);font-weight:650}
+.two{display:grid;grid-template-columns:.92fr 1.08fr;gap:clamp(28px,5vw,80px);align-items:center}
+.two.flip>:first-child{order:2}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 0;padding:0;list-style:none}
+.chips li{border:1.5px solid var(--ink);border-radius:99px;padding:5px 14px;font-weight:600;font-size:.92rem;transition:background .2s,color .2s}
+.chips li:hover{background:var(--ink);color:var(--stone)}
+
+/* ---- Lanes (segmentation) ---- */
+.lanes{padding:clamp(18px,2.4vw,28px)}
+.lanes-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.lanes-top .t{font-family:var(--mono);font-size:.8rem;font-weight:600}
+.lanes-top .t span{color:var(--void-mute);font-weight:400}
+.lanes-ctl{display:flex;gap:6px;flex-wrap:wrap}
+#laneCv{width:100%;height:150px;display:block;border-radius:10px;background:rgba(255,255,255,.03)}
+.accel{margin-top:18px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:16px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--void-line)}
+.accel .from,.accel .to{font-family:var(--mono);font-size:.78rem;color:var(--void-mute);line-height:1.35}
+.accel .from b,.accel .to b{display:block;font-family:var(--f);font-size:clamp(1.4rem,2.6vw,2.2rem);color:var(--void-text);font-weight:700;letter-spacing:-.03em;font-variation-settings:"wdth" 85}
+.accel .to b{color:var(--steel)}
+.accel .arrow{height:1.5px;background:linear-gradient(90deg,var(--void-mute),var(--steel));position:relative}
+.accel .arrow::after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left:7px solid var(--steel);border-right:0}
+.lane-note{margin-top:12px;font-family:var(--mono);font-size:.78rem;color:var(--void-mute);min-height:2.6em}
+.lane-note b{color:var(--void-text)}
+.conns{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-top:12px}
+.conns div{font-family:var(--mono);font-size:.7rem;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.03);border:1px solid var(--void-line);display:flex;justify-content:space-between;gap:6px}
+.conns div i{width:8px;height:8px;border-radius:2px;align-self:center;flex:none}
+
+/* ---- Honest speed ---- */
+.speedbox{padding:clamp(18px,2.4vw,28px)}
+.bign{display:flex;align-items:baseline;gap:.15em;font-size:clamp(4.5rem,13vw,11rem);line-height:.82;letter-spacing:-.035em;font-weight:700;
+  font-variation-settings:"wght" var(--sw,500),"wdth" var(--sd,80),"opsz" 96;font-feature-settings:"tnum";transition:font-variation-settings .5s var(--ease)}
+.bign small{font-size:.22em;letter-spacing:-.01em;color:var(--void-mute);font-weight:500}
+.ctx{font-family:var(--mono);font-size:.82rem;color:var(--void-mute);margin-top:12px;min-height:1.3em}
+.ctx b{color:var(--steel)}
+#spCv{width:100%;height:170px;display:block;margin-top:18px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:.72rem;color:var(--void-mute);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:2px;border-radius:2px}
+.sp-ctl{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.rules{list-style:none;margin:28px 0 0;padding:0;border-top:1.5px solid var(--ink)}
+.rules li{display:grid;grid-template-columns:3ch 1fr;gap:14px;padding:16px 0;border-bottom:1px solid var(--hair);font-size:1.05rem}
+.rules li span{font-family:var(--mono);font-size:.8rem;color:var(--signal);padding-top:4px}
+.rules li b{font-weight:650}
+
+/* ---- Browser hand-off ---- */
+.bw{padding:0}
+.bw-top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--void-line)}
+.url{flex:1;font-family:var(--mono);font-size:.76rem;color:var(--void-mute);background:rgba(255,255,255,.05);border-radius:99px;padding:6px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ext .mk .rh{fill:currentColor;opacity:.55}
+.ext{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;background:var(--cobalt);color:var(--on-accent);transition:transform .4s var(--spring)}
+.ext.pop{transform:scale(1.3) rotate(-10deg)}
+.bw-body{position:relative;padding:28px 26px 30px;min-height:300px}
+.bw-body h5{margin:0 0 6px;font-size:1.35rem;font-weight:700;letter-spacing:-.02em}
+.bw-body p{margin:0 0 18px;color:var(--void-mute);font-size:.92rem}
+.dl-link{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--void-line);font-family:var(--mono);font-size:.82rem;transition:background .3s,border-color .3s}
+.dl-link.hl2{background:rgba(214,176,114,.18);border-color:var(--cobalt)}
+.ctxmenu{position:absolute;min-width:230px;padding:6px;border-radius:10px;background:#131316;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5);
+  font-size:.84rem;opacity:0;transform:scale(.92);transform-origin:0 0;transition:opacity .2s,transform .3s var(--spring);pointer-events:none}
+.ctxmenu.on{opacity:1;transform:none}
+.ctxmenu div{padding:7px 10px;border-radius:6px;color:var(--void-mute)}
+.ctxmenu div.rift{color:var(--void-text);display:flex;align-items:center;gap:8px}
+.ctxmenu div.rift.on{background:var(--cobalt);color:var(--on-accent)}
+.ctxmenu hr{border:0;border-top:1px solid rgba(255,255,255,.08);margin:4px 0}
+.ghost{position:absolute;width:12px;height:16px;pointer-events:none;opacity:0;transition:transform .5s var(--ease),opacity .2s}
+.ghost svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.landed{position:absolute;left:26px;right:26px;bottom:22px;padding:12px 14px;border-radius:10px;background:var(--void2);border:1px solid var(--void-line);
+  display:flex;align-items:center;gap:12px;font-size:.84rem;opacity:0;transform:translateY(16px);transition:opacity .4s,transform .5s var(--spring)}
+.landed.on{opacity:1;transform:none}
+.landed .kind{flex:none}
+.landed .bar{flex:1}
+.zero{display:flex;align-items:baseline;gap:18px;margin-top:30px;flex-wrap:wrap}
+.zero b{font-size:clamp(6rem,15vw,13rem);line-height:.75;font-weight:800;letter-spacing:-.07em;color:var(--cobalt);font-variation-settings:"wdth" 75,"opsz" 96}
+.zero span{font-size:clamp(1.3rem,2.4vw,2rem);font-weight:600;letter-spacing:-.03em;line-height:1.05;max-width:12ch}
+
+/* ---- Kill switch ---- */
+.ks{padding:clamp(18px,2.4vw,28px)}
+.ks-state{padding:22px;border-radius:14px;border:1px solid var(--void-line);background:rgba(255,255,255,.03);transition:background .4s,border-color .4s}
+.ks.drop .ks-state{background:rgba(229,138,87,.09);border-color:var(--signal)}
+.ks-t{font-size:clamp(1.8rem,3.6vw,3rem);font-weight:750;letter-spacing:-.04em;line-height:1;font-variation-settings:"wdth" 85;transition:color .3s}
+.ks.drop .ks-t{color:var(--steel)}
+.ks-m{display:flex;align-items:center;gap:10px;margin-top:12px;font-family:var(--mono);font-size:.82rem;color:var(--void-mute)}
+.ks-m i{width:11px;height:11px;border-radius:50%;background:var(--green);transition:background .3s}
+.ks.drop .ks-m i{background:var(--signal)}
+.ks-rows{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.ks-rows div{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.76rem;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.03);transition:opacity .3s,color .3s}
+.ks.drop .ks-rows div{color:var(--void-mute)}
+.ks-rows div em{font-style:normal}
+.ks-ctl{display:flex;gap:8px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.ks-ctl small{font-family:var(--mono);font-size:.74rem;color:var(--void-mute)}
+
+/* ---- Platforms ---- */
+.plat{border-top:1.5px solid var(--ink)}
+.prow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;padding:clamp(10px,1.6vw,20px) var(--gut);border-bottom:1.5px solid var(--ink);position:relative;overflow:hidden;isolation:isolate}
+.prow::before{content:"";position:absolute;inset:0;background:var(--ink);transform:scaleY(0);transform-origin:bottom;transition:transform .55s var(--ease);z-index:-1}
+.prow:hover::before,.prow:focus-visible::before{transform:none}
+.prow:hover,.prow:focus-visible{color:var(--stone)}
+.pname{font-size:clamp(3rem,10.5vw,11rem);line-height:.9;letter-spacing:-.06em;font-weight:500;font-variation-settings:"wght" 500,"wdth" 75,"opsz" 96;
+  transition:font-variation-settings .6s var(--ease),transform .6s var(--ease)}
+.prow:hover .pname,.prow:focus-visible .pname{font-variation-settings:"wght" 800,"wdth" 100,"opsz" 96;transform:translateX(1.5vw)}
+.pmeta{text-align:right;font-family:var(--mono);font-size:.8rem;line-height:1.7;color:var(--mute);transition:color .3s;padding-right:4px}
+.prow:hover .pmeta,.prow:focus-visible .pmeta{color:var(--stone)}
+.pmeta b{display:block;color:var(--signal);font-weight:700}
+.parrow{position:absolute;right:var(--gut);top:50%;font-size:2rem;transform:translate(40px,-50%);opacity:0;transition:transform .5s var(--ease),opacity .3s}
+
+/* ---- Index rows ---- */
+.idx{margin-top:40px;border-top:1.5px solid var(--ink)}
+.ir{display:grid;grid-template-columns:4ch minmax(0,.9fr) minmax(0,1.1fr);gap:24px;align-items:baseline;padding:22px 12px;border-bottom:1px solid var(--hair);
+  transition:background .35s,color .35s,padding .5s var(--ease)}
+.ir:hover{background:var(--ink);color:var(--stone);padding-left:28px}
+.ir span{font-family:var(--mono);font-size:.8rem;color:var(--signal)}
+.ir dt{font-size:clamp(1.5rem,3vw,2.7rem);font-weight:650;letter-spacing:-.04em;line-height:1;font-variation-settings:"wdth" 85}
+.ir dd{margin:0;font-size:1.05rem;max-width:56ch}
+.ir:hover dd{color:var(--stone)}
+
+.fineprint{color:var(--mute);font-size:.9rem;margin-top:16px}
+
+/* ================= Responsive ================= */
+@media (max-width:1020px){
+  .two,.two.flip{grid-template-columns:1fr}
+  .two.flip>:first-child{order:0}
+  .win-grid{grid-template-columns:1fr}
+  .side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--void-line);scrollbar-width:none}
+  .side h6{display:none}
+  .side button{flex:none;gap:8px}
+  .thead,.row{grid-template-columns:minmax(0,1fr) 120px;padding:0 12px}
+  .thead>:nth-child(2),.thead>:nth-child(4),.thead>:nth-child(5),.row>.kind,.row>.st{display:none}
+  .row>.sp{grid-column:2;text-align:right}
+  .row>.pg{grid-column:1/-1;margin-bottom:10px}
+  .ir{grid-template-columns:1fr;gap:6px}
+}
+@media (max-width:640px){
+  .hero{height:220vh}
+  .hl{font-size:17.5vw;transform:translateY(-20vh)}
+  .hero-meta{display:none}
+  .lede{font-size:1rem}
+  .hero-cta .pill.lg{padding:12px 20px;font-size:1rem}
+  .reveal{width:calc(100vw - 24px)}
+  .win-grid{min-height:0}
+  .nm small,.pm,.statusbar .ok,.statusbar .sum{display:none}
+  .row{min-height:0;padding-top:10px}
+  .row:nth-child(n+5){display:none}
+  .scrollhint{display:none}
+  .pmeta{display:none}
+  .accel{grid-template-columns:1fr}
+  .accel .arrow{display:none}
+}
+/* Reduced motion: no tear, plain stacked hero */
+.hero.static{height:auto}
+.hero.static .pin{position:relative;height:auto;overflow:visible}
+.hero.static .stage{position:relative;background:none;padding:120px 0 40px}
+.hero.static #riftfx,.hero.static .half.R,.hero.static .crack,.hero.static .scrollhint{display:none}
+.hero.static .half.L{position:relative;clip-path:none;padding:40px 0}
+.hero.static .hl{transform:none}
+.hero.static .hero-foot{position:relative;padding-bottom:40px}
+.hero.static .reveal{position:relative;left:auto;top:auto;transform:none;opacity:1;margin:0 auto;pointer-events:auto}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div id="tear" aria-hidden="true"><i></i><i></i></div>
+
+<header class="nav">
+  <a class="logo" href="/" aria-label="Rift home">
+    <svg class="mk" viewBox="13 0 38 64" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>
+    Rift
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a class="lk" href="#lanes">Downloads</a>
+    <a class="lk" href="#honest">Speed</a>
+    <a class="lk" href="#browser">Browser</a>
+    <a class="lk" href="#everywhere">Platforms</a>
+  </nav>
+  <div class="nav-act">
+    <button class="pill ico" id="themeToggle" type="button" aria-label="Switch light or dark theme">
+      <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+    <a class="pill hot" href="/download" data-go>Download</a>
+  </div>
+</header>
+
+<main>
+<!-- ================= HERO ================= -->
+<section class="hero" id="hero" aria-label="Introduction">
+  <div class="pin">
+    <div class="stage">
+      <canvas id="riftfx" aria-hidden="true"></canvas>
+
+      <!-- The app, waiting inside the rift -->
+      <div class="reveal" id="reveal">
+        <div class="void" role="region" aria-label="Preview of the Rift app">
+          <div class="win-top">
+            <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="win-title"><b>Rift</b> &nbsp;·&nbsp; <span id="wtCount">5</span> downloads &nbsp;·&nbsp; torrents and direct links in one list</div>
+            <button class="vbtn" id="addBtn" type="button">+ Add link</button>
+          </div>
+          <div class="win-grid">
+            <div class="side" role="group" aria-label="Filters">
+              <h6>Show</h6>
+              <button type="button" data-f="all" aria-pressed="true">All <em data-c="all">5</em></button>
+              <button type="button" data-f="active" aria-pressed="false">Active <em data-c="active">0</em></button>
+              <button type="button" data-f="seed" aria-pressed="false">Seeding <em data-c="seed">0</em></button>
+              <h6>Type</h6>
+              <button type="button" data-f="bt" aria-pressed="false">Torrents <em data-c="bt">0</em></button>
+              <button type="button" data-f="http" aria-pressed="false">Direct links <em data-c="http">0</em></button>
+              <h6>Category</h6>
+              <button type="button" data-f="cat:Video" aria-pressed="false">Video <em data-c="cat:Video">0</em></button>
+              <button type="button" data-f="cat:Programs" aria-pressed="false">Programs <em data-c="cat:Programs">0</em></button>
+              <button type="button" data-f="cat:ISO" aria-pressed="false">ISO <em data-c="cat:ISO">0</em></button>
+            </div>
+            <div class="list">
+              <div class="thead" aria-hidden="true"><span>Name</span><span>Type</span><span>Progress</span><span>Speed</span><span>Status</span></div>
+              <div class="rows" id="rows"></div>
+              <div class="statusbar">
+                <span>↓ <b id="sbDown">0</b> of <b>20 MB/s</b> limit</span>
+                <span>↑ <b id="sbUp">0</b></span>
+                <span class="ok">Port open · DHT 412 nodes</span>
+                <span>VPN: <b>wg0</b></span>
+                <span class="sum" id="sbSum">rows add up to the total ✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="half L">
+        <h1 class="hl" id="hlL" aria-label="Torrents. Direct links. One rift.">
+          <span class="ln" data-split data-manual data-kin="600,82" data-peak="800,100" data-radius="300">Torrents.</span>
+          <span class="ln" data-split data-manual data-offset="9" data-kin="600,82" data-peak="800,100" data-radius="300">Direct links.</span>
+          <span class="ln" data-split data-manual data-offset="21"><span class="s">One rift.</span></span>
+        </h1>
+      </div>
+      <div class="half R" aria-hidden="true">
+        <div class="hl" id="hlR">
+          <span class="ln" data-split data-manual>Torrents.</span>
+          <span class="ln" data-split data-manual data-offset="9">Direct links.</span>
+          <span class="ln" data-split data-manual data-offset="21"><span class="s">One rift.</span></span>
+        </div>
+      </div>
+      <svg class="crack" id="crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="54,0 46,38 55,52 47,74 52,100"/></svg>
+    </div>
+
+    <div class="hero-foot" id="heroFoot">
+      <div class="rv in" style="--d:.9s">
+        <p class="lede">Rift is a native download manager for <b>Windows, macOS and Linux</b>. A tuned BitTorrent engine and a multi-connection HTTP engine, in one fast app that runs entirely on your device.</p>
+        <div class="hero-meta">
+          <span class="tag"><i></i>libtorrent + rift-get engines</span>
+          <span class="tag">Qt 6 · C++20 · no Electron</span>
+          <span class="tag">Nothing else to install</span>
+        </div>
+      </div>
+      <div class="hero-cta rv in" style="--d:1.05s">
+        <a class="pill hot lg" href="/download" data-go id="heroDl">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+          <span id="heroDlLabel">Download for Windows</span>
+        </a>
+        <a class="pill lg" href="/download#browser" data-go>Browser extension</a>
+      </div>
+    </div>
+    <div class="scrollhint" id="scrollhint" aria-hidden="true">Scroll to open<span></span></div>
+  </div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="mq" aria-hidden="true"><div class="mq-track">
+  <span>Magnet links</span><i>&amp;</i><span>direct links</span><i>/</i><span>8 lanes per file</span><i>/</i><span>Mirrors</span><i>/</i><span>Metalink</span><i>/</i><span>Watch folders</span><i>/</i><span>RSS rules</span><i>/</i><span>Stream while it downloads</span><i>/</i><span>Kill switch</span><i>/</i><span>Checksums</span><i>/</i>
+</div></div>
+
+<div class="wrap">
+<!-- ================= LANES ================= -->
+<section class="blk" id="lanes">
+  <div class="two">
+    <div>
+      <span class="eyebrow rv"><b>01</b> rift-get engine</span>
+      <h2 class="h2" data-split>Eight lanes. <span class="s">One file.</span></h2>
+      <p class="copy rv">Paste a link and Rift opens several connections to the same file, each fetching its own range. When a lane finishes, it <b>takes half of the biggest piece still left</b>, so every connection stays busy until the last byte. No slow tail, no "assembling" step at the end.</p>
+      <p class="copy rv">Auto mode adds connections only while they make it faster, and stops when they don't. Parallel lanes help when a server limits each connection. They can't make your internet line faster, and Rift doesn't pretend they can.</p>
+      <ul class="chips rv"><li>Dynamic splitting</li><li>Auto connection count</li><li>Mirrors</li><li>Metalink</li><li>Resume after a crash</li><li>SHA-256 checks</li><li>FTP</li></ul>
+    </div>
+    <div class="void lanes rv" aria-label="Simulation of a segmented download">
+      <div class="lanes-top">
+        <span class="t">Blender-4.2-windows-x64.zip <span>· 1.2 GB</span></span>
+        <div class="lanes-ctl">
+          <button class="vbtn" id="lThrottle" type="button" aria-pressed="true">Server limits each connection</button>
+          <button class="vbtn" id="lReplay" type="button">Replay</button>
+        </div>
+      </div>
+      <canvas id="laneCv" role="img" aria-label="Each colored band is one connection downloading its own part of the file"></canvas>
+      <div class="accel" aria-live="polite">
+        <div class="from">1 connection<b id="aFrom">0.0 MB/s</b></div>
+        <div class="arrow" aria-hidden="true"></div>
+        <div class="to"><span id="aToN">1 connection</span><b id="aTo">0.0 MB/s</b></div>
+      </div>
+      <div class="lane-note" id="lNote">Probing the server…</div>
+      <div class="conns" id="conns"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HONEST SPEED ================= -->
+<section class="blk" id="honest">
+  <div class="two flip">
+    <div>
+      <span class="eyebrow rv"><b>02</b> Speed display</span>
+      <h2 class="h2" data-split>The number <span class="s">is the number.</span></h2>
+      <p class="copy rv">Every speed Rift shows is measured from bytes that actually arrived. No estimates, no "boosted" figures.</p>
+      <ol class="rules rv">
+        <li><span>01</span><div><b>File data only.</b> Protocol overhead is shown separately, so Rift matches your system's network monitor.</div></li>
+        <li><span>02</span><div><b>It adds up.</b> The speeds of all rows equal the total in the status bar.</div></li>
+        <li><span>03</span><div><b>Zero means zero.</b> When nothing arrives, the speed drops to 0 within 2 seconds and Rift tells you why.</div></li>
+        <li><span>04</span><div><b>Limits are visible.</b> "4.9 of 5 MB/s limit", so a capped download never looks like a slow one.</div></li>
+      </ol>
+    </div>
+    <div class="void speedbox rv">
+      <div class="bign" id="bign" aria-live="off"><span id="bigv">0.0</span><small>MB/s</small></div>
+      <div class="ctx" id="ctx">Smoothed over 5 s · current value in the graph</div>
+      <canvas id="spCv" role="img" aria-label="Graph of current and smoothed download speed"></canvas>
+      <div class="legend"><span><i style="background:var(--cobalt)"></i>Current (1 s)</span><span><i style="background:var(--steel)"></i>Smoothed (5 s)</span><span><i style="background:rgba(255,255,255,.35)"></i>Limit</span></div>
+      <div class="sp-ctl">
+        <button class="vbtn" id="spLimit" type="button" aria-pressed="false">Cap at 5 MB/s</button>
+        <button class="vbtn" id="spStop" type="button" aria-pressed="false">Source goes quiet</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BROWSER ================= -->
+<section class="blk" id="browser">
+  <div class="two">
+    <div>
+      <span class="eyebrow rv"><b>03</b> Browser extension</span>
+      <h2 class="h2" data-split>Your browser <span class="s">hands it over.</span></h2>
+      <p class="copy rv">Right-click any link and choose <b>Download with Rift</b>, or let Rift take over downloads by file type and size. Cookies and the referring page come along, so files behind a sign-in just work.</p>
+      <ul class="chips rv"><li>Chrome</li><li>Edge</li><li>Brave</li><li>Firefox</li></ul>
+      <div class="zero rv"><b>0</b><span>network ports opened to do it.</span></div>
+      <p class="copy rv">The extension talks to Rift through the browser's own native messaging pipe. Nothing listens on your network.</p>
+    </div>
+    <div class="void bw rv" id="bw" aria-label="Animation of a browser download handed to Rift">
+      <div class="bw-top">
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="url">https://download.example.org/releases/</div>
+        <div class="ext" id="ext" aria-hidden="true"><svg class="mk" viewBox="13 0 38 64" width="11" height="14" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg></div>
+      </div>
+      <div class="bw-body" id="bwBody">
+        <h5>Release downloads</h5>
+        <p>Pick the build for your system.</p>
+        <span class="dl-link" id="dlLink">⬇ project-3.1-linux-x86_64.tar.xz <span style="color:var(--void-mute)">· 384 MB</span></span>
+        <div class="ctxmenu" id="ctxm" aria-hidden="true">
+          <div>Open link in new tab</div><div>Save link as…</div><div>Copy link address</div><hr>
+          <div class="rift" id="ctxRift"><svg class="mk" viewBox="13 0 38 64" width="10" height="13" aria-hidden="true"><path class="lh" transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path class="rh" transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>Download with Rift</div>
+        </div>
+        <div class="ghost" id="ghost" aria-hidden="true"><svg viewBox="0 0 12 16" width="14" height="18"><path d="M1 1v12l3.2-3 2.3 5 2-.9-2.3-4.9H11z" fill="#fff" stroke="#000" stroke-width="1"/></svg></div>
+        <div class="landed" id="landed"><span class="kind http">HTTP</span><span style="white-space:nowrap">project-3.1-linux…</span><div class="bar segs" id="landBar"></div><span class="mono" id="landSp" style="font-size:.74rem;color:var(--green)">0.0 MB/s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= KILL SWITCH ================= -->
+<section class="blk" id="privacy">
+  <div class="two flip">
+    <div>
+      <span class="eyebrow rv"><b>04</b> Privacy</span>
+      <h2 class="h2" data-split>Made for the day <span class="s">your VPN drops.</span></h2>
+      <p class="copy rv">Bind Rift to your VPN adapter. If it disconnects or its address changes, Rift pauses <b>every torrent and every direct download within two seconds</b>, and picks up again when the tunnel is back, if you want it to.</p>
+      <ul class="chips rv"><li>Interface binding</li><li>SOCKS5 &amp; HTTP proxy</li><li>Encryption</li><li>IP blocklists</li><li>Anonymous mode</li></ul>
+    </div>
+    <div class="void ks rv" id="ks">
+      <div class="ks-state">
+        <div class="ks-t" id="ksT">Bound to wg0</div>
+        <div class="ks-m"><i></i><span id="ksM">Traffic only leaves through the VPN</span></div>
+      </div>
+      <div class="ks-rows">
+        <div><span>ubuntu-24.04.1-desktop-amd64.iso</span><em class="ksr">6.1 MB/s</em></div>
+        <div><span>Blender-4.2-windows-x64.zip</span><em class="ksr">9.4 MB/s</em></div>
+        <div><span>bbb-4k-sunflower.mkv</span><em class="ksr">2.3 MB/s</em></div>
+      </div>
+      <div class="ks-ctl"><button class="vbtn" id="ksBtn" type="button">Drop the VPN</button><small id="ksTime"></small></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ================= PLATFORMS ================= -->
+<section class="blk" id="everywhere" style="padding-bottom:0">
+  <div class="wrap">
+    <span class="eyebrow rv"><b>05</b> One app, every desk</span>
+    <h2 class="h2" data-split style="margin-bottom:clamp(30px,5vw,60px)">Same Rift. <span class="s">Everywhere.</span></h2>
+  </div>
+  <div class="plat">
+    <a class="prow wrap" href="/download#windows" data-go><span class="pname">Windows</span><span class="pmeta"><b>Windows 10 &amp; 11</b>Installer · Portable ZIP</span></a>
+    <a class="prow wrap" href="/download#macos" data-go><span class="pname">macOS</span><span class="pmeta"><b>macOS 12 or later</b>Universal DMG · ZIP</span></a>
+    <a class="prow wrap" href="/download#linux" data-go><span class="pname">Linux</span><span class="pmeta"><b>x64 &amp; arm64</b>AppImage · DEB · RPM · tar.gz</span></a>
+    <a class="prow wrap" href="/download#browser" data-go><span class="pname">Browser</span><span class="pmeta"><b>Extension</b>Chrome · Edge · Brave · Firefox</span></a>
+  </div>
+</section>
+
+<div class="wrap">
+<!-- ================= INDEX ================= -->
+<section class="blk" id="more">
+  <span class="eyebrow rv"><b>06</b> Also inside</span>
+  <h2 class="h2" data-split>Every detail, <span class="s">on your device.</span></h2>
+  <dl class="idx">
+    <div class="ir rv"><span>A</span><dt>Stream while it downloads</dt><dd>Play a video in VLC, mpv or the built-in player before it finishes. Seeking moves the download to where you are.</dd></div>
+    <div class="ir rv"><span>B</span><dt>Rules that run themselves</dt><dd>Watch folders, RSS rules with episode tracking, seeding limits, and if-this-then-that rules like "when a Movie finishes, move it and unpack it".</dd></div>
+    <div class="ir rv"><span>C</span><dt>One limit for everything</dt><dd>Global and scheduled speed limits and monthly data caps cover torrents and direct downloads together.</dd></div>
+    <div class="ir rv"><span>D</span><dt>Mirrors, Metalink, checksums</dt><dd>Pull one file from several servers at once, and verify it against SHA-256 or the hash a site publishes.</dd></div>
+    <div class="ir rv"><span>E</span><dt>Plays well with your PC</dt><dd>Keeps the computer awake while busy, can sleep or shut down when everything finishes, and slows down on battery, metered networks or while you game.</dd></div>
+    <div class="ir rv"><span>F</span><dt>Move in from other apps</dt><dd>Import your torrents, categories and tags from qBittorrent, Transmission or Deluge without rechecking everything.</dd></div>
+    <div class="ir rv"><span>G</span><dt>Safe by default</dt><dd>Downloads get the system's "from the internet" mark so your antivirus checks them. Removing a torrent never deletes files unless you ask.</dd></div>
+    <div class="ir rv"><span>H</span><dt>Nothing else to install</dt><dd>No .NET, Java, Python, WebView or Visual C++ redistributable. Install it, or unzip the portable build and run.</dd></div>
+  </dl>
+  <p class="fineprint rv">Rift is a neutral download client. It ships with no indexers, no tracker lists and no site rippers, and it never bypasses DRM.</p>
+</section>
+
+<section class="end" aria-label="Download Rift">
+  <a class="big" href="/download" data-go aria-label="Download Rift"><span>R</span><span>i</span><span>f</span><span>t</span></a>
+</section>
+<footer class="foot">
+  <span>Rift · native download manager for Windows, macOS and Linux.</span>
+  <span>Built with C++20, Qt 6, libtorrent and libcurl · <a href="/download" data-go>Download</a></span>
+</footer>
+</div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/assets/rift.js"></script>
+<script>
+(() => {
+const { $, $$, RM, toast, detectOS } = window.Rift;
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = (t) => 1 - Math.pow(1 - t, 3);
+const fmt = (v) => (v >= 10 ? v.toFixed(1) : v.toFixed(1));
+
+/* ---------- Detected OS on the CTA ---------- */
+const { os } = detectOS();
+const osName = { windows: 'Windows', macos: 'macOS', linux: 'Linux' }[os];
+if (osName) { $('#heroDlLabel').textContent = 'Download for ' + osName; $('#heroDl').href = '/download#' + os; }
+else { $('#heroDlLabel').textContent = 'Download Rift'; }
+
+/* ---------- Hero tear ---------- */
+const hero = $('#hero'), L = $('.half.L'), R = $('.half.R'), reveal = $('#reveal'), foot = $('#heroFoot'), crack = $('#crack'), hint = $('#scrollhint');
+const poly = crack.querySelector('polyline');
+crack.style.setProperty('--len', 400);
+poly.style.strokeDasharray = 400; poly.style.strokeDashoffset = 400;
+let P = 0;
+if (RM) {
+  hero.classList.add('static');
+  $$('#hero [data-split]').forEach((el) => el.classList.add('in'));
+} else {
+  setTimeout(() => $$('#hero [data-split]').forEach((el) => el.classList.add('in')), 120);
+  const onScroll = () => {
+    const r = hero.getBoundingClientRect();
+    const total = hero.offsetHeight - innerHeight;
+    P = clamp(-r.top / total);
+    const o = ease(clamp(P / 0.62));
+    const dx = o * 56;
+    L.style.transform = `translate3d(${-dx}vw,${o * -2}vh,0) rotate(${-o * 2.5}deg)`;
+    R.style.transform = `translate3d(${dx}vw,${o * 2}vh,0) rotate(${o * 2.5}deg)`;
+    crack.style.opacity = String(1 - clamp(o * 4));
+    foot.style.opacity = String(1 - clamp(o * 2.4));
+    foot.style.transform = `translateY(${o * 60}px)`;
+    hint.style.opacity = String(1 - clamp(o * 5));
+    const s = 0.7 + 0.3 * ease(clamp((P - 0.08) / 0.6));
+    reveal.style.transform = `translate(-50%,-50%) scale(${s})`;
+    reveal.style.opacity = String(clamp((o - 0.12) * 1.6));
+    reveal.classList.toggle('live', o > 0.85);
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+}
+
+/* ---------- Particles inside the rift ---------- */
+(() => {
+  const cv = $('#riftfx'); if (!cv || RM) return;
+  const c = cv.getContext('2d');
+  let W = 0, H = 0, vis = true;
+  const parts = [];
+  const N = innerWidth < 700 ? 260 : 620;
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; c.setTransform(d, 0, 0, d, 0, 0); };
+  size(); addEventListener('resize', size);
+  // crack x (fraction) along y
+  const xs = [[0, .54], [.38, .46], [.52, .55], [.74, .47], [1, .52]];
+  const crackX = (yf) => { for (let i = 1; i < xs.length; i++) if (yf <= xs[i][0]) { const [y0, x0] = xs[i - 1], [y1, x1] = xs[i]; return x0 + (x1 - x0) * ((yf - y0) / (y1 - y0)); } return .52; };
+  const spawn = (p, init) => { p.y = init ? Math.random() * H : -20; p.off = (Math.random() - .5); p.v = .6 + Math.random() * 2.4; p.s = .5 + Math.random() * 1.6; p.hue = Math.random(); p.ph = Math.random() * 6.28; return p; };
+  for (let i = 0; i < N; i++) parts.push(spawn({}, true));
+  new IntersectionObserver((e) => { vis = e[0].isIntersecting; }).observe(hero);
+  let t = 0;
+  (function frame() {
+    requestAnimationFrame(frame);
+    if (!vis) return;
+    t += .016;
+    const o = ease(clamp(P / 0.62));
+    const spread = 6 + o * W * 1.2;
+    c.fillStyle = 'rgba(8,9,12,.28)'; c.fillRect(0, 0, W, H);
+    const pt = window.Rift.pointer();
+    for (const p of parts) {
+      p.y += p.v * (1 + o * 1.5);
+      if (p.y > H + 20) spawn(p, false);
+      const yf = p.y / H;
+      let x = crackX(yf) * W + p.off * spread + Math.sin(p.y * .012 + t * 1.3 + p.ph) * (8 + o * 30);
+      const dxp = x - pt.x, dyp = p.y - pt.y, d2 = dxp * dxp + dyp * dyp;
+      if (d2 < 16000) x += dxp / Math.sqrt(d2 + 1) * 18;
+      const a = .35 + .65 * (1 - Math.abs(p.off) * 1.6);
+      c.fillStyle = p.hue < .55 ? `rgba(214,176,114,${a})` : p.hue < .85 ? `rgba(229,138,87,${a})` : `rgba(236,236,231,${a * .8})`;
+      c.fillRect(x, p.y, p.s, p.s * (2 + p.v * 1.5));
+    }
+  })();
+})();
+
+/* ---------- App window: unified list ---------- */
+const LIMIT = 20;
+const items = [
+  { id: 1, k: 'bt', name: 'ubuntu-24.04.1-desktop-amd64.iso', meta: '5.8 GB · 84 peers · encrypted', mb: 5940, cat: 'ISO', p: .62, d: 6.1, u: .9, st: 'Downloading', base: 6.2 },
+  { id: 2, k: 'http', name: 'Blender-4.2-windows-x64.zip', meta: '1.2 GB · 8 connections · blender.org', mb: 1230, cat: 'Programs', p: .41, d: 9.4, u: 0, st: 'Downloading', segs: 8, base: 9.5 },
+  { id: 3, k: 'bt', name: 'bbb-4k-sunflower.mkv', meta: '3.4 GB · streaming to mpv · buffer 96%', mb: 3480, cat: 'Video', p: .33, d: 2.3, u: .4, st: 'Streaming', base: 2.3 },
+  { id: 4, k: 'bt', name: 'Sintel.2010.1080p.mkv', meta: '1.1 GB · ratio 3.20', mb: 1130, cat: 'Video', p: 1, d: 0, u: 1.2, st: 'Seeding' },
+  { id: 5, k: 'http', name: 'fedora-workstation-41-x86_64.iso', meta: '2.3 GB · scheduled 02:00', mb: 2350, cat: 'ISO', p: 0, d: 0, u: 0, st: 'Queued' },
+];
+let filter = 'all', sel = 2;
+const rowsEl = $('#rows');
+function rowHTML(it) {
+  const prog = it.segs
+    ? `<div class="bar segs">${Array.from({ length: it.segs }, () => '<span><i></i></span>').join('')}</div>`
+    : `<div class="bar ${it.p >= 1 ? 'done' : ''}"><i></i></div>`;
+  const stc = { Seeding: 'seed', Streaming: 'stream', Queued: 'q' }[it.st] || '';
+  return `<div class="row" data-id="${it.id}">
+    <div class="nm"><b>${it.name}</b><small>${it.meta}</small></div>
+    <span class="kind ${it.k}">${it.k === 'bt' ? 'TORRENT' : 'HTTP'}</span>
+    <div class="pg">${prog}<div class="pm"><span class="pc"></span><span class="eta"></span></div></div>
+    <div class="sp"></div>
+    <span class="st ${stc}">${it.st}</span></div>`;
+}
+rowsEl.innerHTML = items.map(rowHTML).join('');
+items.forEach((it) => { it.el = rowsEl.querySelector(`[data-id="${it.id}"]`); it.el.addEventListener('click', () => { sel = it.id; paint(); }); });
+const match = (it, f) => f === 'all' || (f === 'active' && it.d > 0) || (f === 'seed' && it.st === 'Seeding') || f === it.k || f === 'cat:' + it.cat;
+$$('.side button').forEach((b) => b.addEventListener('click', () => {
+  filter = b.dataset.f;
+  $$('.side button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  paint();
+}));
+$('#addBtn').addEventListener('click', () => toast('In the app this opens the Add dialog: paste a magnet or any URL.'));
+function sizeOf(it) { return it.mb; }
+const ST = { Seeding: 'seed', Streaming: 'stream', Queued: 'q', Completed: 'seed' };
+function paint() {
+  let sd = 0, su = 0;
+  items.forEach((it) => {
+    const st = it.el.querySelector('.st');
+    if (st.textContent !== it.st) { st.textContent = it.st; st.className = 'st ' + (ST[it.st] || ''); }
+    it.el.classList.toggle('gone', !match(it, filter));
+    it.el.classList.toggle('sel', it.id === sel);
+    it.el.querySelector('.pc').textContent = (it.p * 100).toFixed(1) + '%';
+    const rem = (1 - it.p) * sizeOf(it);
+    it.el.querySelector('.eta').textContent = it.p >= 1 ? 'Done' : it.d > 0 ? 'ETA ' + etaStr(rem / it.d) : '—';
+    it.el.querySelector('.sp').innerHTML = `<span class="d">↓ ${it.d.toFixed(1)}</span><span class="u">↑ ${it.u.toFixed(1)}</span>`;
+    if (it.segs) {
+      const spans = it.el.querySelectorAll('.bar.segs i');
+      spans.forEach((s, i) => { s.style.width = (it.p >= 1 ? 100 : clamp(it.p + Math.sin(i * 7.3) * .2 * (1 - it.p)) * 100) + '%'; });
+    } else it.el.querySelector('.bar i').style.width = it.p * 100 + '%';
+    sd += it.d; su += it.u;
+  });
+  $('#sbDown').textContent = sd.toFixed(1) + ' MB/s';
+  $('#sbUp').textContent = su.toFixed(1) + ' MB/s';
+  const counts = {};
+  $$('.side em').forEach((e) => { e.textContent = items.filter((it) => match(it, e.dataset.c)).length; });
+}
+function etaStr(s) { if (!isFinite(s)) return '∞'; if (s < 60) return Math.round(s) + 's'; const m = Math.floor(s / 60); if (m < 60) return m + 'm ' + Math.round(s % 60) + 's'; return Math.floor(m / 60) + 'h ' + (m % 60) + 'm'; }
+let appVis = false;
+new IntersectionObserver((e) => { appVis = e[0].isIntersecting; }).observe(reveal);
+setInterval(() => {
+  if (!appVis) return;
+  items.forEach((it) => {
+    if (it.st === 'Downloading' || it.st === 'Streaming') {
+      it.d = Math.max(.1, it.base + (Math.random() - .5) * it.base * .25);
+      it.p = Math.min(1, it.p + it.d * .5 * 4 / sizeOf(it)); // 4x time-lapse
+      if (it.p >= 1) { it.p = 1; it.d = 0; it.st = it.k === 'bt' ? 'Seeding' : 'Completed'; it.u = it.k === 'bt' ? .6 : 0; it.doneAt = Date.now(); }
+    }
+    if (it.st === 'Seeding') it.u = Math.max(0, Math.min(2, it.u + (Math.random() - .5) * .3));
+    // loop the demo: restart a finished item after a while
+    if (it.doneAt && Date.now() - it.doneAt > 8000) { it.doneAt = 0; it.p = .02; it.st = it.id === 3 ? 'Streaming' : 'Downloading'; it.u = it.k === 'bt' ? .3 : 0; }
+  });
+  // honest totals: scale downloads so the sum never exceeds the limit
+  const sum = items.reduce((a, it) => a + it.d, 0);
+  if (sum > LIMIT) items.forEach((it) => { it.d *= LIMIT / sum; });
+  items.forEach((it) => { it.d = Math.round(it.d * 10) / 10; it.u = Math.round(it.u * 10) / 10; });
+  paint();
+}, 500);
+paint();
+
+/* ---------- Lanes: dynamic segmentation simulation ---------- */
+(() => {
+  const cv = $('#laneCv'), c = cv.getContext('2d');
+  const COLORS = ['#D6B072', '#E58A57', 'var(--green)', '#C38BEA', '#F0924A', '#6CC4C9', '#E98AA8', '#B9C07A', '#EDE8DF'];
+  const SIZE = 1200, MINSEG = 6, LINE = 10, PER = 1.25, MAXC = 9;
+  let throttle = true, segs, conns, t, nextAdd, lastTotal, stopped, note, firstSpeed, done, vis = false, raf;
+  const W = () => cv.clientWidth, H = () => cv.clientHeight;
+  function size() { const d = Math.min(devicePixelRatio || 1, 2); cv.width = W() * d; cv.height = H() * d; c.setTransform(d, 0, 0, d, 0, 0); }
+  size(); addEventListener('resize', size);
+  function reset() {
+    segs = [{ start: 0, end: SIZE, pos: 0, c: 0 }];
+    conns = [{ id: 0, seg: segs[0], v: 0 }];
+    t = 0; nextAdd = 1.6; lastTotal = 0; stopped = false; firstSpeed = 0; done = false;
+    setNote('Probing the server… the first request becomes lane 1.');
+  }
+  function setNote(h) { if (note !== h) { note = h; $('#lNote').innerHTML = h; } }
+  function largest() { let b = null; for (const s of segs) if (!s.doneF && s.c !== -1) { const rem = s.end - s.pos; if (!b || rem > b.end - b.pos) b = s; } return b; }
+  function steal(conn) {
+    const b = largest();
+    if (!b || b.end - b.pos < MINSEG * 2) return false;
+    const mid = b.pos + (b.end - b.pos) / 2;
+    const ns = { start: mid, end: b.end, pos: mid, c: conn.id };
+    b.end = mid; segs.push(ns); conn.seg = ns; return true;
+  }
+  function speeds() {
+    const n = conns.filter((k) => k.seg).length;
+    const per = throttle ? PER : LINE;
+    const total = Math.min(n * per, LINE);
+    return { n, each: n ? total / n : 0, total };
+  }
+  function step(dt) {
+    t += dt;
+    const { n, each, total } = speeds();
+    for (const k of conns) {
+      if (!k.seg) { k.v = 0; continue; }
+      k.v = each * (0.9 + Math.random() * 0.2);
+      k.seg.pos = Math.min(k.seg.end, k.seg.pos + k.v * dt * 6);
+      if (k.seg.pos >= k.seg.end) { k.seg.doneF = true; if (!steal(k)) k.seg = null; }
+    }
+    if (!firstSpeed && t > .6) firstSpeed = each;
+    // adaptive connection controller
+    if (!stopped && t >= nextAdd && !done) {
+      if (conns.length === 1 || total > lastTotal * 1.05) {
+        lastTotal = total;
+        if (conns.length >= MAXC) { stopped = true; }
+        else {
+          const k = { id: conns.length, seg: null, v: 0 };
+          if (steal(k)) conns.push(k);
+          nextAdd = t + 1.1;
+          // test the new lane: measure next tick
+          const s2 = speeds();
+          if (s2.total <= total * 1.05 && conns.length > 1) {
+            // the new lane added nothing: remove it and give its range back
+            const seg = k.seg; const prev = segs.find((s) => s.end === seg.start && !s.doneF);
+            if (prev) { prev.end = seg.end; segs.splice(segs.indexOf(seg), 1); }
+            conns.pop(); stopped = true;
+            setNote(conns.length === 1
+              ? '<b>Extra connections didn\'t help</b>: this server already gives one connection the full line. Auto stays at 1.'
+              : `<b>Auto stopped at ${conns.length}.</b> Lane ${conns.length + 1} added 0 %: the line is full at ${LINE} MB/s.`);
+          } else {
+            setNote(`Lane ${conns.length} added. Total went from ${lastTotal.toFixed(1)} to ${s2.total.toFixed(1)} MB/s, so Auto keeps going.`);
+          }
+        }
+      }
+    }
+    const active = conns.filter((k) => k.seg).length;
+    if (!done && active === 0) { done = true; setNote('<b>Done.</b> Every byte covered exactly once; SHA-256 matches. Replay to watch again.'); }
+    else if (stopped && active > 0 && active < conns.length) setNote(`Lanes are finishing and <b>stealing half of the biggest range left</b>, so all stay busy to the end.`);
+  }
+  function draw() {
+    const w = W(), h = H(); c.clearRect(0, 0, w, h);
+    const pad = 10, bw = w - pad * 2;
+    // track
+    c.fillStyle = 'rgba(255,255,255,.05)'; c.fillRect(pad, 20, bw, h - 40);
+    for (const s of segs) {
+      const x0 = pad + s.start / SIZE * bw, x1 = pad + s.pos / SIZE * bw, xe = pad + s.end / SIZE * bw;
+      c.fillStyle = COLORS[s.c % COLORS.length];
+      c.globalAlpha = s.doneF ? .55 : .95; c.fillRect(x0, 20, Math.max(0, x1 - x0), h - 40);
+      c.globalAlpha = 1;
+      if (!s.doneF) { c.fillStyle = '#fff'; c.fillRect(x1 - 1, 14, 2, h - 28); }
+      c.fillStyle = 'rgba(8,9,12,.9)'; c.fillRect(xe - .5, 20, 1, h - 40);
+    }
+    // ticks
+    c.fillStyle = 'rgba(255,255,255,.35)'; c.font = '10px JetBrains Mono, monospace';
+    c.fillText('0', pad, 12); c.textAlign = 'right'; c.fillText('1.2 GB', w - pad, 12); c.textAlign = 'left';
+    const doneB = segs.reduce((a, s) => a + (s.pos - s.start), 0);
+    c.fillText((doneB / SIZE * 100).toFixed(0) + '% · ' + segs.length + ' ranges', pad, h - 4);
+  }
+  function hud() {
+    const { total } = speeds();
+    const n = conns.filter((k) => k.seg).length || conns.length;
+    $('#aFrom').textContent = (firstSpeed || 0).toFixed(1) + ' MB/s';
+    $('#aToN').textContent = `${conns.length} connection${conns.length > 1 ? 's' : ''}`;
+    $('#aTo').textContent = (done ? 0 : conns.reduce((a, k) => a + k.v, 0)).toFixed(1) + ' MB/s';
+    $('#conns').innerHTML = conns.map((k) => `<div><i style="background:${COLORS[k.id % COLORS.length]}"></i><span>#${k.id + 1}</span><span>${k.seg ? k.v.toFixed(1) : 'idle'}</span></div>`).join('');
+  }
+  let last = 0, hudT = 0;
+  function loop(ts) {
+    raf = requestAnimationFrame(loop);
+    if (!vis) { last = ts; return; }
+    const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts;
+    if (!done) step(dt);
+    draw();
+    if ((hudT += dt) > .25) { hudT = 0; hud(); }
+  }
+  reset();
+  new IntersectionObserver((e) => { vis = e[0].isIntersecting; }).observe(cv);
+  raf = requestAnimationFrame(loop);
+  $('#lReplay').addEventListener('click', reset);
+  $('#lThrottle').addEventListener('click', (e) => {
+    throttle = !throttle; e.currentTarget.setAttribute('aria-pressed', String(throttle));
+    e.currentTarget.textContent = throttle ? 'Server limits each connection' : 'Server gives full speed';
+    reset();
+  });
+})();
+
+/* ---------- Honest speed meter ---------- */
+(() => {
+  const cv = $('#spCv'), c = cv.getContext('2d');
+  let limit = 0, quiet = false, vis = false;
+  const cur = [], sm = []; const N = 120;
+  let ema = 0, lastNonZero = 0, t = 0;
+  const size = () => { const d = Math.min(devicePixelRatio || 1, 2); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; c.setTransform(d, 0, 0, d, 0, 0); };
+  size(); addEventListener('resize', size);
+  new IntersectionObserver((e) => { vis = e[0].isIntersecting; }).observe(cv);
+  function sample() {
+    t += .5;
+    let v = quiet ? 0 : 7.4 + Math.sin(t * .6) * 1.6 + (Math.random() - .5) * 2.6;
+    if (limit) v = Math.min(v, limit * (0.96 + Math.random() * .04));
+    v = Math.max(0, v);
+    ema = ema + (v - ema) * (1 - Math.exp(-.5 / 5 * 2)); // ~5 s smoothing
+    if (v === 0) { if (t - lastNonZero >= 2) ema = 0; } else lastNonZero = t;
+    cur.push(v); sm.push(ema); if (cur.length > N) { cur.shift(); sm.shift(); }
+    $('#bigv').textContent = ema.toFixed(1);
+    const bn = $('#bign');
+    bn.style.setProperty('--sw', String(Math.round(250 + clamp(ema / 10) * 550)));
+    bn.style.setProperty('--sd', String(Math.round(75 + clamp(ema / 10) * 25)));
+    const ctx = $('#ctx');
+    if (quiet) ctx.innerHTML = ema === 0 ? '<b>0 — no peers or server responding.</b> Shown within 2 s, no lingering average.' : 'Source went quiet… dropping to 0 within 2 s';
+    else if (limit) ctx.innerHTML = `${ema.toFixed(1)} of <b>${limit} MB/s limit</b> · capped, not slow`;
+    else ctx.textContent = 'Smoothed over 5 s · current value in the graph';
+  }
+  function draw() {
+    const w = cv.clientWidth, h = cv.clientHeight; c.clearRect(0, 0, w, h);
+    const max = 12, X = (i) => (i / (N - 1)) * w, Y = (v) => h - 6 - (v / max) * (h - 16);
+    c.strokeStyle = 'rgba(255,255,255,.06)'; c.lineWidth = 1;
+    for (let g = 0; g <= 12; g += 3) { c.beginPath(); c.moveTo(0, Y(g)); c.lineTo(w, Y(g)); c.stroke(); }
+    if (limit) { c.setLineDash([4, 5]); c.strokeStyle = 'rgba(255,255,255,.35)'; c.beginPath(); c.moveTo(0, Y(limit)); c.lineTo(w, Y(limit)); c.stroke(); c.setLineDash([]); }
+    const off = N - cur.length;
+    const line = (arr, col, lw, fill) => {
+      c.beginPath(); arr.forEach((v, i) => { const x = X(i + off), y = Y(v); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      c.strokeStyle = col; c.lineWidth = lw; c.lineJoin = 'round'; c.stroke();
+      if (fill && arr.length) { c.lineTo(X(N - 1), h); c.lineTo(X(off), h); c.closePath(); const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, 'rgba(255,148,102,.25)'); g.addColorStop(1, 'rgba(255,148,102,0)'); c.fillStyle = g; c.fill(); }
+    };
+    line(sm, 'var(--steel)', 2.4, true);
+    line(cur, 'rgba(141,153,255,.9)', 1.2, false);
+  }
+  setInterval(() => { if (vis) { sample(); draw(); } }, 500);
+  for (let i = 0; i < N; i++) sample(); draw();
+  $('#spLimit').addEventListener('click', (e) => { limit = limit ? 0 : 5; e.currentTarget.setAttribute('aria-pressed', String(!!limit)); });
+  $('#spStop').addEventListener('click', (e) => { quiet = !quiet; e.currentTarget.setAttribute('aria-pressed', String(quiet)); e.currentTarget.textContent = quiet ? 'Source comes back' : 'Source goes quiet'; });
+})();
+
+/* ---------- Browser hand-off loop ---------- */
+(() => {
+  const body = $('#bwBody'), link = $('#dlLink'), menu = $('#ctxm'), item = $('#ctxRift'), ghost = $('#ghost'), landed = $('#landed'), ext = $('#ext'), lb = $('#landBar'), ls = $('#landSp');
+  lb.innerHTML = Array.from({ length: 6 }, () => '<span><i></i></span>').join('');
+  let vis = false, running = false;
+  new IntersectionObserver((e) => { vis = e[0].isIntersecting; if (vis && !running) run(); }, { threshold: .4 }).observe(body);
+  const wait = (ms) => new Promise((r) => setTimeout(r, RM ? 0 : ms));
+  const at = (x, y) => { ghost.style.transform = `translate(${x}px,${y}px)`; };
+  async function run() {
+    running = true;
+    while (vis) {
+      const br = body.getBoundingClientRect(), lr = link.getBoundingClientRect();
+      const lx = lr.left - br.left + lr.width * .55, ly = lr.top - br.top + lr.height * .5;
+      menu.classList.remove('on'); item.classList.remove('on'); landed.classList.remove('on'); link.classList.remove('hl2');
+      lb.querySelectorAll('i').forEach((i) => (i.style.width = '0%')); ls.textContent = '0.0 MB/s';
+      ghost.style.transition = 'none'; at(br.width - 40, br.height - 30); ghost.style.opacity = 1;
+      await wait(60); ghost.style.transition = '';
+      await wait(500); at(lx, ly); await wait(700);
+      link.classList.add('hl2'); await wait(300);
+      menu.style.left = Math.min(lx + 6, br.width - 240) + 'px'; menu.style.top = (ly + 8) + 'px'; menu.classList.add('on');
+      await wait(700);
+      const ir = item.getBoundingClientRect(); at(ir.left - br.left + 60, ir.top - br.top + ir.height / 2); await wait(600);
+      item.classList.add('on'); await wait(450);
+      menu.classList.remove('on'); ext.classList.add('pop'); setTimeout(() => ext.classList.remove('pop'), 400);
+      ghost.style.opacity = 0; landed.classList.add('on');
+      for (let s = 0; s <= 40 && vis; s++) {
+        lb.querySelectorAll('i').forEach((i, k) => (i.style.width = Math.min(100, s * (2.2 + k * .25)) + '%'));
+        ls.textContent = (s < 3 ? s * 1.3 : 8.6 + Math.random() * 1.2).toFixed(1) + ' MB/s';
+        await wait(90);
+      }
+      await wait(1600);
+    }
+    running = false;
+  }
+})();
+
+/* ---------- Kill switch ---------- */
+(() => {
+  const ks = $('#ks'), btn = $('#ksBtn'), T = $('#ksT'), M = $('#ksM'), tm = $('#ksTime');
+  const speeds = ['6.1 MB/s', '9.4 MB/s', '2.3 MB/s'];
+  let dropped = false;
+  btn.addEventListener('click', () => {
+    dropped = !dropped;
+    ks.classList.toggle('drop', dropped);
+    if (dropped) {
+      T.textContent = 'VPN lost. All paused.';
+      M.textContent = 'wg0 went down · no traffic left the VPN';
+      $$('.ksr', ks).forEach((e) => (e.textContent = 'Paused'));
+      const ms = 300 + Math.round(Math.random() * 500);
+      tm.textContent = `Paused 3 of 3 in ${ms} ms (limit: 2 s)`;
+      btn.textContent = 'Bring the VPN back';
+    } else {
+      T.textContent = 'Bound to wg0';
+      M.textContent = 'Tunnel is back · resumed automatically';
+      $$('.ksr', ks).forEach((e, i) => (e.textContent = speeds[i]));
+      tm.textContent = ''; btn.textContent = 'Drop the VPN';
+    }
+  });
+})();
+})();
+</script>
+</body>
+</html>
