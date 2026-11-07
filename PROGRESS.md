@@ -16,7 +16,7 @@ Legend: `[x]` done · `[ ]` not done · `[~]` partly done (see note)
 ### Engines
 - [x] `rift-get` HTTP engine: probe (`Range: bytes=0-`), single-connection fallback, dynamic segmentation, adaptive connections, stall detection + retry/backoff, `If-Range` resume, positional writes into `.riftpart`, rename on finish, per-download limit, global limit
 - [x] HTTP: checksum verify (SHA-256/SHA-1/MD5 via QCryptographicHash in the app layer)
-- [~] TorrentEngine (libtorrent): session settings mapper, add magnet/file/URL, pause/resume/remove(+files), force start/recheck/reannounce, sequential, first/last pieces, file priorities, per-torrent limits, queue up/down/top/bottom, move storage, resume data in SQLite, alerts → events, session stats (DHT nodes, port status). *Written in full; compiled by CI only until a local MSYS2 build runs.*
+- [x] TorrentEngine (libtorrent): session settings mapper, add magnet/file/URL, pause/resume/remove(+files), force start/recheck/reannounce, sequential, first/last pieces, file priorities, per-torrent limits, queue up/down/top/bottom, move storage, resume data in SQLite, alerts → events, session stats (DHT nodes, port status).
 
 ### App
 - [x] Storage: SQLite schema + migrations (downloads, http_segments, resume_data, categories, tags, history, settings)
@@ -101,7 +101,9 @@ Tracked so nothing from PLAN.md is forgotten. Not started.
 - 2026-11-07: Extension finished (Chromium + Firefox builds, 10 tests). Added `scripts/next-version.py` (5 tests), `release.yml` (Windows, macOS arm64/x64, Linux, extension, SHA256SUMS, latest release) and `ci.yml`.
 - 2026-11-07: The website download page now uses the real asset names (macOS arm64/x64, Linux x86_64 only) and honest signing notes. README.md written.
 
+- 2026-11-07: Full local build with MSYS2 UCRT64 (GCC 16.2, Qt 6.12, libtorrent 2.1.2, curl 8.23): no warnings (2.1 deprecations silenced for torrent.cpp only), ctest passes, `Rift.exe --smoke-test` passes. Launched the real app: DHT connects, a second launch forwards a URL into the running app's Add dialog.
+
 ### Resume note
-- Everything in the 1.0 checklist is written and committed. The only open check is a **full local build** with libtorrent and curl:
-  MSYS2 UCRT64 (`C:\msys64\ucrt64\bin` on PATH) → `cmake -S . -B build -G Ninja && cmake --build build`, then run `build/rift.exe`
-  and `ctest --test-dir build`. Fix whatever `src/engine/torrent.cpp` reports, then tick the TorrentEngine item.
+- 1.0 checklist complete. Local full build: put `C:\msys64\ucrt64\bin` first on PATH, then
+  `cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=C:/msys64/ucrt64 && cmake --build build`, run `build/Rift.exe --portable`.
+- Next: watch the first GitHub release run and fix anything platform-specific it reports.
