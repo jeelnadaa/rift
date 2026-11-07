@@ -32,6 +32,50 @@
 
 namespace lt = libtorrent;
 
+// libtorrent 2.1 (vcpkg builds it without the deprecated API) replaced torrent_info's comment/creator/files()
+// and peer_info::ip; 2.0 (Ubuntu, Homebrew) lacks the replacements. These helpers pick the right one.
+#if LIBTORRENT_VERSION_NUM >= 20100
+#include <libtorrent/load_torrent.hpp>
+#define RIFT_LT21 1
+#endif
+namespace {
+const lt::file_storage &layoutOf(const lt::torrent_info &ti) {
+#ifdef RIFT_LT21
+    return ti.layout();
+#else
+    return ti.files();
+#endif
+}
+lt::tcp::endpoint endpointOf(const lt::peer_info &p) {
+#ifdef RIFT_LT21
+    return p.remote_endpoint();
+#else
+    return p.ip;
+#endif
+}
+// A parsed .torrent file: params to add it, plus comment and creator (2.1 keeps those out of torrent_info).
+struct Parsed {
+    lt::add_torrent_params p;
+    std::string comment, creator;
+};
+Parsed parseTorrent(const std::vector<char> &data, lt::error_code &ec) {
+    const lt::span<char const> buf(data.data(), static_cast<std::ptrdiff_t>(data.size()));
+    Parsed r;
+#ifdef RIFT_LT21
+    r.p = lt::load_torrent_buffer(buf, ec, lt::load_torrent_limits{});
+    r.comment = r.p.comment;
+    r.creator = r.p.created_by;
+#else
+    auto ti = std::make_shared<lt::torrent_info>(buf, ec, lt::from_span);
+    if (ec) return r;
+    r.comment = ti->comment();
+    r.creator = ti->creator();
+    r.p.ti = std::move(ti);
+#endif
+    return r;
+}
+} // namespace
+
 namespace rift::bt {
 
 namespace {
@@ -143,6 +187,18 @@ struct Engine::Impl {
     void push(Event e) {
         std::lock_guard<std::mutex> lk(mtx);
         events.push_back(std::move(e));
+    }
+    // Comment/creator per torrent: 2.1 keeps them in add_torrent_params, not torrent_info.
+    std::map<std::string, std::pair<std::string, std::string>> meta;
+    void remember(const std::string &id, const std::string &comment, const std::string &creator) {
+        if (comment.empty() && creator.empty()) return;
+        std::lock_guard<std::mutex> lk(mtx);
+        meta[id] = {comment, creator};
+    }
+    std::pair<std::string, std::string> metaOf(const std::string &id) const {
+        std::lock_guard<std::mutex> lk(mtx);
+        auto it = meta.find(id);
+        return it == meta.end() ? std::pair<std::string, std::string>{} : it->second;
     }
     void handle(lt::alert *a);
     void loop();
@@ -291,13 +347,12 @@ std::string Engine::addMagnet(const std::string &magnet, const AddOptions &o, st
 
 std::string Engine::addTorrent(const std::vector<char> &data, const AddOptions &o, std::string &error) {
     lt::error_code ec;
-    auto ti = std::make_shared<lt::torrent_info>(lt::span<char const>(data.data(), static_cast<std::ptrdiff_t>(data.size())), ec,
-                                                 lt::from_span);
-    if (ec) { error = "Not a valid .torrent file: " + ec.message(); return {}; }
-    lt::add_torrent_params p;
-    p.ti = ti;
-    const std::string id = idOf(ti->info_hashes());
+    Parsed parsed = parseTorrent(data, ec);
+    lt::add_torrent_params &p = parsed.p;
+    if (ec || !p.ti) { error = "Not a valid .torrent file: " + ec.message(); return {}; }
+    const std::string id = idOf(p.ti->info_hashes());
     if (has(id)) { error = "This torrent is already in the list"; return id; }
+    d->remember(id, parsed.comment, parsed.creator);
     applyAddOptions(p, o);
     d->ses->async_add_torrent(std::move(p));
     return id;
@@ -308,21 +363,25 @@ std::string Engine::addResume(const std::vector<char> &buf, std::string &error) 
     lt::add_torrent_params p = lt::read_resume_data(lt::span<char const>(buf.data(), static_cast<std::ptrdiff_t>(buf.size())), ec);
     if (ec) { error = ec.message(); return {}; }
     const std::string id = idOf(p.info_hashes);
+#ifdef RIFT_LT21
+    d->remember(id, p.comment, p.created_by);
+#endif
     d->ses->async_add_torrent(std::move(p));
     return id;
 }
 
 bool Engine::inspect(const std::vector<char> &data, Preview &out, std::string &error) {
     lt::error_code ec;
-    lt::torrent_info ti(lt::span<char const>(data.data(), static_cast<std::ptrdiff_t>(data.size())), ec, lt::from_span);
-    if (ec) { error = ec.message(); return false; }
+    const Parsed parsed = parseTorrent(data, ec);
+    if (ec || !parsed.p.ti) { error = ec ? ec.message() : std::string("Not a valid .torrent file"); return false; }
+    const lt::torrent_info &ti = *parsed.p.ti;
     out.name = ti.name();
     out.hash = idOf(ti.info_hashes());
-    out.comment = ti.comment();
-    out.creator = ti.creator();
+    out.comment = parsed.comment;
+    out.creator = parsed.creator;
     out.size = ti.total_size();
     out.isPrivate = ti.priv();
-    const lt::file_storage &fs = ti.files();
+    const lt::file_storage &fs = layoutOf(ti);
     for (const lt::file_index_t i : fs.file_range()) {
         if (fs.pad_file_at(i)) continue;
         FileEntry f;
@@ -369,7 +428,7 @@ void Engine::setFirstLast(const std::string &id, bool on) {
     if (!h.is_valid()) return;
     auto ti = h.torrent_file();
     if (!ti) return;
-    const lt::file_storage &fs = ti->files();
+    const lt::file_storage &fs = layoutOf(*ti);
     const auto prio = on ? lt::top_priority : lt::default_priority;
     for (const lt::file_index_t i : fs.file_range()) {
         if (fs.pad_file_at(i) || fs.file_size(i) == 0) continue;
@@ -422,7 +481,17 @@ void Engine::resumeAll() {
 std::string Engine::magnet(const std::string &id) const {
     auto h = d->find(id);
     if (!h.is_valid()) return {};
-    try { return lt::make_magnet_uri(h); } catch (...) { return {}; }
+    try {
+#ifdef RIFT_LT21
+        lt::add_torrent_params atp;
+        atp.info_hashes = h.info_hashes();
+        atp.name = h.status(lt::torrent_handle::query_name).name;
+        for (const auto &t : h.trackers()) atp.trackers.push_back(t.url);
+        return lt::make_magnet_uri(atp);
+#else
+        return lt::make_magnet_uri(h);
+#endif
+    } catch (...) { return {}; }
 }
 
 bool Engine::exportTorrent(const std::string &id, std::vector<char> &out) {
@@ -430,8 +499,18 @@ bool Engine::exportTorrent(const std::string &id, std::vector<char> &out) {
     if (!h.is_valid()) return false;
     auto ti = h.torrent_file();
     if (!ti) return false;
+#ifdef RIFT_LT21
+    lt::add_torrent_params atp;
+    atp.ti = std::const_pointer_cast<lt::torrent_info>(ti);
+    for (const auto &t : h.trackers()) atp.trackers.push_back(t.url);
+    const auto m = d->metaOf(id);
+    atp.comment = m.first;
+    atp.created_by = m.second;
+    out = lt::write_torrent_file_buf(atp, {});
+#else
     lt::create_torrent ct(*ti);
     lt::bencode(std::back_inserter(out), ct.generate());
+#endif
     return !out.empty();
 }
 
@@ -475,8 +554,14 @@ std::vector<TorrentStatus> Engine::snapshot() const {
         if (st.info_hashes.has_v2()) t.hashV2 = hexOf(st.info_hashes.v2);
         if (auto ti = st.torrent_file.lock()) {
             t.isPrivate = ti->priv();
+#ifdef RIFT_LT21
+            const auto m = d->metaOf(id);
+            t.comment = m.first;
+            t.creator = m.second;
+#else
             t.comment = ti->comment();
             t.creator = ti->creator();
+#endif
             t.numFiles = ti->num_files();
             t.numPieces = ti->num_pieces();
             t.pieceLength = ti->piece_length();
@@ -498,7 +583,7 @@ std::vector<FileEntry> Engine::files(const std::string &id) const {
     std::vector<std::int64_t> progress;
     h.file_progress(progress, lt::torrent_handle::piece_granularity);
     const auto prios = h.get_file_priorities();
-    const lt::file_storage &fs = ti->files();
+    const lt::file_storage &fs = layoutOf(*ti);
     for (const lt::file_index_t i : fs.file_range()) {
         if (fs.pad_file_at(i)) continue;
         FileEntry f;
@@ -521,8 +606,9 @@ std::vector<Peer> Engine::peers(const std::string &id) const {
     h.get_peer_info(v);
     for (const lt::peer_info &p : v) {
         Peer x;
-        x.ip = p.ip.address().to_string();
-        x.port = p.ip.port();
+        const lt::tcp::endpoint ep = endpointOf(p);
+        x.ip = ep.address().to_string();
+        x.port = ep.port();
         x.client = p.client;
         x.progress = p.progress;
         x.down = p.payload_down_speed;
