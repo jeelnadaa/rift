@@ -20,6 +20,10 @@
 #ifdef Q_OS_MACOS
 #include <IOKit/pwr_mgt/IOPMLib.h>
 #endif
+#ifdef Q_OS_LINUX
+#include <QDirIterator>
+#include <fontconfig/fontconfig.h>
+#endif
 
 namespace platform {
 
@@ -225,6 +229,38 @@ void setLaunchAtLogin(bool on) {
         f.write(QStringLiteral("[Desktop Entry]\nType=Application\nName=Rift\nExec=\"%1\" --minimized\nIcon=rift\n"
                                "X-GNOME-Autostart-enabled=true\n").arg(exe).toUtf8());
 #endif
+}
+
+bool registerAppFontsWithSystem() {
+#ifdef Q_OS_LINUX
+    // Qt's own path (QFontDatabase::addApplicationFont → QFontconfigDatabase) segfaults with Qt 6.8 on
+    // Ubuntu 22.04's fontconfig for our variable fonts. Instead, copy the fonts to a real folder and give the
+    // folder to fontconfig before Qt reads the font list: fontconfig indexes them itself and Qt sees them
+    // like installed fonts. Must run before the Q*Application is created.
+    QStringList dirs;
+    const QString cache = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation);
+    if (!cache.isEmpty()) dirs << cache + QStringLiteral("/rift/fonts");
+    dirs << QDir::tempPath() + QStringLiteral("/rift-fonts-") + qEnvironmentVariable("USER", QStringLiteral("user"));
+    for (const QString &dir : dirs) {
+        if (!QDir().mkpath(dir)) continue;
+        bool ok = true;
+        QDirIterator it(QStringLiteral(":/fonts"), {QStringLiteral("*.ttf"), QStringLiteral("*.otf")}, QDir::Files);
+        while (ok && it.hasNext()) {
+            QFile in(it.next());
+            const QString dst = dir + QLatin1Char('/') + it.fileName();
+            if (!in.open(QIODevice::ReadOnly)) { ok = false; break; }
+            const QByteArray data = in.readAll();
+            QFile out(dst);
+            if (out.open(QIODevice::ReadOnly) && out.readAll() == data) continue; // already current
+            out.close();
+            QFile::remove(dst);
+            ok = out.open(QIODevice::WriteOnly) && out.write(data) == data.size();
+        }
+        if (ok && FcConfigAppFontAddDir(nullptr, reinterpret_cast<const FcChar8 *>(QFile::encodeName(dir).constData())))
+            return true;
+    }
+#endif
+    return false;
 }
 
 } // namespace platform

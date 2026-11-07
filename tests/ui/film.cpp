@@ -97,6 +97,7 @@ Row makeRow(const Item &it, double t) {
 
 int main(int argc, char *argv[]) {
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
+    const bool fontsViaSystem = platform::registerAppFontsWithSystem();
     QApplication app(argc, argv);
     const QStringList a = app.arguments();
     if (a.size() < 3) { std::fprintf(stderr, "usage: rift_ui_film <take> <outDir> [seconds]\n"); return 1; }
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) {
     auto *driver = new StepDriver;
     driver->install();
     QQuickStyle::setStyle(QStringLiteral("Basic"));
-    installAppFonts();
+    installAppFonts(fontsViaSystem);
 
     QTemporaryDir dir;
     Settings settings(dir.filePath(QStringLiteral("settings.ini")));

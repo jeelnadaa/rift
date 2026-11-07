@@ -7,10 +7,14 @@
 #include <QFontDatabase>
 #include <QGuiApplication>
 
-inline void installAppFonts() {
+#include "app/platform.hpp"
+
+// viaSystem: platform::registerAppFontsWithSystem() already gave the fonts to the OS font list (Linux), so
+// they are not added again here; we only check that the UI family is there.
+inline void installAppFonts(bool viaSystem = false) {
     QDirIterator it(QStringLiteral(":/fonts"), {QStringLiteral("*.ttf"), QStringLiteral("*.otf")}, QDir::Files);
-    bool haveUi = false;
-    while (it.hasNext()) {
+    bool haveUi = viaSystem && QFontDatabase::families().contains(QStringLiteral("Bricolage Grotesque"));
+    while (!viaSystem && it.hasNext()) {
         const int id = QFontDatabase::addApplicationFont(it.next());
         if (id >= 0 && QFontDatabase::applicationFontFamilies(id).contains(QStringLiteral("Bricolage Grotesque"))) haveUi = true;
     }

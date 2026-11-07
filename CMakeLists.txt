@@ -58,6 +58,11 @@ target_include_directories(rift_appqt PUBLIC src)
 target_link_libraries(rift_appqt PUBLIC rift_core Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Widgets)
 if(APPLE)
     target_link_libraries(rift_appqt PUBLIC "-framework IOKit" "-framework CoreFoundation")
+elseif(UNIX)
+    # Linux: the bundled fonts go to fontconfig directly (platform::registerAppFontsWithSystem says why).
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
+    target_link_libraries(rift_appqt PUBLIC PkgConfig::FONTCONFIG)
 endif()
 
 # Fonts (ui/fonts, OFL) and icons are compiled into rift_appqt so the app and the UI harness share them.

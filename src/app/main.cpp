@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
     QApplication::setOrganizationName(QStringLiteral("Rift"));
     QApplication::setApplicationVersion(QStringLiteral(RIFT_VERSION));
     QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    const bool fontsViaSystem = platform::registerAppFontsWithSystem(); // before the app object
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon(QStringLiteral(":/icons/rift-256.png")));
     app.setQuitOnLastWindowClosed(false);
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]) {
     }
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
-    installAppFonts();
+    installAppFonts(fontsViaSystem);
 
     if (smoke) g_prevHandler = qInstallMessageHandler(smokeHandler);
 

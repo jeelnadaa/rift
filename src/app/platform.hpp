@@ -25,5 +25,8 @@ void registerNativeHost();
 bool registerHandlers();
 bool isDefaultMagnetHandler();
 void setLaunchAtLogin(bool on);
+// Linux: hands the bundled fonts (:/fonts) to fontconfig. Call before the Q*Application exists. Returns true
+// when the system font list now includes them, so installAppFonts(true) must not add them again.
+bool registerAppFontsWithSystem();
 
 } // namespace platform

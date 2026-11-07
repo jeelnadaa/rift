@@ -57,6 +57,7 @@ Row row(const QString &id, const QString &kind, const QString &name, const QStri
 
 int main(int argc, char *argv[]) {
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
+    const bool fontsViaSystem = platform::registerAppFontsWithSystem();
     QApplication app(argc, argv);
     const bool show = app.arguments().contains(QStringLiteral("--show"));
     // --shots <dir>: save screenshots of a few states (light + dark) for visual review.
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
     const QString shots = shotsIdx > 0 && shotsIdx + 1 < app.arguments().size() ? app.arguments().at(shotsIdx + 1) : QString();
     g_prev = qInstallMessageHandler(handler);
     QQuickStyle::setStyle(QStringLiteral("Basic"));
-    installAppFonts();
+    installAppFonts(fontsViaSystem);
 
     QTemporaryDir dir;
     Settings settings(dir.filePath(QStringLiteral("settings.ini")));
