@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rift launch film</title>
+<style>
+@font-face { font-family: "Bricolage"; src: url("../../../ui/fonts/BricolageGrotesque-Variable.ttf"); font-weight: 200 800; font-stretch: 75% 100%; }
+@font-face { font-family: "Serif"; src: url("../../../ui/fonts/InstrumentSerif-Italic.ttf"); font-style: italic; }
+@font-face { font-family: "Serif"; src: url("../../../ui/fonts/InstrumentSerif-Regular.ttf"); font-style: normal; }
+@font-face { font-family: "Mono"; src: url("../../../ui/fonts/JetBrainsMono-Variable.ttf"); font-weight: 100 800; }
+:root {
+  --bg: #050608; --ink: #ECEEF3; --ink2: #A2A7B3; --ink3: #6A707C; --line: rgba(225,232,255,.085);
+  --accent: #4C7DFF; --signal: #C38BEA; --ok: #4CC89A; --info: #5EC4C4; --warn: #F0924A; --danger: #F0596A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+body { font-family: "Bricolage"; color: var(--ink); -webkit-font-smoothing: antialiased; }
+#stage { position: absolute; inset: 0; overflow: hidden; background: var(--bg); }
+.layer { position: absolute; inset: 0; }
+.abs { position: absolute; }
+.center { position: absolute; left: 50%; top: 50%; }
+.disp { font-family: "Bricolage"; font-weight: 760; font-variation-settings: "wdth" 78, "opsz" 96; letter-spacing: -0.045em; line-height: .9; }
+.serif { font-family: "Serif"; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
+.mono { font-family: "Mono"; font-feature-settings: "tnum" 1, "zero" 1; }
+
+/* background */
+#glowA, #glowB { position: absolute; width: 1600px; height: 1600px; border-radius: 50%; filter: blur(40px); }
+#glowA { background: radial-gradient(closest-side, rgba(76,125,255,.42), rgba(76,125,255,0)); }
+#glowB { background: radial-gradient(closest-side, rgba(195,139,234,.26), rgba(195,139,234,0)); }
+.streak { position: absolute; width: 3px; height: 1800px; left: 0; top: -360px; background: linear-gradient(180deg, rgba(76,125,255,0), rgba(140,170,255,.55), rgba(76,125,255,0)); transform-origin: 50% 50%; }
+#grain { position: absolute; inset: -64px; background-image: url("grain.png"); opacity: .075; mix-blend-mode: overlay; pointer-events: none; }
+#vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 52%, rgba(0,0,0,.62) 100%); pointer-events: none; }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; mix-blend-mode: screen; }
+
+/* ui window (camera) */
+.cam { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; transform-origin: 0 0; }
+.win { position: absolute; inset: 0; border-radius: 22px 7px 22px 7px; overflow: hidden; background: #050608;
+       box-shadow: 0 0 0 1px rgba(255,255,255,.09), 0 60px 140px rgba(0,0,0,.75), 0 0 120px rgba(76,125,255,.16); }
+.win img { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; display: block; }
+.win .light { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+.persp { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 50% 45%; }
+
+/* hook */
+.ghost { position: absolute; top: 300px; width: 760px; height: 470px; border-radius: 34px 10px 34px 10px;
+         border: 1.5px solid rgba(236,238,243,.16); background: linear-gradient(180deg, rgba(20,22,29,.85), rgba(11,12,16,.85)); overflow: hidden; }
+.ghost .bar { position: absolute; left: 0; right: 0; top: 0; height: 54px; border-bottom: 1px solid rgba(236,238,243,.08); }
+.ghost .bar i { position: absolute; top: 22px; width: 11px; height: 11px; border-radius: 50%; background: rgba(236,238,243,.16); }
+.ghost .tag { position: absolute; right: 24px; top: 16px; font-size: 18px; color: var(--ink3); letter-spacing: .08em; text-transform: uppercase; }
+.ghost .word { position: absolute; left: 50px; top: 150px; font-size: 168px; white-space: nowrap; }
+.ghost .row { position: absolute; left: 50px; height: 12px; border-radius: 6px; background: rgba(236,238,243,.07); }
+#crack { position: absolute; left: 958px; top: 220px; width: 4px; height: 640px; background: linear-gradient(180deg, rgba(76,125,255,0), #8fb0ff 30%, #fff 50%, #8fb0ff 70%, rgba(76,125,255,0)); box-shadow: 0 0 30px #4C7DFF, 0 0 80px rgba(76,125,255,.6); transform-origin: 50% 0; }
+#liar { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font-size: 250px; font-weight: 700; letter-spacing: -0.04em; white-space: nowrap; }
+#liar small { font-size: 90px; color: var(--ink2); margin-left: 24px; letter-spacing: 0; }
+#lie { position: absolute; left: 50%; top: 520px; font-size: 330px; color: var(--danger); white-space: nowrap; text-shadow: 0 0 60px rgba(240,89,106,.45); }
+
+/* reveal */
+#slash { position: absolute; left: 50%; top: 50%; width: 5px; height: 1500px; margin-left: -2.5px; margin-top: -750px;
+         background: linear-gradient(180deg, rgba(76,125,255,0), #a9c0ff 35%, #fff 50%, #a9c0ff 65%, rgba(76,125,255,0));
+         box-shadow: 0 0 40px #4C7DFF, 0 0 120px rgba(76,125,255,.7); }
+#mark { position: absolute; left: 540px; top: 330px; width: 250px; height: 420px; }
+#mark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+#word { position: absolute; left: 820px; top: 318px; font-size: 400px; white-space: nowrap; }
+#word span { display: inline-block; }
+.wordmask { position: absolute; overflow: hidden; padding: 0 30px 40px 0; }
+
+/* chips */
+.chip { position: absolute; padding: 18px 30px 16px; border-radius: 22px 7px 22px 7px; font-size: 34px; font-weight: 650; letter-spacing: .08em; white-space: nowrap; }
+.chip.bt { background: rgba(76,125,255,.16); color: #9db8ff; box-shadow: inset 0 0 0 1.5px rgba(76,125,255,.6), 0 20px 60px rgba(0,0,0,.6); }
+.chip.http { background: rgba(94,196,196,.14); color: #8fe0e0; box-shadow: inset 0 0 0 1.5px rgba(94,196,196,.55), 0 20px 60px rgba(0,0,0,.6); }
+.plus { position: absolute; font-size: 60px; color: var(--ink2); font-weight: 300; }
+
+/* lanes */
+#spot { position: absolute; border-radius: 10px; box-shadow: 0 0 0 4000px rgba(5,6,8,.66), 0 0 0 2px rgba(143,176,255,.55), 0 0 40px rgba(76,125,255,.45); }
+.lab2 { position: absolute; font-size: 21px; line-height: 30px; font-weight: 700; letter-spacing: .04em; transform-origin: 50% 100%; }
+
+.lanelab { position: absolute; top: 571px; width: 142px; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+.beam { position: absolute; left: 0; height: 22px; border-radius: 11px; overflow: hidden; background: rgba(236,238,243,.06); }
+.beam b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 11px; }
+#file { position: absolute; left: 50%; top: 50%; width: 1180px; height: 120px; margin-left: -590px; margin-top: -60px; border-radius: 30px 9px 30px 9px;
+        background: linear-gradient(90deg, rgba(76,200,154,.18), rgba(76,125,255,.18)); box-shadow: inset 0 0 0 1.5px rgba(236,238,243,.22), 0 30px 90px rgba(0,0,0,.6);
+        display: flex; align-items: center; gap: 28px; padding: 0 44px; }
+#file .ic { width: 58px; height: 58px; border-radius: 16px 5px 16px 5px; background: var(--ok); display: grid; place-items: center; color: #04140d; font-size: 34px; font-weight: 800; }
+#file .nm { font-size: 44px; font-weight: 650; letter-spacing: -.01em; font-variation-settings: "wdth" 90; }
+#file .sz { margin-left: auto; font-size: 30px; color: var(--ink2); }
+
+/* browser */
+#browser { position: absolute; left: 210px; top: 120px; width: 1500px; height: 800px; border-radius: 16px; overflow: hidden; background: #1b1c20;
+           box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 60px 140px rgba(0,0,0,.75); font-family: "Segoe UI", system-ui, sans-serif; }
+#browser .tabs { height: 46px; background: #0f1013; position: relative; }
+#browser .tab { position: absolute; left: 14px; top: 8px; width: 330px; height: 38px; border-radius: 10px 10px 0 0; background: #1b1c20; color: #c9ccd3; font-size: 14px; padding: 10px 16px; white-space: nowrap; overflow: hidden; }
+#browser .addr { margin: 9px 16px; height: 36px; border-radius: 18px; background: #0f1013; color: #c9ccd3; font-size: 15px; padding: 8px 20px; }
+#browser .addr b { color: #7d828d; font-weight: 400; }
+#browser .page { position: absolute; left: 0; right: 0; top: 100px; bottom: 0; background: #121317; padding: 46px 70px; color: #d8dbe2; }
+#browser h1 { font-family: "Segoe UI", system-ui, sans-serif; font-size: 34px; font-weight: 600; margin-bottom: 26px; }
+#browser .ls { font-family: "Mono"; font-size: 20px; line-height: 46px; }
+#browser .ls div { display: flex; }
+#browser .ls a { color: #8ab4ff; text-decoration: none; width: 520px; }
+#browser .ls a.hot { text-decoration: underline; }
+#browser .ls span { color: #7d828d; width: 300px; }
+#menu { position: absolute; width: 330px; padding: 8px 0; border-radius: 10px; background: #2a2b30; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 18px 50px rgba(0,0,0,.6);
+        font-family: "Segoe UI", system-ui, sans-serif; font-size: 16px; color: #e3e5ea; transform-origin: 0 0; }
+#menu .it { height: 38px; padding: 9px 22px 0 46px; position: relative; }
+#menu .sep { height: 1px; background: rgba(255,255,255,.1); margin: 6px 0; }
+#menu .rift { font-weight: 600; }
+#menu .rift svg { position: absolute; left: 16px; top: 9px; width: 14px; height: 22px; }
+#menu .hl { position: absolute; left: 6px; right: 6px; top: 0; height: 38px; border-radius: 6px; background: rgba(76,125,255,.35); }
+#cursor { position: absolute; width: 34px; height: 46px; transform-origin: 3px 3px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.6)); }
+.kbd { position: absolute; display: flex; gap: 14px; align-items: center; font-size: 30px; color: var(--ink2); }
+.kbd b { font-family: "Mono"; font-weight: 600; font-size: 30px; color: var(--ink); padding: 12px 22px 10px; border-radius: 14px 5px 14px 5px; background: rgba(236,238,243,.08); box-shadow: inset 0 0 0 1.5px rgba(236,238,243,.2), 0 6px 0 rgba(236,238,243,.08); }
+
+/* everywhere */
+#plat { position: absolute; left: 130px; top: 360px; }
+#plat .pre { font-family: "Mono"; font-size: 30px; color: var(--ink2); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
+#plat .mask { position: relative; height: 230px; width: 900px; overflow: hidden; }
+#plat .pw { position: absolute; left: 0; top: 0; font-size: 230px; white-space: nowrap; }
+#device { position: absolute; left: 50%; top: 50%; }
+#device .scr { position: absolute; border-radius: 30px; border: 2px solid rgba(236,238,243,.22); background: rgba(10,11,14,.6); }
+#device .base { position: absolute; height: 26px; border-radius: 4px 4px 22px 22px; background: linear-gradient(180deg, rgba(236,238,243,.22), rgba(236,238,243,.08)); }
+#lock { position: absolute; width: 96px; height: 96px; border-radius: 30px 9px 30px 9px; background: var(--accent); display: grid; place-items: center; box-shadow: 0 20px 60px rgba(76,125,255,.5); }
+
+/* outro */
+.ow { position: absolute; font-size: 190px; white-space: nowrap; }
+#endmark { position: absolute; left: 50%; top: 300px; width: 190px; height: 320px; margin-left: -95px; }
+#endmark svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+#endword { position: absolute; left: 0; right: 0; top: 650px; text-align: center; font-size: 180px; }
+#url { position: absolute; left: 0; right: 0; top: 862px; text-align: center; font-size: 40px; font-weight: 600; letter-spacing: .02em; }
+#url u { text-decoration: none; color: var(--accent); }
+#sub { position: absolute; left: 0; right: 0; top: 932px; text-align: center; font-size: 24px; color: var(--ink2); letter-spacing: .16em; text-transform: uppercase; }
+
+/* captions */
+#capbg { position: absolute; left: 0; right: 0; bottom: 0; height: 280px; background: linear-gradient(180deg, rgba(5,6,8,0), rgba(5,6,8,.78) 62%, rgba(5,6,8,.9)); }
+#caps { position: absolute; left: 160px; right: 160px; bottom: 74px; text-align: center; font-size: 52px; font-weight: 620; letter-spacing: -0.012em;
+        font-variation-settings: "wdth" 92, "opsz" 48; line-height: 1.12; }
+#caps .w { display: inline-block; margin: 0 .13em; will-change: transform, opacity, filter; }
+#caps .w.em { font-family: "Serif"; font-style: italic; font-weight: 400; font-size: 1.16em; letter-spacing: -0.005em; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- background -->
+  <div class="layer" id="bg">
+    <div id="glowA"></div><div id="glowB"></div>
+    <div id="streaks"></div>
+  </div>
+
+  <!-- 1 hook -->
+  <div class="layer" id="s1">
+    <div class="ghost" id="g1" style="left:160px"><div class="bar"><i style="left:24px"></i><i style="left:44px"></i><i style="left:64px"></i><span class="tag mono">app 1</span></div>
+      <div class="row" style="top:96px;width:300px"></div><div class="row" style="top:380px;width:520px"></div><div class="row" style="top:410px;width:380px"></div>
+      <div class="word disp" id="w1">Torrents</div></div>
+    <div class="ghost" id="g2" style="left:1000px"><div class="bar"><i style="left:24px"></i><i style="left:44px"></i><i style="left:64px"></i><span class="tag mono">app 2</span></div>
+      <div class="row" style="top:96px;width:260px"></div><div class="row" style="top:380px;width:480px"></div><div class="row" style="top:410px;width:420px"></div>
+      <div class="word disp" id="w2">Direct links</div></div>
+    <div id="crack"></div>
+    <div id="liar" class="mono"><span id="liarN">48.2</span><small>MB/s</small></div>
+    <div id="lie" class="serif">lie.</div>
+  </div>
+
+  <!-- 2 reveal -->
+  <div class="layer" id="s2">
+    <div id="slash"></div>
+    <div id="mark">
+      <svg viewBox="13 0 38 64"><path id="mA" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z" fill="#ECEEF3"/></svg>
+      <svg viewBox="13 0 38 64"><path id="mB" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z" fill="#4C7DFF"/></svg>
+    </div>
+    <div class="wordmask" id="wordmask" style="left:820px;top:318px;width:1000px;height:470px"><div id="word" class="disp" style="left:0;top:0"><span>R</span><span>i</span><span>f</span><span>t</span></div></div>
+  </div>
+
+  <!-- 3/4/5/6/7 ui stage -->
+  <div class="layer persp" id="uistage">
+    <div class="cam" id="cam">
+      <div class="win" id="win"><img id="uiA" alt=""><img id="uiB" class="light" alt=""></div>
+      <div id="lanelabs" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- 3 chips -->
+  <div class="layer" id="s3">
+    <div class="chip bt mono" id="chipBt">TORRENTS</div>
+    <div class="plus" id="plus">+</div>
+    <div class="chip http mono" id="chipHttp">DIRECT LINKS</div>
+  </div>
+
+  <!-- 4 lanes spotlight -->
+  <div class="layer" id="s4a"><div id="spot"></div><div id="labs2"></div></div>
+  <!-- 4 beams -->
+  <div class="layer" id="s4"><div id="beams"></div>
+    <div id="file"><div class="ic">✓</div><div class="nm">debian-13.2.0-amd64-DVD-1.iso</div><div class="sz mono">3.90 GB · 8 lanes</div></div>
+  </div>
+
+  <!-- 6 browser -->
+  <div class="layer" id="s6"><div id="bcam" class="layer" style="transform-origin:0 0">
+    <div id="browser">
+      <div class="tabs"><div class="tab">Index of /pub/linux/kernel/v6.x/</div></div>
+      <div class="addr"><b>https://</b>cdn.kernel.org/pub/linux/kernel/v6.x/</div>
+      <div class="page"><h1>Index of /pub/linux/kernel/v6.x/</h1>
+        <div class="ls">
+          <div><a>../</a></div>
+          <div><a>ChangeLog-6.17</a><span>28-Sep-2026 21:04</span><span>512K</span></div>
+          <div><a>linux-6.17.tar.sign</a><span>28-Sep-2026 21:04</span><span>989</span></div>
+          <div><a id="hot">linux-6.17.tar.xz</a><span>28-Sep-2026 21:04</span><span>148M</span></div>
+          <div><a>patch-6.17.xz</a><span>28-Sep-2026 21:04</span><span>12M</span></div>
+          <div><a>sha256sums.asc</a><span>28-Sep-2026 21:05</span><span>210K</span></div>
+        </div></div>
+    </div>
+    <div id="menu">
+      <div class="hl" id="menuHl"></div>
+      <div class="it">Open link in new tab</div><div class="it">Open link in new window</div><div class="it">Save link as…</div><div class="it">Copy link address</div>
+      <div class="sep"></div>
+      <div class="it rift" id="menuRift"><svg viewBox="13 0 38 64"><path transform="translate(-1.1 -4.6)" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z" fill="#ECEEF3"/><path transform="translate(1.1 4.6)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z" fill="#4C7DFF"/></svg>Download with Rift</div>
+      <div class="sep"></div>
+      <div class="it">Inspect</div>
+    </div>
+    <svg id="cursor" viewBox="0 0 24 32"><path d="M2 2 L2 26 L8 20 L12 30 L16 28 L12 18 L20 18 Z" fill="#fff" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="kbd" id="kbd"><b>Ctrl</b>+<b>Enter</b></div>
+  </div>
+
+  <!-- 7 everywhere -->
+  <div class="layer" id="s7">
+    <div id="plat"><div class="pre" id="platPre">Free on</div>
+      <div class="mask"><div class="pw disp" id="pw0">Windows</div><div class="pw disp" id="pw1">macOS</div><div class="pw disp" id="pw2">Linux</div></div></div>
+  </div>
+  <div class="layer" id="s7b">
+    <div id="device"><div class="scr" id="devScr"></div><div class="base" id="devBase"></div></div>
+    <div id="lock"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></div>
+  </div>
+
+  <!-- 8 outro -->
+  <div class="layer" id="s8">
+    <div class="ow disp" id="o1">Torrents.</div>
+    <div class="ow disp" id="o2">Direct links.</div>
+    <div class="ow disp" id="o3">One</div>
+    <div id="endmark">
+      <svg viewBox="13 0 38 64"><path id="eA" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z" fill="#ECEEF3"/></svg>
+      <svg viewBox="13 0 38 64"><path id="eB" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z" fill="#4C7DFF"/></svg>
+    </div>
+    <div id="endword" class="disp">Rift</div>
+    <div id="url" class="mono"><u>rift</u>.solarquack.in</div>
+    <div id="sub" class="mono">Free · Windows · macOS · Linux · Browser extension</div>
+  </div>
+
+  <!-- captions -->
+  <div class="layer" id="capLayer"><div id="capbg"></div><div id="caps"></div></div>
+
+  <div id="flash"></div>
+  <div id="vignette"></div>
+  <div id="grain"></div>
+</div>
+
+<script>
+// ------------------------------------------------------------ math
+function bez(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = (t) => ((ax * t + bx) * t + cx) * t, sy = (t) => ((ay * t + by) * t + cy) * t, dx = (t) => (3 * ax * t + 2 * bx) * t + cx;
+  return (x) => { if (x <= 0) return 0; if (x >= 1) return 1; let t = x; for (let i = 0; i < 8; i++) { const e = sx(t) - x; const d = dx(t); if (Math.abs(e) < 1e-6 || Math.abs(d) < 1e-6) break; t -= e / d; } return sy(Math.min(1, Math.max(0, t))); };
+}
+const E = { std: bez(.2, .8, .2, 1), spring: bez(.2, 1.3, .3, 1), springBig: bez(.18, 1.6, .3, 1), out: bez(.16, 1, .3, 1), in: bez(.7, 0, .84, 0), inout: bez(.65, 0, .35, 1), exit: bez(.4, 0, 1, 1) };
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const L = (a, b, k) => a + (b - a) * k;
+const $ = (id) => document.getElementById(id);
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+function shake(t, t0, amp, dur = .45) { const k = P(t, t0, t0 + dur); if (k <= 0 || k >= 1) return [0, 0]; const a = amp * (1 - k) ** 2; return [a * Math.sin(t * 91), a * Math.cos(t * 77)]; }
+function vis(el, on) { el.style.display = on ? '' : 'none'; return on; }
+function st(el, o) { for (const k in o) el.style[k] = o[k]; }
+
+// ------------------------------------------------------------ data from the renderer
+let LINES = null, FR = {};
+window.setup = (lines, frames) => { LINES = lines; FR = frames; buildCaptions(); };
+const STARTS = [0.25, 5.06, 6.5, 9.0, 13.5, 16.0, 20.0, 24.5];
+// Captions: which lines, from which word, and which words are emphasized.
+const CAP = { 2: { from: 0, em: [5] }, 3: { from: 0, em: [4, 5, 9] }, 4: { from: 0, em: [3, 8] }, 5: { from: 0, em: [8, 9] }, 6: { from: 6, em: [10] } };
+let capEls = {};
+function buildCaptions() {
+  const host = $('caps');
+  for (const k in CAP) {
+    const li = LINES[k], cfg = CAP[k];
+    const toks = li.text.split(/\s+/);
+    const div = document.createElement('div');
+    div.style.position = 'absolute'; div.style.left = '0'; div.style.right = '0'; div.style.bottom = '0';
+    const words = [];
+    toks.forEach((tok, i) => {
+      if (i < cfg.from) return;
+      const s = document.createElement('span');
+      s.className = 'w' + (cfg.em.includes(i) ? ' em' : '');
+      s.textContent = tok;
+      div.appendChild(s); div.appendChild(document.createTextNode(' '));
+      const wb = li.words[i] || li.words[li.words.length - 1];
+      words.push({ el: s, t: STARTS[k] + wb.t, d: wb.d, em: cfg.em.includes(i) });
+    });
+    host.appendChild(div);
+    const last = words[words.length - 1];
+    capEls[k] = { div, words, t0: words[0].t - 0.12, t1: last.t + last.d };
+  }
+}
+function captions(t) {
+  const keys = Object.keys(capEls).map(Number).sort((a, b) => a - b);
+  keys.forEach((k, idx) => {
+    const c = capEls[k];
+    const next = idx + 1 < keys.length ? capEls[keys[idx + 1]].t0 : 99;
+    const end = Math.min(c.t1 + 0.55, next - 0.04);
+    const on = t >= c.t0 && t < end + 0.22;
+    vis(c.div, on);
+    if (!on) return;
+    const out = P(t, end, end + 0.22);
+    c.div.style.opacity = 1 - out;
+    c.div.style.transform = `translateY(${-18 * E.exit(out)}px)`;
+    let cur = -1;
+    c.words.forEach((w, i) => { if (t >= w.t - 0.02) cur = i; });
+    c.words.forEach((w, i) => {
+      const k = P(t, w.t - 0.06, w.t + 0.22);
+      const e = E.spring(k);
+      w.el.style.opacity = clamp(k * 1.6);
+      w.el.style.transform = `translateY(${(1 - e) * 34}px) scale(${L(.92, 1, e)})`;
+      w.el.style.filter = `blur(${(1 - clamp(k * 1.4)) * 8}px)`;
+      const live = i === cur && t < w.t + w.d + 0.25;
+      w.el.style.color = w.em ? (live || t > w.t ? '#8fb0ff' : '#ECEEF3') : (live ? '#FFFFFF' : (i < cur ? '#C9CDD6' : '#ECEEF3'));
+      w.el.style.textShadow = live ? '0 0 26px rgba(76,125,255,.55)' : 'none';
+    });
+  });
+}
+
+// ------------------------------------------------------------ images
+const pending = [];
+function setImg(img, take, f) {
+  const n = FR[take] || 1;
+  const i = Math.max(0, Math.min(n - 1, Math.round(f)));
+  const src = `../frames/${take}/${String(i).padStart(4, '0')}.png`;
+  if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; pending.push(img); }
+}
+
+// ------------------------------------------------------------ static builds
+(function build() {
+  const s = $('streaks');
+  for (let i = 0; i < 7; i++) { const d = document.createElement('div'); d.className = 'streak'; d.id = 'st' + i; s.appendChild(d); }
+  const cols = ['#4C7DFF', '#5EC4C4', '#4CC89A', '#C38BEA', '#F0924A', '#E2B86A', '#F07AA0', '#B9C46A'];
+  window.LANECOLS = cols;
+  const labs = $('lanelabs');
+  for (let i = 0; i < 8; i++) {
+    const d = document.createElement('div'); d.className = 'lanelab mono'; d.id = 'll' + i;
+    d.style.left = (284 + 142 * i) + 'px'; d.style.color = cols[i]; d.textContent = 'LANE ' + String(i + 1).padStart(2, '0');
+    labs.appendChild(d);
+  }
+  const b = $('beams');
+  for (let i = 0; i < 8; i++) { const d = document.createElement('div'); d.className = 'beam'; d.id = 'bm' + i; const f = document.createElement('b'); f.style.background = cols[i]; d.appendChild(f); b.appendChild(d); }
+})();
+
+// ------------------------------------------------------------ camera for the ui window
+function camera({ cx = 720, cy = 405, s = 1, x = 960, y = 540, rx = 0, ry = 0, rz = 0 }) {
+  $('cam').style.transform = `translate(${x}px, ${y}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s}) translate(${-cx}px, ${-cy}px)`;
+}
+
+// ------------------------------------------------------------ scenes
+function background(t) {
+  const a = $('glowA'), b = $('glowB');
+  let boost = 1 + 1.4 * Math.exp(-Math.max(0, t - 5.5) * 2.2) * (t >= 5.5 ? 1 : 0) + 1.2 * Math.exp(-Math.max(0, t - 27) * 2) * (t >= 27 ? 1 : 0);
+  const hookDim = t < 5 ? 0.35 : 1;
+  st(a, { left: (960 - 800 + 380 * Math.sin(t * 0.21)) + 'px', top: (540 - 800 + 160 * Math.cos(t * 0.17) + 220) + 'px', opacity: clamp(0.55 * boost * hookDim, 0, 1) });
+  st(b, { left: (960 - 800 - 420 * Math.cos(t * 0.15)) + 'px', top: (540 - 800 - 200 + 120 * Math.sin(t * 0.23)) + 'px', opacity: clamp(0.5 * hookDim * (t > 24.5 ? 1.3 : 1), 0, 1) });
+  for (let i = 0; i < 7; i++) {
+    const el = $('st' + i);
+    const sp = 60 + 40 * hash(i);
+    const x = ((hash(i + 3) * 2400 + t * sp * (i % 2 ? 1 : -1)) % 2600 + 2600) % 2600 - 340;
+    const op = (0.12 + 0.25 * hash(i + 9)) * (t < 5 ? 0.25 : 1) * (1 + 2.5 * Math.exp(-Math.max(0, t - 5.5) * 3) * (t >= 5.5 ? 1 : 0));
+    st(el, { transform: `translateX(${x}px) rotate(16deg) scaleX(${0.6 + hash(i + 5) * 1.4})`, opacity: clamp(op, 0, .9) });
+  }
+  $('grain').style.transform = `translate(${(hash(Math.round(t * 30)) * 64) | 0}px, ${(hash(Math.round(t * 30) + 7) * 64) | 0}px)`;
+}
+
+function hook(t) {
+  if (!vis($('s1'), t < 5.05)) return;
+  const [sx, sy] = shake(t, 0.36, 10).map((v, i) => v + shake(t, 1.85, 10)[i] + shake(t, 4.28, 18)[i]);
+  const col = P(t, 4.62, 4.98);  // collapse into a slash
+  const ce = E.in(col);
+  $('s1').style.transform = `translate(${sx}px, ${sy}px) rotate(${16 * ce}deg) scale(${1 - 0.15 * ce}, ${1 - 0.985 * ce})`;
+  $('s1').style.filter = `brightness(${1 + 3 * ce})`;
+  // ghost windows
+  const g = (el, t0, side) => {
+    const k = P(t, t0 - 0.12, t0 + 0.5), e = E.spring(k);
+    const away = P(t, 2.55, 3.1), ae = E.std(away);
+    const dim = P(t, 3.45, 3.7);
+    st(el, { opacity: clamp(k * 2) * (1 - 0.93 * dim), transform: `translateX(${side * 26 * ae}px) translateY(${(1 - e) * 60}px) scale(${L(.94, 1, e) * (1 - 0.06 * dim)})` });
+  };
+  g($('g1'), 0.36, -1); g($('g2'), 1.85, 1);
+  const word = (el, t0) => {
+    const k = P(t, t0 - 0.05, t0 + 0.3), e = E.springBig(k);
+    st(el, { opacity: clamp(k * 3), transform: `scale(${L(1.35, 1, e)})`, filter: `blur(${(1 - clamp(k * 2)) * 14}px)`, transformOrigin: '0 60%' });
+  };
+  word($('w1'), 0.36); word($('w2'), 1.85);
+  const ck = P(t, 2.55, 3.0);
+  st($('crack'), { opacity: ck > 0 ? 1 - 0.7 * P(t, 3.45, 3.8) : 0, transform: `scaleY(${E.out(ck)}) translateX(${Math.sin(t * 40) * 1.5}px)` });
+  // lying counter
+  const lk = P(t, 3.5, 3.62);
+  const lies = ['48.2', '312.4', '0.8', '97.1', '4.2', '860.0', '12.9', '1.1', '640.5', '3.3', '211.7', '0.0'];
+  const fi = Math.floor(t * 30);
+  const frozen = t > 4.32;
+  $('liarN').textContent = frozen ? '860.0' : lies[Math.floor(hash(Math.floor(fi / 2)) * lies.length)];
+  const rgb = frozen ? 6 + 10 * Math.exp(-(t - 4.32) * 6) : 4 + 8 * hash(fi);
+  st($('liar'), { opacity: lk, color: frozen ? '#ECEEF3' : '#ECEEF3', textShadow: `${rgb}px 0 rgba(240,89,106,.8), ${-rgb}px 0 rgba(94,196,196,.8)`,
+                  transform: `translateY(${(1 - E.spring(lk)) * 40}px) skewX(${frozen ? 0 : (hash(fi + 1) - .5) * 6}deg)`, filter: frozen ? 'none' : `blur(${hash(fi + 2) * 1.5}px)` });
+  const lie = P(t, 4.22, 4.42), le = E.springBig(lie);
+  st($('lie'), { opacity: clamp(lie * 4), transform: `translateX(-50%) rotate(-8deg) scale(${L(2.2, 1, le)})` });
+}
+
+function reveal(t) {
+  if (!vis($('s2'), t >= 4.9 && t < 6.75)) return;
+  const [sx, sy] = shake(t, 5.5, 22, .6);
+  const exit = P(t, 6.25, 6.7), xe = E.exit(exit);
+  $('s2').style.transform = `translate(${sx}px, ${sy - 70 * xe}px) scale(${1 - 0.1 * xe})`;
+  $('s2').style.opacity = 1 - xe;
+  // slash grows, then bursts on the downbeat
+  const g = P(t, 4.9, 5.5);
+  const after = P(t, 5.5, 5.9);
+  st($('slash'), { transform: `rotate(16deg) scaleY(${E.inout(g)}) scaleX(${1 + 6 * E.in(g) * (1 - after) + 30 * E.out(after)})`, opacity: (1 - after) * clamp(g * 3) });
+  // mark halves fly together along their offset and snap at 5.5
+  const m = P(t, 5.18, 5.5), me = E.in(m);
+  const far = 1 - me;
+  $('mA').setAttribute('transform', `translate(${-1.1 - 30 * far} ${-4.6 - 120 * far})`);
+  $('mB').setAttribute('transform', `translate(${1.1 + 30 * far} ${4.6 + 120 * far})`);
+  const pop = E.spring(P(t, 5.5, 5.9));
+  st($('mark'), { opacity: clamp(m * 3), transform: `scale(${t < 5.5 ? 1 : L(1.12, 1, pop)})` });
+  // wordmark letters rise out of a mask, staggered
+  [...$('word').children].forEach((el, i) => {
+    const k = P(t, 5.5 + i * 0.045, 5.5 + i * 0.045 + 0.42), e = E.spring(k);
+    st(el, { transform: `translateY(${(1 - e) * 480}px)` });
+  });
+  $('flash').style.opacity = Math.max(0, 0.55 * Math.exp(-Math.max(0, t - 5.5) * 9) * (t >= 5.5 ? 1 : 0));
+}
+
+function uiStage(t) {
+  const on = t >= 6.45 && t < 24.6 && !(t >= 16.0 && t < 18.1);
+  if (!vis($('uistage'), on)) return;
+  const A = $('uiA'), B = $('uiB');
+  B.style.display = 'none';
+  $('win').style.filter = 'none';
+  $('lanelabs').style.display = 'none';
+  $('uistage').style.opacity = 1;
+  if (t < 9.0) {                                  // 3: rows arrive
+    setImg(A, 'list', (t - 6.9) * 30);
+    const k = P(t, 6.45, 7.45), e = E.spring(k);
+    const drift = P(t, 7.45, 9.0);
+    camera({ s: L(0.74, 1.0, e) + 0.03 * drift, x: 960, y: L(860, 625, e), rx: L(28, 6, e) - 2 * drift, ry: -2 * drift, rz: L(-4, 0, e) });
+    $('uistage').style.opacity = clamp(k * 2.5);
+    const out = P(t, 8.85, 9.0);
+    $('win').style.filter = `blur(${6 * out}px)`;
+  } else if (t < 13.5) {                          // 4: dive into the lanes
+    setImg(A, 'lanes', (t - 9.0) * 30);
+    const k = P(t, 9.0, 10.45), e = E.inout(k);
+    const inK = P(t, 9.0, 9.2);
+    camera({ cx: L(720, 852, e), cy: L(405, 602, e), s: L(0.9, 1.62, e), x: 960, y: L(560, 470, e), rx: L(6, 0, e), ry: L(-3, 0, e) });
+    $('win').style.filter = `blur(${8 * (1 - E.out(inK))}px)`;
+    const dim = P(t, 11.65, 12.0);
+    $('win').style.filter = `blur(${10 * E.std(dim)}px) brightness(${1 - 0.72 * E.std(dim)})`;
+    const ex = P(t, 13.3, 13.5); $('uistage').style.opacity = 1 - ex;
+  } else if (t < 16.0) {                          // 5: honest speed
+    setImg(A, 'stats', (t - 13.5) * 30 + 10);
+    const k = P(t, 13.5, 15.6), e = E.inout(k);
+    camera({ cx: L(420, 720, e), cy: L(162, 360, e), s: L(2.5, 1.0, e), x: 960, y: L(500, 520, e), rx: L(0, 5, e), ry: L(0, -4, e) });
+    const inK = P(t, 13.5, 13.68); $('win').style.filter = `blur(${10 * (1 - E.out(inK))}px)`;
+    $('uistage').style.opacity = clamp(inK * 3) * (1 - P(t, 15.85, 16.0));
+  } else if (t < 20.0) {                          // 6: add dialog from the browser
+    const take = t < 19.2 ? (t - 18.0) : 2.5 + (t - 19.2);
+    setImg(A, 'add', take * 30);
+    const k = P(t, 18.1, 18.6), e = E.spring(k);
+    const z = E.inout(P(t, 18.45, 18.95)), back = E.inout(P(t, 19.3, 19.75));
+    camera({ cx: L(720, 720, z), cy: L(405, 396, z), s: L(L(0.7, 1.0, e), L(1.62, 1.08, back), z), x: L(1500, 960, E.out(k)), y: L(540, 530, z), ry: L(-28, 0, e), rx: L(4, 0, z) });
+    $('uistage').style.opacity = clamp(k * 3) * (1 - P(t, 19.85, 20.0));
+  } else {                                        // 7: everywhere
+    const mac = t >= 21.6 && t < 22.45;
+    setImg(A, 'lanes', 60 + (t - 20.0) * 30);
+    if (t >= 21.45 && t < 22.6) { B.style.display = ''; setImg(B, 'light', (t - 21.45) * 30); }
+    // diagonal wipes: in at "Mac" (21.62), out at "Linux" (22.09)
+    const wi = E.inout(P(t, 21.5, 21.85)), wo = E.inout(P(t, 22.0, 22.35));
+    const a = wi * 130 - 15, b = wo * 130 - 15;  // percentages along x
+    B.style.clipPath = `polygon(${b}% 0, ${a}% 0, ${a - 18}% 100%, ${b - 18}% 100%)`;
+    const k = P(t, 20.0, 20.5), e = E.spring(k);
+    const dev = P(t, 22.75, 23.45), de = E.inout(dev);
+    camera({ cx: 720, cy: 405, s: L(L(0.5, 0.6, e), 0.5, de), x: L(L(1500, 1290, E.out(k)), 960, de), y: L(560, 500, de), ry: L(L(-30, -14, e), 0, de), rx: L(4, 0, de) });
+    $('uistage').style.opacity = clamp(k * 3) * (1 - P(t, 24.3, 24.6));
+    void mac;
+  }
+}
+
+function lanes(t) {
+  if (!vis($('s4a'), t >= 10.4 && t < 11.9)) return;
+  // segment bar in UI px: x 284..1420, y 595..608; camera at this point: cx 852, cy 602, s 1.62, screen (960, 470)
+  const S = 1.62, X = (ux) => 960 + (ux - 852) * S, Y = (uy) => 470 + (uy - 602) * S;
+  const k = P(t, 10.45, 10.75), e = E.std(k), out = P(t, 11.6, 11.85);
+  st($('spot'), { left: (X(284) - 14) + 'px', top: (Y(595) - 14) + 'px', width: ((1420 - 284) * S + 28) + 'px', height: (13 * S + 28) + 'px', opacity: e * (1 - out) });
+  const host = $('labs2');
+  if (!host.children.length) for (let i = 0; i < 8; i++) { const d = document.createElement('div'); d.className = 'lab2 mono'; d.textContent = String(i + 1).padStart(2, '0'); d.style.color = LANECOLS[i]; host.appendChild(d); }
+  [...host.children].forEach((d, i) => {
+    const lk = P(t, 10.58 + i * 0.06, 10.58 + i * 0.06 + 0.32), le = E.springBig(lk);
+    st(d, { left: (X(284 + 142 * i + 142 * 0.6) - 14) + 'px', top: (Y(601.5) - 15) + 'px', opacity: clamp(lk * 2) * (1 - out), transform: `translateY(${(1 - le) * 14}px) scale(${L(.5, 1, le)})` });
+  });
+}
+
+function chips(t) {
+  if (!vis($('s3'), t >= 8.2 && t < 9.05)) return;
+  const pop = (el, t0, x, y) => { const k = P(t, t0, t0 + 0.35), e = E.springBig(k); st(el, { left: x + 'px', top: y + 'px', opacity: clamp(k * 3), transform: `translate(-50%, -50%) translateY(${(1 - e) * 40}px) scale(${L(.6, 1, e)})` }); };
+  pop($('chipBt'), 8.3, 690, 112); pop($('plus'), 8.36, 960, 108); pop($('chipHttp'), 8.42, 1230, 112);
+  $('s3').style.opacity = 1 - P(t, 8.88, 9.02);
+}
+
+function beams(t) {
+  if (!vis($('s4'), t >= 11.65 && t < 13.55)) return;
+  const conv = P(t, 12.35, 12.76), ce = E.in(conv);
+  for (let i = 0; i < 8; i++) {
+    const el = $('bm' + i);
+    const k = P(t, 11.7 + i * 0.04, 11.7 + i * 0.04 + 0.4), e = E.spring(k);
+    const y0 = 540 - 8 * 21 + i * 42;
+    const fill = clamp(L(0.25 + 0.05 * i, 1, E.std(P(t, 11.8, 12.6))));
+    st(el, { left: L(L(-1200, 370, e), 960 - 590, ce) + 'px', top: L(y0, 540 - 11, ce) + 'px', width: L(1180, 1180, ce) + 'px', opacity: clamp(k * 2) * (1 - P(t, 12.7, 12.8)) });
+    el.firstChild.style.width = (fill * 100) + '%';
+  }
+  const f = P(t, 12.74, 13.0), fe = E.springBig(f);
+  st($('file'), { opacity: clamp(f * 4) * (1 - P(t, 13.3, 13.5)), transform: `scale(${L(.8, 1, fe)})` });
+  $('flash').style.opacity = Math.max(+$('flash').style.opacity || 0, 0.35 * Math.exp(-Math.max(0, t - 12.76) * 10) * (t >= 12.76 ? 1 : 0));
+}
+
+function browser(t) {
+  if (!vis($('s6'), t >= 15.95 && t < 18.25)) return;
+  const k = P(t, 15.95, 16.45), e = E.spring(k);
+  const out = P(t, 18.02, 18.22), oe = E.in(out);
+  st($('browser'), { opacity: clamp(k * 3), transform: `translateY(${(1 - e) * 80}px) scale(${L(.94, 1, e)})` });
+  // camera: push in on the link and the menu, then rush past on the hand-over
+  const zin = E.inout(P(t, 16.2, 17.1));
+  const zs = L(1, 1.6, zin) * (1 + 0.6 * oe);
+  const fX = 600, fY = 560; // focus: the link and the menu under it (stage px), anchored at screen (820, 470)
+  st($('bcam'), { transform: `translate(${L(960, 820, zin)}px, ${L(540, 470, zin)}px) scale(${zs}) translate(${-L(960, fX, zin)}px, ${-L(540, fY, zin)}px)`, opacity: 1 - oe, filter: `blur(${10 * oe}px)` });
+  // cursor path
+  const link = { x: 520, y: 405 }; // within the page: link row
+  const bx = 210, by = 120;
+  const hx = bx + 70 + 150, hy = by + 100 + 46 + 60 + 46 * 3 + 22; // "linux-6.17.tar.xz"
+  const c1 = E.inout(P(t, 16.15, 16.9));
+  let cx = L(1450, hx, c1), cy = L(880, hy, c1);
+  const mOpen = P(t, 17.0, 17.22), me = E.spring(mOpen);
+  const mx = hx + 6, my = hy + 6;
+  const toItem = E.inout(P(t, 17.3, 17.8));
+  const itemY = my + 8 + 38 * 4 + 13 + 19;
+  cx = L(cx, mx + 150, toItem); cy = L(cy, itemY, toItem);
+  const press = (t >= 16.97 && t < 17.07) || (t >= 17.97 && t < 18.07);
+  st($('cursor'), { left: cx + 'px', top: cy + 'px', transform: `scale(${press ? 0.86 : 1})`, opacity: clamp(k * 3) * (1 - P(t, 18.05, 18.2)) });
+  $('hot').className = t > 16.85 ? 'hot' : '';
+  const closed = t >= 18.08;
+  st($('menu'), { left: mx + 'px', top: my + 'px', opacity: closed ? 0 : clamp(mOpen * 4), transform: `scale(${L(.94, 1, me)})`, display: t >= 17.0 && !closed ? '' : 'none' });
+  const hl = P(t, 17.62, 17.72);
+  st($('menuHl'), { top: (8 + 38 * 4 + 13) + 'px', opacity: hl * (t >= 17.97 && t < 18.03 ? 0.6 : 1) });
+}
+
+function keys(t) {
+  const el = $('kbd');
+  const on = t >= 18.95 && t < 19.75;
+  el.style.display = on ? '' : 'none';
+  if (!on) return;
+  const k = P(t, 18.95, 19.2), e = E.spring(k);
+  const press = t >= 19.25 && t < 19.38;
+  st(el, { left: '1420px', top: '860px', opacity: clamp(k * 3) * (1 - P(t, 19.55, 19.75)), transform: `translateY(${(1 - e) * 30}px) scale(${press ? .93 : 1})` });
+}
+
+function everywhere(t) {
+  const on = t >= 20.0 && t < 23.0;
+  if (vis($('s7'), on)) {
+    const pre = P(t, 20.1, 20.4), pe = E.spring(pre);
+    const ex = P(t, 22.6, 22.95), xe = E.exit(ex);
+    st($('platPre'), { opacity: clamp(pre * 2) * (1 - xe), transform: `translateY(${(1 - pe) * 20}px)` });
+    const times = [20.48, 21.58, 22.05];
+    for (let i = 0; i < 3; i++) {
+      const k = P(t, times[i] + 0.05, times[i] + 0.4), e = E.spring(k);
+      const nxt = i < 2 ? P(t, times[i + 1] - 0.08, times[i + 1] + 0.1) : ex;
+      const ne = E.exit(nxt);
+      st($('pw' + i), { transform: `translateY(${(1 - e) * 240 - ne * 240}px)`, opacity: (k > 0 ? 1 : 0) * (1 - ne), color: i === 1 ? '#ECEEF3' : '#ECEEF3' });
+    }
+  }
+  const on2 = t >= 22.7 && t < 24.6;
+  if (vis($('s7b'), on2)) {
+    const d = P(t, 22.75, 23.45), de = E.inout(d);
+    const w = 1440 * 0.5, h = 810 * 0.5;
+    const pad = L(140, 26, de);
+    st($('devScr'), { left: (-w / 2 - pad) + 'px', top: (-h / 2 - pad - 40) + 'px', width: (w + pad * 2) + 'px', height: (h + pad * 2) + 'px', opacity: clamp(d * 3) * (1 - P(t, 24.3, 24.6)) });
+    st($('devBase'), { left: (-w / 2 - 110) + 'px', top: (h / 2 + 26 - 40 + 6) + 'px', width: (w + 220) + 'px', opacity: clamp((d - .4) * 3) * (1 - P(t, 24.3, 24.6)) });
+    const lk = P(t, 23.9, 24.25), le = E.springBig(lk);
+    st($('lock'), { left: (960 + w / 2 + 26 - 48) + 'px', top: (500 - h / 2 - 66 - 48) + 'px', opacity: clamp(lk * 3) * (1 - P(t, 24.3, 24.6)), transform: `scale(${L(.3, 1, le)}) rotate(${(1 - le) * -20}deg)` });
+  }
+}
+
+function outro(t) {
+  if (!vis($('s8'), t >= 24.45)) return;
+  const [sx, sy] = shake(t, 24.61, 10).map((v, i) => v + shake(t, 25.56, 10)[i] + shake(t, 27.0, 20, .6)[i]);
+  $('s8').style.transform = `translate(${sx}px, ${sy}px)`;
+  const fuse = P(t, 26.8, 27.0), fe = E.in(fuse);
+  const w = (el, t0, x, y) => {
+    const k = P(t, t0 - 0.04, t0 + 0.3), e = E.springBig(k);
+    st(el, { left: L(x, 960, fe) + 'px', top: L(y, 520, fe) + 'px', opacity: clamp(k * 3) * (1 - fuse), transform: `translate(-50%, -50%) scale(${L(1.4, 1, e) * (1 - 0.8 * fe)})`, filter: `blur(${(1 - clamp(k * 2)) * 12 + fe * 10}px)` });
+  };
+  w($('o1'), 24.61, 600, 420); w($('o2'), 25.56, 1290, 640); w($('o3'), 26.83, 960, 540);
+  // end mark: halves snap on 27.0, then the wordmark, url and line
+  const m = P(t, 26.82, 27.0), me = E.in(m);
+  const far = 1 - me;
+  $('eA').setAttribute('transform', `translate(${-1.1 - 40 * far} ${-4.6 - 140 * far})`);
+  $('eB').setAttribute('transform', `translate(${1.1 + 40 * far} ${4.6 + 140 * far})`);
+  const pop = E.spring(P(t, 27.0, 27.45));
+  st($('endmark'), { opacity: clamp(m * 3), transform: `scale(${t < 27 ? 1 : L(1.25, 1, pop)})` });
+  const wk = P(t, 27.12, 27.55), wke = E.spring(wk);
+  st($('endword'), { opacity: clamp(wk * 2), transform: `translateY(${(1 - wke) * 50}px)`, letterSpacing: L(0.08, -0.045, wke) + 'em' });
+  const uk = P(t, 27.45, 27.85), ue = E.spring(uk);
+  st($('url'), { opacity: clamp(uk * 2), transform: `translateY(${(1 - ue) * 30}px)` });
+  const sk = P(t, 27.65, 28.05), se = E.spring(sk);
+  st($('sub'), { opacity: clamp(sk * 2) * 0.9, transform: `translateY(${(1 - se) * 24}px)` });
+  $('flash').style.opacity = Math.max(+$('flash').style.opacity || 0, 0.5 * Math.exp(-Math.max(0, t - 27.0) * 8) * (t >= 27.0 ? 1 : 0));
+  const fadeEnd = P(t, 28.55, 29.0);
+  $('s8').style.filter = `brightness(${1 - 0.9 * fadeEnd})`;
+}
+
+// ------------------------------------------------------------ frame
+window.render = async (t) => {
+  pending.length = 0;
+  $('flash').style.opacity = 0;
+  background(t);
+  hook(t); reveal(t); uiStage(t); lanes(t); chips(t); beams(t); browser(t); keys(t); everywhere(t); outro(t);
+  captions(t);
+  vis($('capLayer'), t >= 6.5 && t < 24.5);
+  await Promise.all(pending.map((img) => img.decode().catch(() => {})));
+  return true;
+};
+window.ready = async () => { await document.fonts.ready; await Promise.all([...document.fonts].map((f) => f.load().catch(() => {}))); return [...document.fonts].map((f) => f.family + ':' + f.status); };
+</script>
+</body>
+</html>

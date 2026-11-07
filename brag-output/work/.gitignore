@@ -1,0 +1,8 @@
+# Regenerable and large: rebuild with the steps in README.md
+frames/
+stills/
+video_noaudio.mp4
+audio/music_only.wav
+sheet*.png
+crop.png
+render.log

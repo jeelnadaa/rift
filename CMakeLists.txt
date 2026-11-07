@@ -88,6 +88,11 @@ if(RIFT_BUILD_TESTS)
     set_target_properties(rift_ui_harness PROPERTIES WIN32_EXECUTABLE OFF MACOSX_BUNDLE OFF)
     add_test(NAME ui_harness COMMAND rift_ui_harness)
     set_tests_properties(ui_harness PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    # Deterministic frame recorder for the launch video (brag-output/). Dev tool only, not installed.
+    qt_add_executable(rift_ui_film tests/ui/film.cpp)
+    qt_add_resources(rift_ui_film "film_qml" PREFIX "/harness" FILES tests/ui/MockApp.qml)
+    target_link_libraries(rift_ui_film PRIVATE rift_appqt rift_uiplugin Qt6::Quick Qt6::QuickControls2 Qt6::Svg)
+    set_target_properties(rift_ui_film PROPERTIES WIN32_EXECUTABLE OFF MACOSX_BUNDLE OFF)
 endif()
 
 if(RIFT_UI_ONLY)
