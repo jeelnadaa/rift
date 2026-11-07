@@ -7,7 +7,13 @@ name: Release
 on:
   push:
     branches: [main]
+  # Run by hand (Actions → Release → Run workflow) to build only some platforms, e.g. "linux" while
+  # fixing a Linux-only problem. Partial runs upload their build as workflow artifacts and publish nothing.
   workflow_dispatch:
+    inputs:
+      platforms:
+        description: "all, or any of: windows macos linux extension (space separated)"
+        default: all
 
 permissions:
   contents: write
@@ -38,6 +44,7 @@ jobs:
 
   extension:
     needs: version
+    if: ${{ !inputs.platforms || inputs.platforms == 'all' || contains(inputs.platforms, 'extension') }}
     runs-on: ubuntu-latest
     env:
       V: ${{ needs.version.outputs.version }}
@@ -57,18 +64,28 @@ jobs:
 
   windows:
     needs: version
+    if: ${{ !inputs.platforms || inputs.platforms == 'all' || contains(inputs.platforms, 'windows') }}
     runs-on: windows-2022
     env:
       V: ${{ needs.version.outputs.version }}
-      VCPKG_BINARY_SOURCES: clear;x-gha,readwrite
+      # Built vcpkg packages (boost, openssl, libtorrent, curl) are kept in an on-disk binary cache that
+      # actions/cache saves between runs, so only the first run compiles them (~25 min); later runs restore
+      # them in about a minute. vcpkg checks each package's ABI hash, so a stale entry is never used.
+      VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkg-bincache,readwrite
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/github-script@v7
-        name: Expose the Actions cache to vcpkg
+      - name: Prepare the vcpkg binary cache
+        id: vcpkg
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force vcpkg-bincache | Out-Null
+          "rev=$(git -C "$env:VCPKG_INSTALLATION_ROOT" rev-parse --short HEAD)" >> $env:GITHUB_OUTPUT
+      - uses: actions/cache/restore@v4
+        id: vcpkg-restore
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          path: vcpkg-bincache
+          key: vcpkg-x64-windows-${{ steps.vcpkg.outputs.rev }}-
+          restore-keys: vcpkg-x64-windows-
       - uses: ilammy/msvc-dev-cmd@v1
       - uses: jurplel/install-qt-action@v4
         with:
@@ -80,6 +97,17 @@ jobs:
         run: |
           & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install libtorrent curl[ssl] --triplet x64-windows --clean-after-build
           if ($LASTEXITCODE -ne 0) { exit 1 }
+          # Name the cache after its contents, so it is saved again only when a package was rebuilt.
+          $names = (Get-ChildItem vcpkg-bincache -Recurse -File | ForEach-Object Name | Sort-Object) -join ","
+          $sha = [System.Security.Cryptography.SHA256]::Create()
+          $h = -join ($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($names))[0..7] | ForEach-Object { $_.ToString("x2") })
+          "VCPKG_CACHE_KEY=vcpkg-x64-windows-${{ steps.vcpkg.outputs.rev }}-$h" >> $env:GITHUB_ENV
+      # Saved right away (not at job end), so a later failing step doesn't throw the 25-minute build away.
+      - uses: actions/cache/save@v4
+        if: env.VCPKG_CACHE_KEY != steps.vcpkg-restore.outputs.cache-matched-key
+        with:
+          path: vcpkg-bincache
+          key: ${{ env.VCPKG_CACHE_KEY }}
       - name: Configure and build
         shell: pwsh
         run: |
@@ -131,6 +159,7 @@ jobs:
 
   macos:
     needs: version
+    if: ${{ !inputs.platforms || inputs.platforms == 'all' || contains(inputs.platforms, 'macos') }}
     strategy:
       fail-fast: true
       matrix:
@@ -201,6 +230,7 @@ jobs:
 
   linux:
     needs: version
+    if: ${{ !inputs.platforms || inputs.platforms == 'all' || contains(inputs.platforms, 'linux') }}
     runs-on: ubuntu-22.04
     env:
       V: ${{ needs.version.outputs.version }}
@@ -253,15 +283,28 @@ jobs:
             grep -iE 'error|could not|cannot|failed|not found' linuxdeploy.log | tail -9 | sed 's/^/::error::linuxdeploy: /'
             exit 1
           fi
-          QT_QPA_PLATFORM=offscreen ./Rift-$V-linux-x86_64.AppImage --appimage-extract-and-run --smoke-test > smoke.log 2>&1; rc=$?
+          # The appimage plugin names the file from LDAI_OUTPUT, but older builds ignore it: take whatever it made.
+          img="Rift-$V-linux-x86_64.AppImage"
+          if [ ! -f "$img" ]; then
+            made=$(ls -t ./*.AppImage | grep -v linuxdeploy | head -n1)
+            [ -n "$made" ] || { echo "::error::linuxdeploy produced no AppImage"; ls -la; exit 1; }
+            mv "$made" "$img"
+          fi
+          chmod +x "$img"
+          # Smoke test the extracted image (no FUSE needed). Exit 127 means a missing library or file: list them.
+          rm -rf squashfs-root && ./"$img" --appimage-extract > /dev/null
+          QT_QPA_PLATFORM=offscreen ./squashfs-root/AppRun --smoke-test > smoke.log 2>&1; rc=$?
           set -e
           cat smoke.log
           if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"
           elif [ $rc -ne 0 ]; then
             tail -n 9 smoke.log | sed 's/^/::error::smoke: /'
+            for f in squashfs-root/usr/bin/rift squashfs-root/usr/plugins/platforms/*.so; do
+              [ -f "$f" ] && LD_LIBRARY_PATH=squashfs-root/usr/lib ldd "$f" | grep 'not found' | sed "s|^|::error::missing for $(basename "$f"): |"
+            done
             echo "::error::Smoke test failed ($rc)"; exit 1
           fi
-          mkdir -p out && mv "Rift-$V-linux-x86_64.AppImage" out/
+          mkdir -p out && mv "$img" out/
       - name: deb, rpm and tar.gz
         run: |
           # The deployed AppDir (Rift + bundled Qt) goes to /opt/rift; /usr/bin/rift is a launcher.
@@ -282,6 +325,7 @@ jobs:
 
   publish:
     needs: [version, extension, windows, macos, linux]
+    if: ${{ !inputs.platforms || inputs.platforms == 'all' }}
     runs-on: ubuntu-latest
     env:
       V: ${{ needs.version.outputs.version }}
