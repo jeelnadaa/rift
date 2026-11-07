@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLockFile>
 #include <QProcess>
 #include <QThread>
 
@@ -73,11 +74,16 @@ int main(int argc, char *argv[]) {
 
         QJsonObject reply;
         if (Ipc::sendToRunning(msg, &reply, 4000)) { writeMessage(reply); continue; }
-        if (type == QLatin1String("ping")) { writeMessage({{"ok", false}, {"running", false}}); continue; }
-        // Rift is not running: start it in the tray and retry for up to 10 s.
-        QProcess::startDetached(riftExecutable(), {QStringLiteral("--minimized")});
+        // Only a real download starts Rift. "ping" and "config" are background questions the extension asks for
+        // every browser download; answering "not running" keeps those from launching anything.
+        if (type != QLatin1String("download")) { writeMessage({{"ok", false}, {"running", false}}); continue; }
+        // Rift is not running: start it in the tray (once, however many hosts the browser spawned at the same
+        // moment: the launch lock lets one of them do it) and retry for up to 15 s.
+        QLockFile launchLock(Ipc::lockPath(QStringLiteral("-launch.lock")));
+        launchLock.setStaleLockTime(20000);
+        if (launchLock.tryLock(0)) QProcess::startDetached(riftExecutable(), {QStringLiteral("--minimized")});
         bool sent = false;
-        for (int i = 0; i < 40 && !sent; ++i) {
+        for (int i = 0; i < 60 && !sent; ++i) {
             QThread::msleep(250);
             sent = Ipc::sendToRunning(msg, &reply, 4000);
         }

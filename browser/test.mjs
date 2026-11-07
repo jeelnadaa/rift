@@ -38,6 +38,33 @@ t("siteSkipped", () => {
   assert.ok(!L.siteSkipped("https://notexample.com/x", ["example.com"]));
   assert.ok(!L.siteSkipped("", ["example.com"]));
 });
+t("shouldTakeOver skips downloads that aren't new", () => {
+  const now = Date.parse("2026-11-07T20:00:00Z");
+  const fresh = { url: "https://e.com/a.iso", fileSize: 3e9, state: "in_progress", startTime: "2026-11-07T19:59:55Z" };
+  assert.equal(L.shouldTakeOver(fresh, {}, "", now).take, true);
+  assert.equal(L.shouldTakeOver({ ...fresh, startTime: "2026-11-07T19:50:00Z" }, {}, "", now).reason, "old");
+  assert.equal(L.shouldTakeOver({ ...fresh, state: "interrupted" }, {}, "", now).reason, "not new");
+  assert.equal(L.shouldTakeOver({ ...fresh, state: "complete" }, {}, "", now).reason, "not new");
+  assert.equal(L.shouldTakeOver({ ...fresh, paused: true }, {}, "", now).reason, "resumed");
+  assert.equal(L.shouldTakeOver({ ...fresh, startTime: undefined }, {}, "", now).take, true);
+});
+t("guard: no repeats, no bursts, backs off after a failure", () => {
+  const g = L.createGuard({ repeatMs: 1000, burstMs: 1000, burstMax: 3, cooldownMs: 5000 });
+  assert.equal(g.check(["https://e.com/a"], 0).ok, true);
+  g.note(["https://e.com/a", undefined], 0);
+  assert.equal(g.check(["https://e.com/a"], 10).reason, "repeat");
+  assert.equal(g.check([undefined, "https://e.com/a"], 10).reason, "repeat");
+  assert.equal(g.check(["https://e.com/a"], 2000).ok, true);
+  g.note(["https://e.com/b"], 2000); g.note(["https://e.com/c"], 2001); g.note(["https://e.com/d"], 2002);
+  assert.equal(g.check(["https://e.com/e"], 2003).reason, "burst");
+  assert.equal(g.check(["https://e.com/e"], 3500).ok, true);
+  g.failed(4000);
+  assert.equal(g.check(["https://e.com/z"], 4001).reason, "rift unavailable");
+  assert.equal(g.unavailable(8999), true);
+  assert.equal(g.check(["https://e.com/z"], 9001).ok, true);
+  g.failed(10000); g.succeeded();
+  assert.equal(g.check(["https://e.com/y"], 10001).ok, true);
+});
 t("shouldTakeOver", () => {
   const big = { url: "https://e.com/ubuntu.iso", fileSize: 3e9 };
   assert.equal(L.shouldTakeOver(big, {}).take, true);

@@ -11,6 +11,9 @@ class Ipc : public QObject {
     Q_OBJECT
 public:
     static QString serverName();
+    // Per-user lock file path next to the socket name: "<temp>/rift-xxxx<suffix>". The app holds
+    // "<name>.lock" for its whole life (one Rift per user); the native host uses "-launch.lock".
+    static QString lockPath(const QString &suffix);
     // Sends `msg` to a running instance. Returns false if none is running.
     static bool sendToRunning(const QJsonObject &msg, QJsonObject *reply = nullptr, int timeoutMs = 3000);
 

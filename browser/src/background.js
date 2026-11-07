@@ -5,9 +5,11 @@ if (typeof importScripts === "function" && typeof RiftLogic === "undefined") imp
 
 const api = typeof browser !== "undefined" ? browser : chrome;
 const L = RiftLogic;
-const bypass = new Set();           // URLs we hand back to the browser (Rift unreachable)
+const guard = L.createGuard();       // no loops, no bursts, back off while Rift is unreachable
 let remoteCfg = null;               // last config from Rift
 let remoteAt = 0;
+let remoteFailAt = 0;               // last failed config request (don't ask again for a minute)
+let takeovers = Promise.resolve();  // take-overs run one at a time
 
 // ---- Native messaging ------------------------------------------------------------------------
 function native(msg) {
@@ -37,9 +39,11 @@ async function localCfg() {
 // Rift's own settings win for types / size; the extension's toggles can only narrow them.
 async function effectiveCfg() {
   const local = await localCfg();
-  if (!remoteCfg || Date.now() - remoteAt > 60000) {
+  const now = Date.now();
+  if ((!remoteCfg || now - remoteAt > 60000) && now - remoteFailAt > 60000) {
+    // "config" never starts Rift (the native host only launches it for a real download).
     const r = await native({ type: "config" });
-    if (r && r.ok) { remoteCfg = r; remoteAt = Date.now(); }
+    if (r && r.ok) { remoteCfg = r; remoteAt = Date.now(); } else remoteFailAt = Date.now();
   }
   const c = Object.assign({}, local);
   if (remoteCfg) {
@@ -125,25 +129,38 @@ async function onMenu(info, tab) {
     const cfg = await effectiveCfg();
     const all = await linksInTab(tab.id, info.menuItemId === "rift-selection");
     const links = L.collectLinks(all, info.menuItemId === "rift-selection" ? "" : cfg.types);
-    for (const u of links.slice(0, 500)) await sendToRift(u, { referer });
+    for (const u of links.slice(0, 500)) {
+      const r = await sendToRift(u, { referer });
+      if (!r || !r.ok) break; // Rift is unavailable: don't try the other 499
+    }
   }
 }
 
 // ---- Take over browser downloads -------------------------------------------------------------
-async function onCreated(item) {
+async function takeOver(item) {
   const url = item.finalUrl || item.url;
-  if (bypass.has(url)) { bypass.delete(url); return; }
+  const urls = [item.url, item.finalUrl];
+  const pre = guard.check(urls, Date.now());
+  if (!pre.ok) return;                          // repeat / burst / Rift unavailable: the browser keeps it
   const cfg = await effectiveCfg();
-  const d = L.shouldTakeOver(item, cfg, api.runtime.id);
+  const d = L.shouldTakeOver(item, cfg, api.runtime.id, Date.now());
   if (!d.take) return;
+  const g = guard.check(urls, Date.now());      // re-check: state may have changed while asking for config
+  if (!g.ok) return;
+  guard.note(urls, Date.now());
   try { await api.downloads.cancel(item.id); } catch (_) { return; }  // already finished: leave it
   try { await api.downloads.erase({ id: item.id }); } catch (_) { /* ignore */ }
   const r = await sendToRift(url, { referer: item.referrer || "", filename: item.filename || "" });
-  if (!r || !r.ok) {
-    // Rift is unavailable: give the download back to the browser.
-    bypass.add(url);
-    try { await api.downloads.download({ url }); } catch (_) { /* nothing else we can do */ }
-  }
+  if (r && r.ok) { guard.succeeded(); return; }
+  // Rift is unavailable: give this one download back to the browser (the guard has its URL, so the restarted
+  // download isn't taken again) and leave every other download alone for a while.
+  guard.failed(Date.now());
+  try { await api.downloads.download({ url }); } catch (_) { /* nothing else we can do */ }
+}
+
+function onCreated(item) {
+  // One at a time, so a burst of downloads can't start a burst of native hosts.
+  takeovers = takeovers.then(() => takeOver(item)).catch(() => {});
 }
 
 // ---- Messages from the popup / options ------------------------------------------------------

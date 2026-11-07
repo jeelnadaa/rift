@@ -13,6 +13,8 @@
 #include <QFontDatabase>
 #include <QIcon>
 #include <QJsonArray>
+#include <QLockFile>
+#include <QThread>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
@@ -80,11 +82,29 @@ int main(int argc, char *argv[]) {
     QString dataDir = portable ? appDir + "/Data" : QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (smoke) dataDir = smokeDir.path();
 
-    // Single instance: hand our arguments to the running Rift and exit.
+    // Single instance: hand our arguments to the running Rift and exit. The lock file closes the startup race:
+    // a Rift that is still starting holds the lock but isn't listening yet, and without the lock every launch
+    // in that window (e.g. many browser downloads at once) used to become its own full Rift. Qt removes a lock
+    // left by a crashed process (dead PID), and age never makes it stale (0) since a live Rift holds it for days.
+    QLockFile instanceLock(Ipc::lockPath(QStringLiteral(".lock")));
+    instanceLock.setStaleLockTime(0);
     if (!smoke) {
         QJsonArray a;
         for (const QString &s : args) a.append(s);
-        if (Ipc::sendToRunning({{"type", "args"}, {"args", a}})) return 0;
+        const QJsonObject forward{{"type", "args"}, {"args", a}};
+        if (Ipc::sendToRunning(forward)) return 0;
+        if (!instanceLock.tryLock(0)) {
+            // Another Rift owns the lock: give it up to 20 s to start listening, then leave either way.
+            for (int i = 0; i < 80; ++i) {
+                QThread::msleep(250);
+                if (Ipc::sendToRunning(forward)) return 0;
+                if (instanceLock.tryLock(0)) break; // the owner died while starting: take over
+            }
+            if (!instanceLock.isLocked()) {
+                std::fprintf(stderr, "Rift is already running.\n");
+                return 0;
+            }
+        }
     }
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
@@ -101,7 +121,7 @@ int main(int argc, char *argv[]) {
     }
     Ipc ipc;
     ipc.handler = [&ctrl](const QJsonObject &m) { return ctrl.handleIpc(m); };
-    if (!smoke) ipc.listen();
+    if (!smoke && !ipc.listen()) qWarning("rift: could not open the single-instance socket %s", qPrintable(Ipc::serverName()));
 
     OpenFilter openFilter(&ctrl);
     app.installEventFilter(&openFilter);

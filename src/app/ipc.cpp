@@ -12,6 +12,10 @@ QString Ipc::serverName() {
     return QStringLiteral("rift-") + QString::fromLatin1(QCryptographicHash::hash(who, QCryptographicHash::Sha1).toHex().left(12));
 }
 
+QString Ipc::lockPath(const QString &suffix) {
+    return QDir(QDir::tempPath()).filePath(serverName() + suffix);
+}
+
 bool Ipc::sendToRunning(const QJsonObject &msg, QJsonObject *reply, int timeoutMs) {
     QLocalSocket s;
     s.connectToServer(serverName());
