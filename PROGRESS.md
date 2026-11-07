@@ -103,6 +103,7 @@ Tracked so nothing from PLAN.md is forgotten. Not started.
 
 - 2026-11-07: Full local build with MSYS2 UCRT64 (GCC 16.2, Qt 6.12, libtorrent 2.1.2, curl 8.23): no warnings (2.1 deprecations silenced for torrent.cpp only), ctest passes, `Rift.exe --smoke-test` passes. Launched the real app: DHT connects, a second launch forwards a URL into the running app's Add dialog.
 - 2026-11-07: Get extension downloads the release zip from GitHub, website domain is rift.solarquack.in, launch video in `brag-output/` (web copy on the site's home page). Release CI: Windows caches vcpkg builds (actions/cache, files backend), the Linux AppImage smoke test reports missing libraries, and Run workflow takes a `platforms` input (e.g. `linux`) for quick partial builds that don't publish.
+- 2026-11-07: CI skips pushes that only touch docs (`*.md`), `rift-static/`, `brag-output/` or `wrangler.jsonc`; every build job uses a compiler cache (ccache, sccache on Windows).
 
 ### Resume note
 - 1.0 checklist complete. Local full build: put `C:\msys64\ucrt64\bin` first on PATH, then

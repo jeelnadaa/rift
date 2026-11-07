@@ -3,9 +3,12 @@
 name: CI
 
 on:
+  # Docs, the website and the launch video don't change the app: pushing only those runs nothing.
   pull_request:
+    paths-ignore: ['**.md', 'rift-static/**', 'brag-output/**', 'wrangler.jsonc', '.github/workflows/release.yml']
   push:
     branches-ignore: [main]
+    paths-ignore: ['**.md', 'rift-static/**', 'brag-output/**', 'wrangler.jsonc', '.github/workflows/release.yml']
   workflow_dispatch:
 
 jobs:
@@ -28,5 +31,12 @@ jobs:
         with:
           version: "6.8.3"
           cache: true
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ci-ui
+          max-size: 500M
       - name: UI harness (real QML, mock controller; fails on any QML warning)
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: bash scripts/ui-harness.sh
