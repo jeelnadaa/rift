@@ -103,7 +103,7 @@ AbstractButton {
                         text: d.modelData[1]
                         color: Theme.c.text
                         font.family: Theme.fontUi
-                        font.pixelSize: 13.5
+                        font.pixelSize: 13
                         font.weight: d.current ? Font.DemiBold : Font.Normal
                         anchors.verticalCenter: parent.verticalCenter
                     }

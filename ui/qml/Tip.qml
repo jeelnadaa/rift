@@ -22,7 +22,7 @@ ToolTip {
             text: tip.text
             color: Theme.c.window
             font.family: Theme.fontUi
-            font.pixelSize: 12.5
+            font.pixelSize: 12
             font.weight: Font.DemiBold
             anchors.verticalCenter: parent.verticalCenter
         }

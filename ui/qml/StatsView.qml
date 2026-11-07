@@ -88,8 +88,8 @@ Rectangle {
                     spacing: 8
                     RowLayout {
                         Cap { text: qsTr("Speed, last 2 minutes"); Layout.fillWidth: true }
-                        Text { text: "↓ " + App.fmtSpeed(App.downSpeed); color: Theme.c.down; font.family: Theme.fontMono; font.pixelSize: 12.5 }
-                        Text { text: "↑ " + App.fmtSpeed(App.upSpeed); color: Theme.c.up; font.family: Theme.fontMono; font.pixelSize: 12.5 }
+                        Text { text: "↓ " + App.fmtSpeed(App.downSpeed); color: Theme.c.down; font.family: Theme.fontMono; font.pixelSize: 12 }
+                        Text { text: "↑ " + App.fmtSpeed(App.upSpeed); color: Theme.c.up; font.family: Theme.fontMono; font.pixelSize: 12 }
                     }
                     SpeedGraph { Layout.fillWidth: true; Layout.fillHeight: true; samples: App.speedHistory }
                 }

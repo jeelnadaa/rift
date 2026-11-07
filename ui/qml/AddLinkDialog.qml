@@ -65,7 +65,7 @@ RDialog {
                 placeholderTextColor: Theme.c.text3
                 selectionColor: Theme.selection
                 font.family: Theme.fontMono
-                font.pixelSize: 12.5
+                font.pixelSize: 12
                 padding: 10
                 background: Rectangle {
                     radius: Theme.radius.sm
@@ -94,7 +94,7 @@ RDialog {
                     visible: modelData[0] > 0
                     spacing: 5
                     Icon { name: modelData[2]; size: 14; color: modelData[3]; anchors.verticalCenter: parent.verticalCenter }
-                    Text { text: modelData[1]; color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 12.5; anchors.verticalCenter: parent.verticalCenter }
+                    Text { text: modelData[1]; color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
                 }
             }
         }
@@ -115,7 +115,7 @@ RDialog {
         columnSpacing: 14
         rowSpacing: 10
 
-        Text { text: qsTr("Save to"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Save to"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
@@ -133,7 +133,7 @@ RDialog {
             }
         }
 
-        Text { text: qsTr("Category"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Category"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         Select {
             id: category
             Layout.preferredWidth: 220
@@ -147,7 +147,7 @@ RDialog {
             onActivated: if (!dlg.folderTouched) folder.text = App.defaultFolderFor(value)
         }
 
-        Text { visible: dlg.singleHttp; text: qsTr("File name"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: dlg.singleHttp; text: qsTr("File name"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         Field {
             id: fileName
             visible: dlg.singleHttp
@@ -157,7 +157,7 @@ RDialog {
             tip: qsTr("Leave empty to use the name the server sends")
         }
 
-        Text { visible: (dlg.info.urls || 0) > 0; text: qsTr("Connections"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: (dlg.info.urls || 0) > 0; text: qsTr("Connections"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         RowLayout {
             visible: (dlg.info.urls || 0) > 0
             spacing: 10
@@ -169,7 +169,7 @@ RDialog {
             Text { text: qsTr("per file"); color: Theme.c.text3; font.family: Theme.fontUi; font.pixelSize: 13 }
         }
 
-        Text { visible: dlg.singleHttp; text: qsTr("Checksum"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: dlg.singleHttp; text: qsTr("Checksum"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         Field {
             id: checksum
             visible: dlg.singleHttp
@@ -197,7 +197,7 @@ RDialog {
             text: qsTr("Ctrl+Enter to add")
             color: Theme.c.text3
             font.family: Theme.fontUi
-            font.pixelSize: 12.5
+            font.pixelSize: 12
         },
         Item { Layout.fillWidth: true },
         Btn { text: qsTr("Cancel"); tip: qsTr("Close without adding"); kbd: "Esc"; onClicked: dlg.close() },

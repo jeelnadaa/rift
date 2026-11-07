@@ -32,7 +32,7 @@ Item {
                 color: Theme.c.raised
                 border.color: Theme.c.line
                 clip: true
-                property real left: 1
+                property real remaining: 1
 
                 Rectangle {
                     z: -1
@@ -52,7 +52,7 @@ Item {
                     NumberAnimation { target: t; property: "opacity"; from: 0; to: 1; duration: Theme.motion.base }
                 }
 
-                NumberAnimation on left {
+                NumberAnimation on remaining {
                     id: drain
                     from: 1; to: 0
                     duration: 10000
@@ -83,7 +83,7 @@ Item {
                     wrapMode: Text.Wrap
                     color: Theme.c.text
                     font.family: Theme.fontUi
-                    font.pixelSize: 13.5
+                    font.pixelSize: 13
                 }
                 Row {
                     id: acts
@@ -112,7 +112,7 @@ Item {
                 Rectangle {
                     anchors.bottom: parent.bottom
                     height: 2
-                    width: parent.width * t.left
+                    width: parent.width * t.remaining
                     color: Theme.soft(t.col, 0.5)
                 }
                 HoverHandler { id: hover }

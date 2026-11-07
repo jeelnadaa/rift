@@ -61,7 +61,7 @@ Item {
         text: n.value === 0 && n.zeroText.length && !input.activeFocus ? "" : n.suffix
         color: Theme.c.text3
         font.family: Theme.fontUi
-        font.pixelSize: 12.5
+        font.pixelSize: 12
     }
     Column {
         id: steps

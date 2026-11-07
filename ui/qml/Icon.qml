@@ -18,6 +18,6 @@ Item {
         smooth: true
         mipmap: true
         opacity: root.color.a
-        source: root.name.length ? "data:image/svg+xml;base64," + Qt.btoa(Icons.svg(root.name, Theme.hex(root.color), root.stroke)) : ""
+        source: root.name.length ? "data:image/svg+xml;utf8," + encodeURIComponent(Icons.svg(root.name, Theme.hex(root.color), root.stroke)) : ""
     }
 }

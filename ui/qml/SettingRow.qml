@@ -34,7 +34,7 @@ Item {
             text: sr.help
             color: Theme.c.text3
             font.family: Theme.fontUi
-            font.pixelSize: 12.5
+            font.pixelSize: 12
             wrapMode: Text.Wrap
             lineHeight: 1.15
         }

@@ -46,7 +46,7 @@ RDialog {
             text: App.engineVersions
             color: Theme.c.text3
             font.family: Theme.fontMono
-            font.pixelSize: 11.5
+            font.pixelSize: 11
         }
     }
 

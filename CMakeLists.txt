@@ -16,6 +16,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0" CACHE STRING "Minimum macOS")
 
 option(RIFT_BUILD_APP "Build the Qt application (needs Qt 6, libtorrent, libcurl)" ON)
 option(RIFT_BUILD_TESTS "Build unit tests" ON)
+option(RIFT_UI_ONLY "Build only the Qt parts (QML module, native host, UI harness); no libtorrent/libcurl" OFF)
 
 if(MSVC)
     add_compile_options(/utf-8 /W3 /permissive- /Zc:__cplusplus)
@@ -41,6 +42,44 @@ endif()
 
 # ---------------------------------------------------------------- dependencies
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Sql Network Widgets Svg)
+qt_standard_project_setup(REQUIRES 6.5)
+
+# All QML lives in ui/qml as a static QML module "Rift" (see ui/qml/CMakeLists.txt).
+add_subdirectory(ui/qml)
+
+# Qt-only app pieces (no engines): used by the app and by the UI harness.
+add_library(rift_appqt STATIC
+    src/app/settings.cpp src/app/settings.hpp
+    src/app/downloadmodel.cpp src/app/downloadmodel.hpp
+    src/app/storage.cpp src/app/storage.hpp
+    src/app/ipc.cpp src/app/ipc.hpp
+    src/app/platform.cpp src/app/platform.hpp)
+target_include_directories(rift_appqt PUBLIC src)
+target_link_libraries(rift_appqt PUBLIC rift_core Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Widgets)
+if(APPLE)
+    target_link_libraries(rift_appqt PUBLIC "-framework IOKit" "-framework CoreFoundation")
+endif()
+
+# ---------------------------------------------------------------- native messaging host
+qt_add_executable(rift-native-host src/nativehost/main.cpp src/app/ipc.cpp src/app/ipc.hpp)
+target_include_directories(rift-native-host PRIVATE src)
+target_link_libraries(rift-native-host PRIVATE Qt6::Core Qt6::Network)
+set_target_properties(rift-native-host PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
+
+# ---------------------------------------------------------------- UI harness (real QML, mock controller)
+if(RIFT_BUILD_TESTS)
+    qt_add_executable(rift_ui_harness tests/ui/harness.cpp)
+    qt_add_resources(rift_ui_harness "harness_qml" PREFIX "/harness" FILES tests/ui/MockApp.qml)
+    target_link_libraries(rift_ui_harness PRIVATE rift_appqt rift_uiplugin Qt6::Quick Qt6::QuickControls2 Qt6::Svg)
+    set_target_properties(rift_ui_harness PROPERTIES WIN32_EXECUTABLE OFF MACOSX_BUNDLE OFF)
+    add_test(NAME ui_harness COMMAND rift_ui_harness)
+    set_tests_properties(ui_harness PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()
+
+if(RIFT_UI_ONLY)
+    return()
+endif()
+
 find_package(CURL REQUIRED)
 find_package(LibtorrentRasterbar CONFIG QUIET)
 if(TARGET LibtorrentRasterbar::torrent-rasterbar)
@@ -50,8 +89,6 @@ else()
     pkg_check_modules(LIBTORRENT REQUIRED IMPORTED_TARGET libtorrent-rasterbar)
     set(RIFT_LIBTORRENT PkgConfig::LIBTORRENT)
 endif()
-
-qt_standard_project_setup(REQUIRES 6.5)
 
 # ---------------------------------------------------------------- engines
 add_library(rift_http STATIC src/http/engine.cpp)
@@ -67,12 +104,7 @@ configure_file(src/app/version.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/generated/vers
 
 set(RIFT_APP_SOURCES
     src/app/main.cpp
-    src/app/controller.cpp src/app/controller.hpp
-    src/app/downloadmodel.cpp src/app/downloadmodel.hpp
-    src/app/settings.cpp src/app/settings.hpp
-    src/app/storage.cpp src/app/storage.hpp
-    src/app/ipc.cpp src/app/ipc.hpp
-    src/app/platform.cpp src/app/platform.hpp)
+    src/app/controller.cpp src/app/controller.hpp)
 
 if(WIN32)
     string(REPLACE "." ";" _rift_v "${RIFT_VERSION_NUMERIC}")
@@ -93,9 +125,6 @@ endif()
 qt_add_executable(Rift WIN32 MACOSX_BUNDLE ${RIFT_APP_SOURCES} ${MACOS_ICON})
 target_include_directories(Rift PRIVATE src ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
-# All QML lives in ui/qml as a static QML module "Rift" (see ui/qml/CMakeLists.txt).
-add_subdirectory(ui/qml)
-
 file(GLOB RIFT_FONTS ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.ttf ${CMAKE_CURRENT_SOURCE_DIR}/ui/fonts/*.otf)
 set(RIFT_FONT_ALIASES "")
 foreach(f IN LISTS RIFT_FONTS)
@@ -111,10 +140,9 @@ qt_add_resources(Rift "rift_icons" PREFIX "/icons" FILES ui/assets/tray.png ui/a
 
 target_link_libraries(Rift PRIVATE
     Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Svg
-    rift_uiplugin rift_http rift_bt rift_core)
+    rift_uiplugin rift_appqt rift_http rift_bt rift_core)
 
 if(APPLE)
-    target_link_libraries(Rift PRIVATE "-framework IOKit" "-framework CoreFoundation")
     set_target_properties(Rift PROPERTIES
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/packaging/macos/Info.plist.in
         MACOSX_BUNDLE_GUI_IDENTIFIER app.rift.Rift
@@ -124,12 +152,6 @@ if(APPLE)
 elseif(UNIX)
     set_target_properties(Rift PROPERTIES OUTPUT_NAME rift)
 endif()
-
-# ---------------------------------------------------------------- native messaging host
-qt_add_executable(rift-native-host src/nativehost/main.cpp src/app/ipc.cpp src/app/ipc.hpp)
-target_include_directories(rift-native-host PRIVATE src)
-target_link_libraries(rift-native-host PRIVATE Qt6::Core Qt6::Network)
-set_target_properties(rift-native-host PROPERTIES MACOSX_BUNDLE OFF WIN32_EXECUTABLE OFF)
 
 # ---------------------------------------------------------------- install (Linux packages, AppImage)
 include(GNUInstallDirs)

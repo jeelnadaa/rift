@@ -200,7 +200,7 @@ Item {
             text: r.kind === "bt" ? r.seeds + "·" + r.peers : (r.conns > 0 ? qsTr("%n conn", "", r.conns) : "—")
             color: Theme.c.text3
             font.family: Theme.fontMono
-            font.pixelSize: 12.5
+            font.pixelSize: 12
         }
     }
 

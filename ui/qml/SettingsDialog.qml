@@ -82,7 +82,7 @@ Popup {
                     text: "Rift " + App.version
                     color: Theme.c.text3
                     font.family: Theme.fontMono
-                    font.pixelSize: 11.5
+                    font.pixelSize: 11
                 }
             }
             Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: Theme.c.line }

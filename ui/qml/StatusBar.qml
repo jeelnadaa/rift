@@ -41,7 +41,7 @@ Rectangle {
                 text: cell.text
                 color: Theme.c.text2
                 font.family: Theme.fontMono
-                font.pixelSize: 11.5
+                font.pixelSize: 11
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

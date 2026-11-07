@@ -18,6 +18,6 @@ Item {
         sourceSize: Qt.size(Math.ceil(root.implicitWidth * 3), Math.ceil(root.size * 3))
         smooth: true
         mipmap: true
-        source: "data:image/svg+xml;base64," + Qt.btoa(root.svg)
+        source: "data:image/svg+xml;utf8," + encodeURIComponent(root.svg)
     }
 }

@@ -99,7 +99,7 @@ Item {
                         text: modelData[1]
                         color: Theme.c.text3
                         font.family: Theme.fontUi
-                        font.pixelSize: 12.5
+                        font.pixelSize: 12
                         anchors.verticalCenter: parent.verticalCenter
                     }
                 }

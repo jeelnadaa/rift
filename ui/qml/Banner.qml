@@ -41,7 +41,7 @@ Rectangle {
         wrapMode: Text.Wrap
         color: Theme.c.text
         font.family: Theme.fontUi
-        font.pixelSize: 13.5
+        font.pixelSize: 13
     }
     Row {
         id: btns

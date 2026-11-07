@@ -16,7 +16,7 @@ Rectangle {
         text: k.kind === "bt" ? "TORRENT" : "HTTP"
         color: k.col
         font.family: Theme.fontMono
-        font.pixelSize: 9.5
+        font.pixelSize: 10
         font.weight: Font.Bold
         font.letterSpacing: 0.6
     }

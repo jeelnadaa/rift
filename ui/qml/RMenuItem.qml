@@ -42,7 +42,7 @@ MenuItem {
                 text: it.text
                 color: it.danger ? Theme.c.danger : Theme.c.text
                 font.family: Theme.fontUi
-                font.pixelSize: 13.5
+                font.pixelSize: 13
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -53,7 +53,7 @@ MenuItem {
             anchors.verticalCenter: parent.verticalCenter
             color: Theme.c.text3
             font.family: Theme.fontMono
-            font.pixelSize: 11.5
+            font.pixelSize: 11
         }
         Icon {
             visible: it.subMenu !== null

@@ -30,14 +30,14 @@ RMenu {
     RMenu {
         id: catSub
         title: qsTr("Category")
-        RMenuItem { text: qsTr("None"); checkable: true; checked: cm.one && !cm.d.category; onTriggered: App.setCategory(cm.sel, "") }
+        RMenuItem { text: qsTr("None"); checkable: true; checked: !!(cm.one && !cm.d.category); onTriggered: App.setCategory(cm.sel, "") }
         Instantiator {
             model: App.categories
             delegate: RMenuItem {
                 required property var modelData
                 text: modelData.name
                 checkable: true
-                checked: cm.one && cm.d.category === modelData.name
+                checked: !!(cm.one && cm.d.category === modelData.name)
                 onTriggered: App.setCategory(cm.sel, modelData.name)
             }
             onObjectAdded: (i, o) => catSub.insertItem(i + 1, o)
@@ -53,7 +53,7 @@ RMenu {
                 required property var modelData
                 text: "#" + modelData.name
                 checkable: true
-                checked: cm.one && cm.d.tags && cm.d.tags.indexOf(modelData.name) >= 0
+                checked: !!(cm.one && cm.d.tags && cm.d.tags.indexOf(modelData.name) >= 0)
                 onTriggered: App.toggleTag(cm.sel, modelData.name)
             }
             onObjectAdded: (i, o) => tagSub.insertItem(i, o)
@@ -70,7 +70,7 @@ RMenu {
         onTriggered: cm.win.pickFolder(function (p) { App.moveTo(cm.sel, p) })
     }
     Sep {}
-    RMenuItem { text: qsTr("Download in order"); checkable: true; visible: cm.bt; checked: cm.bt && cm.d.sequential
+    RMenuItem { text: qsTr("Download in order"); checkable: true; visible: cm.bt; checked: !!(cm.bt && cm.d.sequential)
         onTriggered: App.setSequential(cm.sel, !cm.d.sequential) }
     RMenuItem { text: qsTr("Force recheck"); iconName: "recheck"; visible: cm.bt || !cm.one; onTriggered: App.recheck(cm.sel) }
     RMenuItem { text: qsTr("Ask trackers for peers"); iconName: "refresh"; visible: cm.bt || !cm.one; onTriggered: App.reannounce(cm.sel) }

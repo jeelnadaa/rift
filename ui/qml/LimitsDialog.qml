@@ -38,18 +38,18 @@ RDialog {
         columnSpacing: 14
         rowSpacing: 10
         Cap { text: dlg.isGlobal ? qsTr("Normal") : qsTr("Limits"); Layout.columnSpan: 2 }
-        Text { text: qsTr("Download"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Download"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         NumField { id: down; suffix: "KB/s"; zeroText: qsTr("Unlimited"); to: 10000000; step: 100; tip: qsTr("0 means unlimited") }
-        Text { text: qsTr("Upload"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Upload"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         NumField { id: up; suffix: "KB/s"; zeroText: qsTr("Unlimited"); to: 10000000; step: 50; tip: qsTr("0 means unlimited") }
 
         Cap { visible: dlg.isGlobal; text: qsTr("Alternative (turtle)"); Layout.columnSpan: 2; Layout.topMargin: 8 }
-        Text { visible: dlg.isGlobal; text: qsTr("Download"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: dlg.isGlobal; text: qsTr("Download"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         NumField { id: altDown; visible: dlg.isGlobal; suffix: "KB/s"; zeroText: qsTr("Unlimited"); to: 10000000; step: 100; tip: qsTr("Used while Alt speed is on") }
-        Text { visible: dlg.isGlobal; text: qsTr("Upload"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: dlg.isGlobal; text: qsTr("Upload"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         NumField { id: altUp; visible: dlg.isGlobal; suffix: "KB/s"; zeroText: qsTr("Unlimited"); to: 10000000; step: 50; tip: qsTr("Used while Alt speed is on") }
 
-        Text { visible: !dlg.isGlobal; text: qsTr("Connections"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { visible: !dlg.isGlobal; text: qsTr("Connections"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         NumField { id: conns; visible: !dlg.isGlobal; from: 1; to: 32; tip: qsTr("Most parallel connections for direct links") }
     }
 

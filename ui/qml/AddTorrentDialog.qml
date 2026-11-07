@@ -129,7 +129,7 @@ RDialog {
                             elide: Text.ElideMiddle
                             color: dlg.picked[fd.index] ? Theme.c.text : Theme.c.text3
                             font.family: Theme.fontUi
-                            font.pixelSize: 13.5
+                            font.pixelSize: 13
                         }
                         Text {
                             text: App.fmtBytes(fd.modelData.size)
@@ -149,14 +149,14 @@ RDialog {
         columns: 2
         columnSpacing: 14
         rowSpacing: 10
-        Text { text: qsTr("Save to"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Save to"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
             Field { id: folder; Layout.fillWidth: true; iconName: "folder"; tip: qsTr("Folder for the downloaded files"); onTextEdited: dlg.folderTouched = true }
             Btn { text: qsTr("Browse…"); tip: qsTr("Choose a folder"); onClicked: dlg.win.pickFolder(function (p) { folder.text = p; dlg.folderTouched = true }) }
         }
-        Text { text: qsTr("Category"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13.5 }
+        Text { text: qsTr("Category"); color: Theme.c.text2; font.family: Theme.fontUi; font.pixelSize: 13 }
         Select {
             id: category
             Layout.preferredWidth: 220
@@ -183,7 +183,7 @@ RDialog {
         wrapMode: Text.Wrap
         color: Theme.c.text3
         font.family: Theme.fontUi
-        font.pixelSize: 12.5
+        font.pixelSize: 12
     }
 
     footerItems: [

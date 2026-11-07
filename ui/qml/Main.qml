@@ -299,7 +299,7 @@ ApplicationWindow {
     SettingsDialog { id: settingsDlg; win: root }
     CommandPalette { id: palette; win: root }
     AboutDialog { id: aboutDlg }
-    ContextMenu { id: ctxMenu; win: root }
+    RowMenu { id: ctxMenu; win: root }
 
     FileDialog {
         id: torrentPicker

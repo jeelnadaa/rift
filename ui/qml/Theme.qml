@@ -21,14 +21,14 @@ QtObject {
 
     // ---- Type scale (px) ------------------------------------------------------------
     readonly property QtObject type: QtObject {
-        readonly property real caption: 11.5
-        readonly property real small: 13
-        readonly property real body: 14
-        readonly property real num: 13
-        readonly property real title: 16
-        readonly property real section: 22
-        readonly property real page: 28
-        readonly property real display: 44
+        readonly property int caption: 11
+        readonly property int small: 13
+        readonly property int body: 14
+        readonly property int num: 13
+        readonly property int title: 16
+        readonly property int section: 22
+        readonly property int page: 28
+        readonly property int display: 44
     }
 
     // ---- Radius / sizes ----------------------------------------------------------------
