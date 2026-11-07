@@ -27,6 +27,7 @@
 #include <chrono>
 #include <map>
 #include <mutex>
+#include <set>
 #include <sstream>
 #include <thread>
 
@@ -39,7 +40,19 @@ namespace lt = libtorrent;
 #include <libtorrent/pread_disk_io.hpp>
 #define RIFT_LT21 1
 #endif
+// torrent_flags::default_dont_download is missing from older 2.0 releases (Ubuntu 22.04 has 2.0.5). Qualified lookup
+// only follows a namespace's using-directives when the name isn't declared there itself, so this zero fallback is
+// picked only when libtorrent lacks the flag; kHasDontDownload then routes to the manual path (see applyAddOptions).
+namespace rift_lt_compat {
+inline constexpr lt::torrent_flags_t default_dont_download{};
+}
+namespace libtorrent::torrent_flags {
+using namespace ::rift_lt_compat;
+}
+
 namespace {
+constexpr bool kHasDontDownload = lt::torrent_flags::default_dont_download != lt::torrent_flags_t{};
+
 const lt::file_storage &layoutOf(const lt::torrent_info &ti) {
 #ifdef RIFT_LT21
     return ti.layout();
@@ -179,6 +192,7 @@ struct Engine::Impl {
     SessionInfo info;
     std::chrono::steady_clock::time_point lastDht{};
     std::function<void(const std::string &, const std::vector<char> &)> *onResume = nullptr;
+    std::set<std::string> zeroOnMetadata; // magnets added "don't download" without the libtorrent flag (under mtx)
 
     lt::torrent_handle find(const std::string &id) const {
         std::lock_guard<std::mutex> lk(mtx);
@@ -224,6 +238,16 @@ void Engine::Impl::handle(lt::alert *a) {
         for (const lt::torrent_status &st : x->status) status[idOf(st.info_hashes)] = st;
     } else if (auto *x = lt::alert_cast<lt::metadata_received_alert>(a)) {
         const std::string id = idOf(x->handle.info_hashes());
+        bool zero = false;
+        {
+            std::lock_guard<std::mutex> lk(mtx);
+            zero = zeroOnMetadata.erase(id) > 0;
+        }
+        if (zero) {
+            if (auto ti = x->handle.torrent_file())
+                x->handle.prioritize_files(std::vector<lt::download_priority_t>(
+                    static_cast<std::size_t>(ti->num_files()), lt::dont_download));
+        }
         push({Event::Metadata, id, x->handle.status(lt::torrent_handle::query_name).name, {}});
         x->handle.save_resume_data(lt::torrent_handle::save_info_dict);
     } else if (auto *x = lt::alert_cast<lt::torrent_finished_alert>(a)) {
@@ -325,14 +349,24 @@ Engine::~Engine() {
 
 void Engine::apply(const Settings &s) { d->ses->apply_settings(makePack(s)); }
 
-static void applyAddOptions(lt::add_torrent_params &p, const Engine::AddOptions &o) {
+static void applyAddOptions(lt::add_torrent_params &p, const Engine::AddOptions &o, std::mutex &mtx,
+                            std::set<std::string> &zeroOnMetadata, const std::string &id) {
     p.save_path = o.savePath;
     if (o.paused) {
         p.flags |= lt::torrent_flags::paused;
         p.flags &= ~lt::torrent_flags::auto_managed;
     }
     if (o.sequential) p.flags |= lt::torrent_flags::sequential_download;
-    if (o.dontDownload) p.flags |= lt::torrent_flags::default_dont_download;
+    if (o.dontDownload) {
+        if constexpr (kHasDontDownload) {
+            p.flags |= lt::torrent_flags::default_dont_download;
+        } else if (p.ti) {
+            p.file_priorities.assign(static_cast<std::size_t>(p.ti->num_files()), lt::dont_download);
+        } else {
+            std::lock_guard<std::mutex> lk(mtx);
+            zeroOnMetadata.insert(id); // the metadata alert sets every file to 0 as soon as the file list exists
+        }
+    }
     if (!o.filePriorities.empty()) {
         p.file_priorities.clear();
         for (int v : o.filePriorities) p.file_priorities.push_back(lt::download_priority_t(static_cast<std::uint8_t>(v)));
@@ -346,7 +380,7 @@ std::string Engine::addMagnet(const std::string &magnet, const AddOptions &o, st
     if (ec) { error = "Not a valid magnet link: " + ec.message(); return {}; }
     const std::string id = idOf(p.info_hashes);
     if (has(id)) { error = "This torrent is already in the list"; return id; }
-    applyAddOptions(p, o);
+    applyAddOptions(p, o, d->mtx, d->zeroOnMetadata, id);
     d->ses->async_add_torrent(std::move(p));
     return id;
 }
@@ -359,7 +393,7 @@ std::string Engine::addTorrent(const std::vector<char> &data, const AddOptions &
     const std::string id = idOf(p.ti->info_hashes());
     if (has(id)) { error = "This torrent is already in the list"; return id; }
     d->remember(id, parsed.comment, parsed.creator);
-    applyAddOptions(p, o);
+    applyAddOptions(p, o, d->mtx, d->zeroOnMetadata, id);
     d->ses->async_add_torrent(std::move(p));
     return id;
 }
