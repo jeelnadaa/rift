@@ -13,6 +13,11 @@ RMenu {
 
     component Sep: MenuSeparator { contentItem: Rectangle { implicitHeight: 1; color: Theme.c.lineSoft } }
 
+    RMenuItem {
+        text: qsTr("Choose files…"); iconName: "list"
+        visible: cm.one && cm.d.state === "choose"
+        onTriggered: cm.win.openPick(cm.sel[0])
+    }
     RMenuItem { text: qsTr("Open"); iconName: "external"; enabled: cm.done; kbd: "Enter"; onTriggered: App.openFile(cm.sel[0]) }
     RMenuItem { text: qsTr("Show in folder"); iconName: "folderOpen"; enabled: cm.one; onTriggered: App.openFolder(cm.sel[0]) }
     Sep {}

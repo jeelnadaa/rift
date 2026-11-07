@@ -15,7 +15,7 @@ QVariantMap Settings::defaults() {
         {"speedUnits", "bytes"}, {"binaryUnits", false}, {"showSpeedInTitle", true},
         // Downloads
         {"savePath", dl}, {"incompletePath", ""}, {"useIncompletePath", false}, {"startPaused", false},
-        {"sequentialDefault", false}, {"deleteTorrentAfterAdd", false}, {"categoryFolders", false},
+        {"sequentialDefault", false}, {"deleteTorrentAfterAdd", false}, {"pickFiles", true}, {"categoryFolders", false},
         {"minFreeSpaceGB", 2},
         // Connection
         {"listenPort", 0}, {"upnp", true}, {"natpmp", true}, {"maxConnections", 500},

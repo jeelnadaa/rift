@@ -101,6 +101,7 @@ public:
         std::string savePath;
         bool paused = false, sequential = false, firstLast = false;
         std::vector<int> filePriorities;   // optional, by file index
+        bool dontDownload = false;         // every file starts at priority 0 (set when metadata arrives, for magnets)
         std::vector<std::string> trackers; // extra trackers
     };
     // Return the info-hash id on success; empty + error on failure. Adding is async: watch events.
@@ -119,6 +120,7 @@ public:
     void setSequential(const std::string &id, bool on);
     void setFirstLast(const std::string &id, bool on);
     void setFilePriority(const std::string &id, int index, int priority);
+    void setFilePriorities(const std::string &id, const std::vector<int> &priorities); // by file index
     void setLimits(const std::string &id, int down, int up);
     enum class QueueOp { Up, Down, Top, Bottom };
     void queue(const std::string &id, QueueOp op);

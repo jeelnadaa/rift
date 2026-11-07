@@ -6,12 +6,14 @@
 #include "storage.hpp"
 
 #include <QHash>
+#include <QSet>
 #include <QJsonObject>
 #include <QMutex>
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QPointer>
 #include <QSystemTrayIcon>
+#include <QThreadPool>
 #include <QTimer>
 #include <QVariantList>
 #include <memory>
@@ -60,6 +62,9 @@ class Controller : public QObject {
 
 public:
     Controller(const QString &dataDir, bool portable, QObject *parent = nullptr);
+    // Off for the smoke test (and CI): don't touch per-user OS state outside the data folder, i.e. the browser
+    // native-messaging registration and the launch-at-login entry, which belong to the installed Rift.
+    void setSystemIntegration(bool on) { m_systemIntegration = on; }
     ~Controller() override;
 
     bool start(QString *error);   // open storage, start engines, restore downloads
@@ -106,6 +111,11 @@ public:
     Q_INVOKABLE int addLinks(const QString &text, const QVariantMap &opts);
     Q_INVOKABLE QVariantMap inspectTorrent(const QString &pathOrUrl);
     Q_INVOKABLE bool addTorrentFile(const QString &pathOrUrl, const QVariantMap &opts);
+    // Choosing files before a torrent downloads (setting "pickFiles"). Torrents added without explicit file
+    // priorities start with every file skipped; requestPickFiles asks the UI to show the picker.
+    Q_INVOKABLE QVariantMap pickInfo(const QString &rowId);   // {ready, name, size, files:[{path,size}]}
+    Q_INVOKABLE bool confirmPick(const QString &rowId, const QVariantList &priorities);
+    Q_INVOKABLE void cancelPick(const QString &rowId);        // removes the torrent (nothing was downloaded)
     Q_INVOKABLE QVariantMap classify(const QString &text); // {magnets, urls, torrents, invalid, names[]}
     Q_INVOKABLE QString defaultFolderFor(const QString &category) const;
 
@@ -136,6 +146,7 @@ public:
     // Browser extension zips for this exact version on GitHub Releases:
     // {release: bool, chromium: url, firefox: url, chromiumFile, firefoxFile, page: url}
     Q_INVOKABLE QVariantMap extensionDownloads() const;
+    Q_INVOKABLE void setDarkFrame(bool dark);   // native title bar follows the app theme (Windows)
     Q_INVOKABLE void copyLinks(const QStringList &ids);
     Q_INVOKABLE void copyText(const QString &text);
     Q_INVOKABLE bool exportTorrent(const QString &id, const QString &path);
@@ -178,6 +189,7 @@ signals:
     void toast(const QString &text, const QString &kind, const QString &action);
     void requestAdd(const QString &text, const QVariantMap &meta);   // open the add dialog prefilled
     void requestAddTorrent(const QString &path);                     // open the torrent dialog
+    void requestPickFiles(const QString &rowId);                     // open the file picker for a torrent
     void showWindow();
     void quitRequested();
 
@@ -189,6 +201,10 @@ private:
     void arbitrate();
     void persistHttp(bool force);
     void refreshDetail();
+    void startBtDetail(const QString &id, const std::string &hash);
+    bool wantsPick(const QVariantMap &opts) const;
+    void beginPick(const QString &hash, bool pausedAfter);
+    void savePicks();
     void rebuildCounts();
     void handleBtEvents();
     void handleHttpTransitions();
@@ -219,6 +235,9 @@ private:
     QHash<qint64, QString> m_httpPrevState;
     QHash<QString, QString> m_btPrevState;
     QHash<QString, QString> m_btPending;            // hash → name while being added
+    bool m_systemIntegration = true;
+    QSet<QString> m_pick;                           // hashes waiting for the user to choose files
+    QSet<QString> m_pickPaused;                     // ... that should stay paused once chosen
     QMutex m_resumeMutex;
     QHash<QString, QByteArray> m_resumePending;     // filled on the libtorrent alert thread
 
@@ -239,6 +258,13 @@ private:
     QVariantMap m_detail;
     QVariantList m_files, m_peers, m_trackers, m_pieces;
     QString m_detailTab = QStringLiteral("overview");
+    // Torrent details (files, peers, trackers, pieces) are read from libtorrent on m_detailPool, never on the UI
+    // thread: those calls wait for libtorrent's network thread. One read at a time; results for a row/tab that
+    // is no longer shown are dropped.
+    QThreadPool m_detailPool;
+    bool m_detailBusy = false;
+    QString m_detailKey;                 // "<row id>|<tab>" the lists belong to
+    QHash<QString, QString> m_magnets;   // row id → magnet link, built once
     QString m_clipOffer, m_clipSeen;
     qint64 m_lastPersist = 0, m_lastResumeSave = 0, m_lastStats = 0, m_lastFree = 0, m_tickCount = 0;
     int64_t m_btLimitApplied = -1, m_httpLimitApplied = -1;

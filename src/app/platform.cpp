@@ -15,7 +15,10 @@
 #include <QUrl>
 
 #ifdef Q_OS_WIN
+#include <QGuiApplication>
+#include <QWindow>
 #include <windows.h>
+#include <dwmapi.h>
 #endif
 #ifdef Q_OS_MACOS
 #include <IOKit/pwr_mgt/IOPMLib.h>
@@ -231,7 +234,30 @@ void setLaunchAtLogin(bool on) {
 #endif
 }
 
+void setDarkTitleBar(bool dark) {
+#ifdef Q_OS_WIN
+    // Set directly through DWM: Qt 6.8's QStyleHints::setColorScheme would also do it, but leaves part of the
+    // app's palette-driven state stale. Attribute 20 is DWMWA_USE_IMMERSIVE_DARK_MODE (19 before Windows 10 20H1).
+    const BOOL on = dark ? TRUE : FALSE;
+    for (QWindow *w : QGuiApplication::topLevelWindows()) {
+        if (!w->handle()) continue;
+        const HWND hwnd = reinterpret_cast<HWND>(w->winId());
+        if (FAILED(DwmSetWindowAttribute(hwnd, 20, &on, sizeof on))) DwmSetWindowAttribute(hwnd, 19, &on, sizeof on);
+        // Repaint the frame now, not on the next activation change.
+        SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+    }
+#else
+    Q_UNUSED(dark);
+#endif
+}
+
 bool registerAppFontsWithSystem() {
+#if defined(Q_OS_WIN) && QT_VERSION < QT_VERSION_CHECK(6, 12, 0)
+    // Qt 6.8's DirectWrite font engine draws our variable fonts at one weight (bold, the wordmark and headings
+    // all come out regular). Its FreeType engine renders weights and the wdth/opsz axes correctly; 6.12's
+    // DirectWrite does too. QT_QPA_PLATFORM set by the user (or -platform) still wins.
+    if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM")) qputenv("QT_QPA_PLATFORM", "windows:fontengine=freetype");
+#endif
 #ifdef Q_OS_LINUX
     // Qt's own path (QFontDatabase::addApplicationFont → QFontconfigDatabase) segfaults with Qt 6.8 on
     // Ubuntu 22.04's fontconfig for our variable fonts. Instead, copy the fonts to a real folder and give the

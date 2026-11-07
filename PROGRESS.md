@@ -106,6 +106,7 @@ Tracked so nothing from PLAN.md is forgotten. Not started.
 - 2026-11-07: CI skips pushes that only touch docs (`*.md`), `rift-static/`, `brag-output/` or `wrangler.jsonc`; every build job uses a compiler cache (ccache, sccache on Windows).
 - 2026-11-07: Linux CI segfaulted in `QFontDatabase::addApplicationFont` (Qt 6.8 fontconfig backend, Ubuntu 22.04; backtrace via `scripts/ci-crash-report.sh`). On Linux the bundled fonts now go to fontconfig directly (`platform::registerAppFontsWithSystem`, before the app object exists).
 - 2026-11-07: The live site was still the 08:40 version (no deploys since). Added `.github/workflows/website.yml`: wrangler deploy on changes to `rift-static/`, once the two Cloudflare secrets are set.
+- 2026-11-07: Windows release (Qt 6.8.3) drew every Bricolage weight as regular; reproduced with Qt 6.8.3 MSVC (aqt into `build/qt683`) and fixed by selecting Qt's FreeType font engine on Windows for Qt < 6.12. Title bar follows the app theme on Windows (DWM dark mode; Qt 6.8's setColorScheme left theme colors stale), F11 / Ctrl+Cmd+F full screen. Responsiveness: libtorrent 2.1 uses pread_disk_io, torrent details are read off the UI thread (files only on the Files tab, magnet cached). New: choose files before a magnet/.torrent downloads (PickFilesDialog, setting `pickFiles`). `--smoke-test` no longer rewrites the browser native-host registration or launch-at-login.
 
 ### Resume note
 - 1.0 checklist complete. Local full build: put `C:\msys64\ucrt64\bin` first on PATH, then

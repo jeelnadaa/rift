@@ -156,7 +156,7 @@ QtObject {
         case "downloading": case "probing": return accent
         case "seeding": case "completed": return c.success
         case "streaming": return c.signal
-        case "stalled": return c.warning
+        case "stalled": case "choose": return c.warning
         case "checking": case "moving": case "metadata": return c.violet
         case "error": return c.danger
         case "scheduled": return c.info
@@ -166,6 +166,7 @@ QtObject {
     function stateLabel(s) {
         switch (s) {
         case "metadata": return qsTr("Fetching metadata")
+        case "choose": return qsTr("Choose files")
         case "probing": return qsTr("Connecting")
         case "checking": return qsTr("Checking")
         case "moving": return qsTr("Moving")

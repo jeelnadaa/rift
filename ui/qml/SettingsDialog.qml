@@ -282,6 +282,10 @@ Popup {
                     }
                 }
                 SettingRow {
+                    label: qsTr("Choose files before a torrent downloads")
+                    Toggle { checked: sd.s.pickFiles; tip: qsTr("Ask which files to download for every magnet link and .torrent"); onToggled: sd.set("pickFiles", checked) }
+                }
+                SettingRow {
                     label: qsTr("Add downloads paused")
                     Toggle { checked: sd.s.startPaused; tip: qsTr("Start paused"); onToggled: sd.set("startPaused", checked) }
                 }

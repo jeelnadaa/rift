@@ -27,7 +27,25 @@ ApplicationWindow {
     Binding { target: Theme; property: "density"; value: App.settings.density }
     Binding { target: Theme; property: "reducedMotion"; value: App.settings.reducedMotion }
 
+    // The window frame (title bar) follows the app's theme, not only the OS one (Windows 10/11).
+    function applyFrameScheme() { App.setDarkFrame(Theme.dark) }
+    Connections { target: Theme; function onDarkChanged() { root.applyFrameScheme() } }
+    onVisibilityChanged: Qt.callLater(applyFrameScheme) // the native window may be (re)created on show
+
+    // True full screen (no title bar or taskbar): F11 on Windows/Linux, Ctrl+Cmd+F on macOS.
+    property bool maxBeforeFullScreen: false
+    readonly property bool fullScreen: visibility === Window.FullScreen
+    function toggleFullScreen() {
+        if (fullScreen) {
+            if (maxBeforeFullScreen) showMaximized(); else showNormal()
+        } else {
+            maxBeforeFullScreen = visibility === Window.Maximized
+            showFullScreen()
+        }
+    }
+
     Component.onCompleted: {
+        applyFrameScheme()
         if (App.settings.winX >= 0 && App.settings.winY >= 0) { x = App.settings.winX; y = App.settings.winY }
         if (App.settings.winMax && !StartMinimized) showMaximized()
         App.list.filter = App.settings.lastFilter
@@ -35,8 +53,8 @@ ApplicationWindow {
         App.list.ascending = App.settings.sortAsc
     }
     function saveGeometry() {
-        App.settings.set("winMax", visibility === Window.Maximized)
-        if (visibility !== Window.Maximized && visibility !== Window.Minimized && visible) {
+        App.settings.set("winMax", visibility === Window.Maximized || (fullScreen && maxBeforeFullScreen))
+        if (visibility !== Window.FullScreen && visibility !== Window.Maximized && visibility !== Window.Minimized && visible) {
             App.settings.set("winW", width); App.settings.set("winH", height)
             App.settings.set("winX", x); App.settings.set("winY", y)
         }
@@ -73,6 +91,20 @@ ApplicationWindow {
     function openSettings(section) { settingsDlg.show(section) }
     function openAbout() { aboutDlg.open() }
     function openExtension() { extDlg.show() }
+    // File pickers queue up (several torrents added at once) and open one after another.
+    property var pickQueue: []
+    function openPick(rowId) {
+        if (pickDlg.visible && pickDlg.rowId === rowId) return
+        if (pickQueue.indexOf(rowId) < 0) pickQueue = pickQueue.concat([rowId])
+        nextPick()
+    }
+    function nextPick() {
+        if (pickDlg.visible || pickQueue.length === 0) return
+        var id = pickQueue[0]
+        pickQueue = pickQueue.slice(1)
+        bringToFront()
+        pickDlg.show(id)
+    }
     function openPalette() { palette.show() }
     function openContextMenu() { if (App.selection.length) ctxMenu.popup() }
     function pickFolder(cb) { folderCallback = cb; folderPicker.open() }
@@ -91,6 +123,7 @@ ApplicationWindow {
         target: App
         function onRequestAdd(text, meta) { root.openAdd(text, meta) }
         function onRequestAddTorrent(path) { root.bringToFront(); torrentDlg.show(path) }
+        function onRequestPickFiles(rowId) { root.openPick(rowId) }
         function onShowWindow() { root.bringToFront() }
         function onToast(text, kind, action) { toasts.show(text, kind, action) }
         function onQuitRequested() { root.quitting = true; root.saveGeometry() }
@@ -300,6 +333,7 @@ ApplicationWindow {
     CommandPalette { id: palette; win: root }
     AboutDialog { id: aboutDlg }
     ExtensionDialog { id: extDlg }
+    PickFilesDialog { id: pickDlg; onClosed: Qt.callLater(root.nextPick) }
     RowMenu { id: ctxMenu; win: root }
 
     FileDialog {
@@ -331,13 +365,14 @@ ApplicationWindow {
     }
 
     // ---- Shortcuts ------------------------------------------------------------------------
-    readonly property bool dialogOpen: addDlg.visible || torrentDlg.visible || removeDlg.visible || limitsDlg.visible
+    readonly property bool dialogOpen: addDlg.visible || torrentDlg.visible || pickDlg.visible || removeDlg.visible || limitsDlg.visible
                                        || promptDlg.visible || settingsDlg.visible || palette.visible || aboutDlg.visible
     Shortcut { sequences: [StandardKey.New]; onActivated: root.openAdd("", {}) }
     Shortcut { sequences: [StandardKey.Open]; onActivated: root.openTorrentPicker() }
     Shortcut { sequence: "Ctrl+K"; onActivated: root.openPalette() }
     Shortcut { sequence: "Ctrl+,"; onActivated: root.openSettings("") }
     Shortcut { sequence: "Ctrl+F"; enabled: root.page === "transfers"; onActivated: toolbar.searchField.forceActiveFocus() }
+    Shortcut { sequences: [StandardKey.FullScreen]; context: Qt.ApplicationShortcut; onActivated: root.toggleFullScreen() }
     Shortcut { sequence: "Ctrl+B"; onActivated: App.settings.set("sidebarVisible", !App.settings.sidebarVisible) }
     Shortcut { sequence: "Ctrl+I"; onActivated: App.settings.set("detailsVisible", !App.settings.detailsVisible) }
     Shortcut { sequence: "Ctrl+T"; onActivated: App.setAltSpeed(!App.settings.altSpeed) }
@@ -379,6 +414,7 @@ ApplicationWindow {
         palette.show(); palette.close()
         aboutDlg.open(); aboutDlg.close()
         extDlg.show(); extDlg.browser = "firefox"; extDlg.close(); extDlg.browser = "chromium"
+        pickDlg.show("t:mock"); pickDlg.close()
         toasts.show("Smoke test", "ok", "undo")
         App.settings.set("theme", "stone")
         App.settings.set("density", "compact")

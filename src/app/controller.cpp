@@ -88,6 +88,7 @@ bool Controller::start(QString *error) {
     if (!m_store.open(m_dataDir + "/rift.db", error)) return false;
 
     // Torrent engine
+    m_detailPool.setMaxThreadCount(1);
     const QByteArray state = m_store.blob("session_state");
     m_bt = std::make_unique<bt::Engine>(bt::Settings{}, std::vector<char>(state.begin(), state.end()));
     m_bt->onResumeData = [this](const std::string &id, const std::vector<char> &data) {
@@ -96,6 +97,8 @@ bool Controller::start(QString *error) {
     };
     applyBtSettings();
     for (const TorrentRecord &r : m_store.loadTorrents()) m_btRec.insert(r.id, r);
+    for (const QString &h : QString::fromUtf8(m_store.blob("pick_pending")).split(QLatin1Char(','), Qt::SkipEmptyParts))
+        if (m_btRec.contains(h)) m_pick.insert(h);
     for (const auto &[id, blob] : m_store.loadResume()) {
         std::string err;
         m_bt->addResume(std::vector<char>(blob.begin(), blob.end()), err);
@@ -132,7 +135,7 @@ bool Controller::start(QString *error) {
         m_http->add(req);
     }
 
-    platform::registerNativeHost();
+    if (m_systemIntegration) platform::registerNativeHost();
     setupTray();
     applySettings();
     m_timer.start(500);
@@ -155,6 +158,7 @@ void Controller::shutdown() {
         m_resumePending.clear();
     }
     m_store.addStats(m_statDown, m_statUp);
+    m_detailPool.waitForDone(); // a details read may still use m_bt
     m_bt.reset();
     m_http.reset();
     platform::preventSleep(false);
@@ -177,7 +181,8 @@ void Controller::applySettings(const QString &key) {
         arbitrate();
         if (m_altAction) m_altAction->setChecked(m_settings->b("altSpeed"));
     }
-    if (key.isEmpty() || key == QLatin1String("launchAtLogin")) platform::setLaunchAtLogin(m_settings->b("launchAtLogin"));
+    if (m_systemIntegration && (key.isEmpty() || key == QLatin1String("launchAtLogin")))
+        platform::setLaunchAtLogin(m_settings->b("launchAtLogin"));
     if (key == QLatin1String("savePath")) m_lastFree = 0;
 }
 
@@ -261,6 +266,7 @@ void Controller::tick() {
         r.name = t.hasMetadata ? q(t.name) : (rec.name.isEmpty() ? q(t.name) : rec.name);
         if (t.hasMetadata && rec.name != r.name) { rec.name = r.name; m_store.saveTorrent(rec); }
         r.state = q(t.state);
+        if (m_pick.contains(hash)) r.state = t.hasMetadata ? QStringLiteral("choose") : QStringLiteral("metadata");
         r.category = rec.category;
         r.tags = rec.tags;
         r.source = rec.source;
@@ -284,6 +290,7 @@ void Controller::tick() {
         r.queue = t.queuePos;
         r.isPrivate = t.isPrivate;
         r.sequential = t.sequential;
+        if (m_pick.contains(hash)) { r.progress = 0; r.done = 0; r.eta = -1; } // nothing chosen yet, not "100% of 0"
         btDown += t.down;
         btUp += t.up;
         // Seeding limit
@@ -467,9 +474,10 @@ void Controller::handleBtEvents() {
             emit toast(tr("Could not add torrent: %1").arg(q(e.message)), QStringLiteral("danger"), {});
             break;
         case bt::Event::Metadata:
+            m_magnets.remove(QStringLiteral("t:") + hash); // the name (dn=) is known now
             break;
         case bt::Event::Finished: {
-            if (!m_btRec.contains(hash)) break;
+            if (!m_btRec.contains(hash) || m_pick.contains(hash)) break; // nothing chosen yet, nothing finished
             TorrentRecord &rec = m_btRec[hash];
             if (rec.completedAt > 0) break; // already counted (e.g. a recheck)
             rec.completedAt = nowMs();
@@ -485,6 +493,7 @@ void Controller::handleBtEvents() {
             break;
         }
         case bt::Event::Removed:
+            if (m_pick.remove(hash)) { m_pickPaused.remove(hash); savePicks(); }
             break;
         case bt::Event::Moved:
             emit toast(tr("Moved to %1").arg(q(e.message)), QStringLiteral("ok"), {});
@@ -567,6 +576,7 @@ void Controller::setDetailTab(const QString &t) {
 void Controller::refreshDetail() {
     const Row *r = m_current.isEmpty() ? nullptr : row(m_current);
     if (!r) {
+        m_detailKey.clear();
         if (!m_detail.isEmpty()) {
             m_detail.clear(); m_files.clear(); m_peers.clear(); m_trackers.clear(); m_pieces.clear();
             emit detailChanged();
@@ -581,7 +591,12 @@ void Controller::refreshDetail() {
                   {"completed", r->completed}, {"availability", r->availability}, {"isPrivate", r->isPrivate},
                   {"sequential", r->sequential}, {"segs", r->segs}, {"source", r->source}, {"resumable", r->resumable},
                   {"queuePos", r->queue}};
-    m_files.clear(); m_peers.clear(); m_trackers.clear(); m_pieces.clear();
+    // Lists stay while the same row and tab are shown, so the view doesn't flicker between reads.
+    const QString key = r->id + QLatin1Char('|') + m_detailTab;
+    if (key != m_detailKey) {
+        m_detailKey = key;
+        m_files.clear(); m_peers.clear(); m_trackers.clear(); m_pieces.clear();
+    }
     if (r->kind == QLatin1String("bt")) {
         const std::string hash = u(r->id.mid(2));
         for (const bt::TorrentStatus &t : m_bt->snapshot()) {
@@ -593,28 +608,10 @@ void Controller::refreshDetail() {
             d.insert("savePath", q(t.savePath)); d.insert("tracker", q(t.currentTracker));
             break;
         }
-        if (m_detailTab == QLatin1String("files") || m_detailTab == QLatin1String("overview")) {
-            for (const bt::FileEntry &f : m_bt->files(hash))
-                m_files.push_back(QVariantMap{{"index", f.index}, {"path", q(f.path)}, {"size", static_cast<qint64>(f.size)},
-                                              {"done", static_cast<qint64>(f.done)}, {"priority", f.priority},
-                                              {"progress", f.size > 0 ? static_cast<double>(f.done) / static_cast<double>(f.size) : 1.0}});
-        }
-        if (m_detailTab == QLatin1String("peers")) {
-            for (const bt::Peer &p : m_bt->peers(hash))
-                m_peers.push_back(QVariantMap{{"ip", q(p.ip)}, {"port", p.port}, {"client", q(p.client)}, {"flags", q(p.flags)},
-                                              {"progress", p.progress}, {"down", p.down}, {"up", p.up}, {"utp", p.utp},
-                                              {"encrypted", p.encrypted}, {"seed", p.seed}});
-        }
-        if (m_detailTab == QLatin1String("trackers")) {
-            for (const bt::Tracker &t : m_bt->trackers(hash))
-                m_trackers.push_back(QVariantMap{{"url", q(t.url)}, {"status", q(t.status)}, {"message", q(t.message)},
-                                                 {"tier", t.tier}, {"seeds", t.seeds}, {"peers", t.peers}, {"downloaded", t.downloaded}});
-        }
-        if (m_detailTab == QLatin1String("overview")) {
-            for (uint8_t v : m_bt->pieceMap(hash, 120)) m_pieces.push_back(static_cast<int>(v));
-            d.insert("magnet", q(m_bt->magnet(hash)));
-        }
+        if (m_magnets.contains(r->id)) d.insert("magnet", m_magnets.value(r->id));
+        startBtDetail(r->id, hash);
     } else {
+        m_pieces.clear();
         const qint64 id = r->id.mid(2).toLongLong();
         const HttpRecord rec = m_httpRec.value(id);
         d.insert("url", rec.url);
@@ -653,6 +650,49 @@ void Controller::refreshDetail() {
     }
     m_detail = d;
     emit detailChanged();
+}
+
+void Controller::startBtDetail(const QString &id, const std::string &hash) {
+    if (m_detailBusy || !m_bt) return; // the running read will land; the next tick asks again
+    m_detailBusy = true;
+    const QString tab = m_detailTab;
+    const bool needMagnet = tab == QLatin1String("overview") && !m_magnets.contains(id);
+    bt::Engine *engine = m_bt.get();
+    m_detailPool.start([this, engine, id, hash, tab, needMagnet] {
+        QVariantList files, peers, trackers, pieces;
+        QString magnet;
+        if (tab == QLatin1String("files")) {
+            for (const bt::FileEntry &f : engine->files(hash))
+                files.push_back(QVariantMap{{"index", f.index}, {"path", q(f.path)}, {"size", static_cast<qint64>(f.size)},
+                                            {"done", static_cast<qint64>(f.done)}, {"priority", f.priority},
+                                            {"progress", f.size > 0 ? static_cast<double>(f.done) / static_cast<double>(f.size) : 1.0}});
+        } else if (tab == QLatin1String("peers")) {
+            for (const bt::Peer &p : engine->peers(hash))
+                peers.push_back(QVariantMap{{"ip", q(p.ip)}, {"port", p.port}, {"client", q(p.client)}, {"flags", q(p.flags)},
+                                            {"progress", p.progress}, {"down", p.down}, {"up", p.up}, {"utp", p.utp},
+                                            {"encrypted", p.encrypted}, {"seed", p.seed}});
+        } else if (tab == QLatin1String("trackers")) {
+            for (const bt::Tracker &t : engine->trackers(hash))
+                trackers.push_back(QVariantMap{{"url", q(t.url)}, {"status", q(t.status)}, {"message", q(t.message)},
+                                               {"tier", t.tier}, {"seeds", t.seeds}, {"peers", t.peers}, {"downloaded", t.downloaded}});
+        } else if (tab == QLatin1String("overview")) {
+            for (uint8_t v : engine->pieceMap(hash, 120)) pieces.push_back(static_cast<int>(v));
+            if (needMagnet) magnet = q(engine->magnet(hash));
+        }
+        QMetaObject::invokeMethod(this, [this, id, tab, needMagnet, files, peers, trackers, pieces, magnet] {
+            m_detailBusy = false;
+            if (needMagnet && !magnet.isEmpty()) m_magnets.insert(id, magnet);
+            if (m_detailKey != id + QLatin1Char('|') + tab) return; // selection or tab changed meanwhile
+            if (tab == QLatin1String("files")) m_files = files;
+            else if (tab == QLatin1String("peers")) m_peers = peers;
+            else if (tab == QLatin1String("trackers")) m_trackers = trackers;
+            else if (tab == QLatin1String("overview")) {
+                m_pieces = pieces;
+                if (needMagnet && !magnet.isEmpty()) m_detail.insert("magnet", magnet);
+            }
+            emit detailChanged();
+        }, Qt::QueuedConnection);
+    });
 }
 
 void Controller::select(const QStringList &ids, const QString &current) {
@@ -780,7 +820,10 @@ bool Controller::addMagnet(const QString &magnet, const QVariantMap &opts) {
     bt::Engine::AddOptions o;
     const QString cat = opts.value("category").toString();
     o.savePath = u(savePathFor(opts, cat));
-    o.paused = opts.contains("paused") ? opts.value("paused").toBool() : m_settings->b("startPaused");
+    const bool paused = opts.contains("paused") ? opts.value("paused").toBool() : m_settings->b("startPaused");
+    const bool pick = wantsPick(opts);
+    o.paused = paused && !pick; // a magnet must run to fetch its file list; nothing downloads until files are chosen
+    o.dontDownload = pick;
     o.sequential = opts.contains("sequential") ? opts.value("sequential").toBool() : m_settings->b("sequentialDefault");
     std::string err;
     const std::string id = m_bt->addMagnet(u(magnet), o, err);
@@ -797,6 +840,7 @@ bool Controller::addMagnet(const QString &magnet, const QVariantMap &opts) {
     m_btRec.insert(r.id, r);
     m_btPending.insert(r.id, magnet);
     m_store.saveTorrent(r);
+    if (pick) beginPick(r.id, paused);
     return true;
 }
 
@@ -804,7 +848,10 @@ bool Controller::addTorrentData(const QByteArray &data, const QVariantMap &opts,
     bt::Engine::AddOptions o;
     const QString cat = opts.value("category").toString();
     o.savePath = u(savePathFor(opts, cat));
-    o.paused = opts.contains("paused") ? opts.value("paused").toBool() : m_settings->b("startPaused");
+    const bool paused = opts.contains("paused") ? opts.value("paused").toBool() : m_settings->b("startPaused");
+    const bool pick = wantsPick(opts);
+    o.paused = paused && !pick;
+    o.dontDownload = pick;
     o.sequential = opts.contains("sequential") ? opts.value("sequential").toBool() : m_settings->b("sequentialDefault");
     for (const QVariant &v : opts.value("priorities").toList()) o.filePriorities.push_back(v.toInt());
     std::string err;
@@ -825,7 +872,88 @@ bool Controller::addTorrentData(const QByteArray &data, const QVariantMap &opts,
     m_btRec.insert(r.id, r);
     m_btPending.insert(r.id, source);
     m_store.saveTorrent(r);
+    if (pick) beginPick(r.id, paused);
     return true;
+}
+
+// ---- choosing files before a torrent downloads
+
+bool Controller::wantsPick(const QVariantMap &opts) const {
+    return m_settings->b("pickFiles") && !opts.contains("priorities") && !opts.value("noPick").toBool();
+}
+
+void Controller::beginPick(const QString &hash, bool pausedAfter) {
+    m_pick.insert(hash);
+    if (pausedAfter) m_pickPaused.insert(hash); else m_pickPaused.remove(hash);
+    savePicks();
+    emit requestPickFiles(QStringLiteral("t:") + hash);
+}
+
+void Controller::savePicks() {
+    m_store.setBlob("pick_pending", QStringList(m_pick.cbegin(), m_pick.cend()).join(QLatin1Char(',')).toUtf8());
+}
+
+QVariantMap Controller::pickInfo(const QString &rowId) {
+    const QString hash = rowId.startsWith(QLatin1String("t:")) ? rowId.mid(2) : rowId;
+    const Row *r = row(QStringLiteral("t:") + hash);
+    QVariantMap m{{"id", QStringLiteral("t:") + hash}, {"pending", m_pick.contains(hash)},
+                  {"name", r ? r->name : m_btRec.value(hash).name}};
+    bool ready = false;
+    for (const bt::TorrentStatus &t : m_bt->snapshot()) {
+        if (q(t.id) != hash) continue;
+        ready = t.hasMetadata;
+        m.insert("savePath", q(t.savePath));
+        break;
+    }
+    if (ready) {
+        // One read of the file list (the dialog asks once metadata is there), not on every tick.
+        QVariantList files;
+        qint64 total = 0;
+        for (const bt::FileEntry &f : m_bt->files(u(hash))) {
+            files.push_back(QVariantMap{{"index", f.index}, {"path", q(f.path)}, {"size", static_cast<qint64>(f.size)}});
+            total += static_cast<qint64>(f.size);
+        }
+        ready = !files.isEmpty();
+        m.insert("files", files);
+        m.insert("size", total);
+    }
+    m.insert("ready", ready);
+    return m;
+}
+
+bool Controller::confirmPick(const QString &rowId, const QVariantList &priorities) {
+    const QString hash = rowId.startsWith(QLatin1String("t:")) ? rowId.mid(2) : rowId;
+    if (!m_pick.contains(hash)) return false;
+    std::vector<int> pr;
+    bool any = false;
+    for (const QVariant &v : priorities) { pr.push_back(v.toInt()); any = any || v.toInt() > 0; }
+    if (!any) return false;
+    m_bt->setFilePriorities(u(hash), pr);
+    if (m_pickPaused.contains(hash)) m_bt->pause(u(hash));
+    m_pick.remove(hash);
+    m_pickPaused.remove(hash);
+    savePicks();
+    m_bt->saveResumeData(); // keep the choice across a crash
+    const QString name = m_btRec.value(hash).name;
+    emit toast(name.isEmpty() ? tr("Downloading the chosen files") : tr("Downloading %1").arg(name), QStringLiteral("ok"), {});
+    return true;
+}
+
+void Controller::cancelPick(const QString &rowId) {
+    const QString hash = rowId.startsWith(QLatin1String("t:")) ? rowId.mid(2) : rowId;
+    if (!m_pick.contains(hash)) return;
+    m_pick.remove(hash);
+    m_pickPaused.remove(hash);
+    savePicks();
+    m_bt->remove(u(hash), false); // no file was chosen, so none was written; never delete files here
+    m_btRec.remove(hash);
+    m_store.removeTorrent(hash);
+    if (m_current == QStringLiteral("t:") + hash || m_selection.contains(QStringLiteral("t:") + hash)) {
+        m_selection.clear();
+        m_current.clear();
+        emit selectionChanged();
+    }
+    emit toast(tr("Not added"), QStringLiteral("info"), {});
 }
 
 QVariantMap Controller::inspectTorrent(const QString &pathOrUrl) {
@@ -1127,6 +1255,8 @@ void Controller::openFileAt(const QString &id, const QString &relativePath) {
     const QString base = m_detail.value("savePath").toString();
     platform::openPath(QDir(base.isEmpty() ? QFileInfo(r->path).absolutePath() : base).filePath(relativePath));
 }
+
+void Controller::setDarkFrame(bool dark) { platform::setDarkTitleBar(dark); }
 
 QVariantMap Controller::extensionDownloads() const {
     // Release builds (x.y.z from CI) have matching extension zips attached to release vX.Y.Z.

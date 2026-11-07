@@ -158,7 +158,8 @@ FocusScope {
                     dl.selectRow(index, m.modifiers)
                 }
             }
-            onDoubleClicked: row.st === "completed" || row.st === "seeding" ? App.openFile(rid) : App.togglePause([rid])
+            onDoubleClicked: row.st === "choose" ? dl.win.openPick(rid)
+                           : row.st === "completed" || row.st === "seeding" ? App.openFile(rid) : App.togglePause([rid])
             onMenu: (x, y) => dl.win.openContextMenu()
 
             // fade-up on list change, staggered 22 ms

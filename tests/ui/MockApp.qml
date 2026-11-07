@@ -9,6 +9,7 @@ QtObject {
     signal toast(string text, string kind, string action)
     signal requestAdd(string text, var meta)
     signal requestAddTorrent(string path)
+    signal requestPickFiles(string rowId)
     signal showWindow()
     signal quitRequested()
 
@@ -85,6 +86,13 @@ QtObject {
                  exists: false, files: [{ index: 0, path: "a/b.mkv", size: 4e9 }, { index: 1, path: "a/c.srt", size: 2e5 }] }
     }
     function addTorrentFile(p, opts) { return true }
+    function pickInfo(id) {
+        return { id: id, pending: true, ready: true, name: "Sintel", size: 4.2e9, savePath: "D:/Downloads",
+                 files: [{ index: 0, path: "Sintel/sintel-4k.mkv", size: 4e9 }, { index: 1, path: "Sintel/sintel.en.srt", size: 2e5 },
+                         { index: 2, path: "Sintel/poster.jpg", size: 1.9e8 }] }
+    }
+    function confirmPick(id, pr) { return true }
+    function cancelPick(id) {}
     function classify(text) {
         var lines = text.split(/[\r\n]+/).filter(function (l) { return l.trim().length })
         var m = 0, u = 0, bad = 0, names = []
@@ -103,6 +111,7 @@ QtObject {
     function setCategory(ids, c) {} function toggleTag(ids, t) {} function setLimits(ids, d, u) {}
     function setConnections(ids, n) {} function moveTo(ids, f) {} function addTracker(id, url) {}
     function openFolder(id) {} function openFile(id) {} function openFileAt(id, p) {}
+    function setDarkFrame(dark) {}
     function extensionDownloads() {
         return { release: true, chromiumFile: "Rift-1.0.0-browser-chromium.zip", firefoxFile: "Rift-1.0.0-browser-firefox.zip",
                  chromium: "https://github.com/jeelnadaa/rift/releases/download/v1.0.0/Rift-1.0.0-browser-chromium.zip",

@@ -36,6 +36,7 @@ namespace lt = libtorrent;
 // and peer_info::ip; 2.0 (Ubuntu, Homebrew) lacks the replacements. These helpers pick the right one.
 #if LIBTORRENT_VERSION_NUM >= 20100
 #include <libtorrent/load_torrent.hpp>
+#include <libtorrent/pread_disk_io.hpp>
 #define RIFT_LT21 1
 #endif
 namespace {
@@ -306,7 +307,11 @@ Engine::Engine(const Settings &s, const std::vector<char> &state) : d(std::make_
         }
     }
     params.settings = makePack(s);
-#ifdef _WIN32
+#ifdef RIFT_LT21
+    // Multi-threaded pread/pwrite disk I/O: no mmap working-set growth on Windows (PLAN 4.4), and disk work stays
+    // off the network thread, so handle calls (status, peers, files) answer quickly during fast downloads.
+    params.disk_io_constructor = lt::pread_disk_io_constructor;
+#elif defined(_WIN32)
     params.disk_io_constructor = lt::posix_disk_io_constructor; // PLAN 4.4: avoids mmap working-set issues on Windows
 #endif
     d->ses = std::make_unique<lt::session>(std::move(params));
@@ -327,6 +332,7 @@ static void applyAddOptions(lt::add_torrent_params &p, const Engine::AddOptions 
         p.flags &= ~lt::torrent_flags::auto_managed;
     }
     if (o.sequential) p.flags |= lt::torrent_flags::sequential_download;
+    if (o.dontDownload) p.flags |= lt::torrent_flags::default_dont_download;
     if (!o.filePriorities.empty()) {
         p.file_priorities.clear();
         for (int v : o.filePriorities) p.file_priorities.push_back(lt::download_priority_t(static_cast<std::uint8_t>(v)));
@@ -441,6 +447,14 @@ void Engine::setFirstLast(const std::string &id, bool on) {
 void Engine::setFilePriority(const std::string &id, int index, int priority) {
     if (auto h = d->find(id); h.is_valid())
         h.file_priority(lt::file_index_t(index), lt::download_priority_t(static_cast<std::uint8_t>(priority)));
+}
+void Engine::setFilePriorities(const std::string &id, const std::vector<int> &priorities) {
+    auto h = d->find(id);
+    if (!h.is_valid()) return;
+    std::vector<lt::download_priority_t> p;
+    p.reserve(priorities.size());
+    for (int v : priorities) p.push_back(lt::download_priority_t(static_cast<std::uint8_t>(v)));
+    h.prioritize_files(p);
 }
 void Engine::setLimits(const std::string &id, int down, int up) {
     if (auto h = d->find(id); h.is_valid()) { h.set_download_limit(down); h.set_upload_limit(up); }

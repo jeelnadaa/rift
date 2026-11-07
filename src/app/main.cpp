@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
     if (smoke) g_prevHandler = qInstallMessageHandler(smokeHandler);
 
     Controller ctrl(dataDir, portable);
+    ctrl.setSystemIntegration(!smoke);
     QString error;
     if (!ctrl.start(&error)) {
         std::fprintf(stderr, "Rift could not start: %s\n", qPrintable(error));

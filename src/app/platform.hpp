@@ -25,8 +25,12 @@ void registerNativeHost();
 bool registerHandlers();
 bool isDefaultMagnetHandler();
 void setLaunchAtLogin(bool on);
-// Linux: hands the bundled fonts (:/fonts) to fontconfig. Call before the Q*Application exists. Returns true
-// when the system font list now includes them, so installAppFonts(true) must not add them again.
+// Windows 10/11: dark or light native title bar for every top-level window. No-op elsewhere (macOS and Linux
+// title bars follow the system / window manager).
+void setDarkTitleBar(bool dark);
+// Font setup that must happen before the Q*Application exists. Windows (Qt < 6.12): selects the FreeType font
+// engine, which renders our variable fonts' weights. Linux: hands the bundled fonts (:/fonts) to fontconfig.
+// Returns true when the system font list now includes them, so installAppFonts(true) must not add them again.
 bool registerAppFontsWithSystem();
 
 } // namespace platform

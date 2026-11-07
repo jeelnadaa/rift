@@ -32,6 +32,7 @@ Popup {
         { n: qsTr("Statistics"), i: "chart", k: "", run: function () { win.page = "stats" } },
         { n: qsTr("History"), i: "clock", k: "", run: function () { win.page = "history" } },
         { n: qsTr("Toggle sidebar"), i: "window", k: "Ctrl+B", run: function () { App.settings.set("sidebarVisible", !App.settings.sidebarVisible) } },
+        { n: win && win.fullScreen ? qsTr("Exit full screen") : qsTr("Full screen"), i: "window", k: Qt.platform.os === "osx" ? "Ctrl+Cmd+F" : "F11", run: function () { win.toggleFullScreen() } },
         { n: qsTr("Toggle details"), i: "info", k: "Ctrl+I", run: function () { App.settings.set("detailsVisible", !App.settings.detailsVisible) } },
         { n: qsTr("Theme: Stone (light)"), i: "sun", k: "", run: function () { App.settings.set("theme", "stone") } },
         { n: qsTr("Theme: Obsidian (dark)"), i: "moon", k: "", run: function () { App.settings.set("theme", "obsidian") } },

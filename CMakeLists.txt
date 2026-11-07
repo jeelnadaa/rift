@@ -58,6 +58,8 @@ target_include_directories(rift_appqt PUBLIC src)
 target_link_libraries(rift_appqt PUBLIC rift_core Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Widgets)
 if(APPLE)
     target_link_libraries(rift_appqt PUBLIC "-framework IOKit" "-framework CoreFoundation")
+elseif(WIN32)
+    target_link_libraries(rift_appqt PUBLIC dwmapi) # dark title bar (platform::setDarkTitleBar)
 elseif(UNIX)
     # Linux: the bundled fonts go to fontconfig directly (platform::registerAppFontsWithSystem says why).
     find_package(PkgConfig REQUIRED)
