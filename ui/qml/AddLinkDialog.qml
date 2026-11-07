@@ -85,10 +85,10 @@ RDialog {
             spacing: 8
             visible: links.text.trim().length > 0
             Repeater {
-                model: [[dlg.info.urls || 0, qsTr("%n direct link(s)", "", dlg.info.urls || 0), "link", Theme.c.kindHttp],
-                        [dlg.info.magnets || 0, qsTr("%n magnet(s)", "", dlg.info.magnets || 0), "magnet", Theme.kindTorrent],
-                        [dlg.info.torrents || 0, qsTr("%n torrent file(s)", "", dlg.info.torrents || 0), "fileTorrent", Theme.kindTorrent],
-                        [dlg.info.invalid || 0, qsTr("%n line(s) not understood", "", dlg.info.invalid || 0), "alert", Theme.c.warning]]
+                model: [[dlg.info.urls || 0, ((dlg.info.urls || 0) === 1 ? qsTr("1 direct link") : qsTr("%1 direct links").arg(dlg.info.urls || 0)), "link", Theme.c.kindHttp],
+                        [dlg.info.magnets || 0, ((dlg.info.magnets || 0) === 1 ? qsTr("1 magnet") : qsTr("%1 magnets").arg(dlg.info.magnets || 0)), "magnet", Theme.kindTorrent],
+                        [dlg.info.torrents || 0, ((dlg.info.torrents || 0) === 1 ? qsTr("1 torrent file") : qsTr("%1 torrent files").arg(dlg.info.torrents || 0)), "fileTorrent", Theme.kindTorrent],
+                        [dlg.info.invalid || 0, ((dlg.info.invalid || 0) === 1 ? qsTr("1 line not understood") : qsTr("%1 lines not understood").arg(dlg.info.invalid || 0)), "alert", Theme.c.warning]]
                 delegate: Row {
                     required property var modelData
                     visible: modelData[0] > 0

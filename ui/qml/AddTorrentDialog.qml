@@ -19,7 +19,7 @@ RDialog {
     }
 
     title: info.ok ? info.name : qsTr("Open torrent")
-    subtitle: info.ok ? qsTr("%1 · %n file(s)", "", (info.files || []).length).arg(App.fmtBytes(info.size)) : ""
+    subtitle: info.ok ? ((info.files || []).length === 1 ? qsTr("%1 · 1 file").arg(App.fmtBytes(info.size)) : qsTr("%1 · %2 files").arg(App.fmtBytes(info.size)).arg((info.files || []).length)) : ""
     iconName: "fileTorrent"
     dialogWidth: 760
 

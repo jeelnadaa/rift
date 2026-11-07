@@ -95,6 +95,9 @@ if(RIFT_UI_ONLY)
 endif()
 
 find_package(CURL REQUIRED)
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW) # libtorrent's config looks up Boost; use BoostConfig, not FindBoost
+endif()
 find_package(LibtorrentRasterbar CONFIG QUIET)
 if(TARGET LibtorrentRasterbar::torrent-rasterbar)
     set(RIFT_LIBTORRENT LibtorrentRasterbar::torrent-rasterbar)
@@ -110,6 +113,13 @@ target_link_libraries(rift_http PUBLIC rift_core CURL::libcurl)
 set_target_properties(rift_http PROPERTIES AUTOMOC OFF)
 
 add_library(rift_bt STATIC src/engine/torrent.cpp)
+# The engine targets libtorrent 2.0 (vcpkg, apt) and 2.1 (MSYS2, Homebrew). 2.1 deprecates some 2.0 APIs that
+# still work, so its deprecation warnings are silenced for this one file.
+if(MSVC)
+    target_compile_options(rift_bt PRIVATE /wd4996)
+else()
+    target_compile_options(rift_bt PRIVATE -Wno-deprecated-declarations)
+endif()
 target_link_libraries(rift_bt PUBLIC rift_core ${RIFT_LIBTORRENT})
 set_target_properties(rift_bt PROPERTIES AUTOMOC OFF)
 
