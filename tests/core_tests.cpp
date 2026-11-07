@@ -1,4 +1,5 @@
 // Unit tests for src/core. No framework: each CHECK prints the failing expression.
+#include "../src/core/arbiter.hpp"
 #include "../src/core/segments.hpp"
 #include "../src/core/speed.hpp"
 #include "../src/core/text.hpp"
@@ -164,7 +165,21 @@ static void testNames() {
     CHECK_EQ(magnetDisplayName(mg), std::string("Ubuntu 24.04 ISO"));
 }
 
+static void testArbiter() {
+    auto [a, b] = splitLimit(0, 5, 5);
+    CHECK(a == 0 && b == 0);
+    auto [t, h] = splitLimit(1'000'000, 0, 0);
+    CHECK_EQ(t + h, int64_t(1'000'000));
+    CHECK_EQ(h, int64_t(500'000));
+    auto [t2, h2] = splitLimit(1'000'000, 900'000, 100'000);
+    CHECK(t2 > h2 && h2 >= 150'000 && t2 + h2 == 1'000'000);
+    auto [t3, h3] = splitLimit(1'000'000, 0, 1'000'000);
+    CHECK_EQ(t3, int64_t(150'000));
+    CHECK_EQ(h3, int64_t(850'000));
+}
+
 int main() {
+    testArbiter();
     testRangeSet();
     testSchedulerSteal();
     testSchedulerTooSmall();
