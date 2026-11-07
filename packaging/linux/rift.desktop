@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Rift
+GenericName=Download Manager
+Comment=Torrents and direct downloads in one fast, calm window
+Exec=rift %U
+Icon=rift
+Terminal=false
+Categories=Network;FileTransfer;P2P;Qt;
+Keywords=torrent;magnet;download;bittorrent;http;
+MimeType=x-scheme-handler/magnet;application/x-bittorrent;
+StartupNotify=true
+StartupWMClass=rift

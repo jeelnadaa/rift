@@ -75,7 +75,13 @@ set(RIFT_APP_SOURCES
     src/app/platform.cpp src/app/platform.hpp)
 
 if(WIN32)
-    list(APPEND RIFT_APP_SOURCES packaging/windows/rift.rc packaging/windows/rift.manifest)
+    string(REPLACE "." ";" _rift_v "${RIFT_VERSION_NUMERIC}")
+    list(GET _rift_v 0 RIFT_VERSION_MAJOR)
+    list(GET _rift_v 1 RIFT_VERSION_MINOR)
+    list(GET _rift_v 2 RIFT_VERSION_PATCH)
+    set(RIFT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+    configure_file(packaging/windows/rift.rc.in ${CMAKE_CURRENT_BINARY_DIR}/generated/rift.rc @ONLY)
+    list(APPEND RIFT_APP_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/generated/rift.rc packaging/windows/rift.manifest)
 endif()
 
 set(MACOS_ICON "")

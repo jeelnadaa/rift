@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>app.rift.Rift</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Rift</name>
+  <summary>Torrents and direct downloads in one fast, calm window</summary>
+  <description>
+    <p>Rift downloads torrents, magnet links and direct HTTP/HTTPS/FTP links. Direct links are split
+    across several connections and resume after interruptions; torrents use libtorrent with DHT,
+    peer exchange and local discovery.</p>
+    <p>A browser extension for Chrome, Edge, Brave and Firefox sends downloads straight to Rift.</p>
+  </description>
+  <launchable type="desktop-id">rift.desktop</launchable>
+  <url type="homepage">https://rift.app</url>
+  <url type="bugtracker">https://github.com/jeelnadaa/rift/issues</url>
+  <developer id="app.rift"><name>Rift contributors</name></developer>
+  <content_rating type="oars-1.1"/>
+  <provides><binary>rift</binary></provides>
+  <categories><category>Network</category><category>FileTransfer</category><category>P2P</category></categories>
+</component>
