@@ -380,7 +380,19 @@ The public site lives in **[rift-static/](rift-static)**. It is plain HTML/CSS/J
 ### Local preview
 
 ```bash
-python -m http.server 5174 --directory rift-static
+python scripts/serve-static.py
 ```
 
-Locally, use `/download.html`; Cloudflare serves it at `/download`.
+This serves `rift-static/` at http://127.0.0.1:5174 the way Cloudflare Pages does: clean URLs (`/download`), `.html` → clean-URL redirects, `_redirects` rules, the custom `404.html`, and no caching. Plain `python -m http.server` can't do clean URLs, so `/download` gives a bare 404 there.
+
+### Site colors
+
+The site uses the app palette:
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `--cobalt` | `#1E46D8` | `#4C7DFF` | primary buttons, logo, links |
+| `--press` | `#142E94` | `#2F5BE0` | hover and press fill on blue buttons |
+| `--signal` | `#1838B5` | `#8FAEFF` | highlight text: serif accents, labels, cursor |
+| `--steel` | `#1F7F86` | `#5EC4C4` | upload speed, direct-link badges |
+| `--danger` | `#B32638` | `#F0596A` | kill switch demo, checksum mismatch |

@@ -79,7 +79,7 @@
 .nm small{display:block;font-family:var(--mono);font-size:.7rem;color:var(--void-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kind{font-family:var(--mono);font-size:.66rem;font-weight:700;padding:3px 7px;border-radius:5px;justify-self:start;letter-spacing:.04em}
 .kind.bt{background:rgba(76,125,255,.18);color:var(--cobalt)}
-.kind.http{background:rgba(229,138,87,.16);color:var(--steel)}
+.kind.http{background:rgba(94,196,196,.14);color:var(--steel)}
 .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;position:relative}
 .bar>i{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:var(--cobalt)}
 .bar.done>i{background:var(--green)}
@@ -180,12 +180,12 @@ section.blk{padding:clamp(80px,12vw,180px) 0;position:relative}
 /* ---- Kill switch ---- */
 .ks{padding:clamp(18px,2.4vw,28px)}
 .ks-state{padding:22px;border-radius:14px;border:1px solid var(--void-line);background:rgba(255,255,255,.03);transition:background .4s,border-color .4s}
-.ks.drop .ks-state{background:rgba(229,138,87,.09);border-color:var(--signal)}
+.ks.drop .ks-state{background:rgba(240,89,106,.09);border-color:var(--danger)}
 .ks-t{font-size:clamp(1.8rem,3.6vw,3rem);font-weight:750;letter-spacing:-.04em;line-height:1;font-variation-settings:"wdth" 85;transition:color .3s}
 .ks.drop .ks-t{color:var(--steel)}
 .ks-m{display:flex;align-items:center;gap:10px;margin-top:12px;font-family:var(--mono);font-size:.82rem;color:var(--void-mute)}
 .ks-m i{width:11px;height:11px;border-radius:50%;background:var(--green);transition:background .3s}
-.ks.drop .ks-m i{background:var(--signal)}
+.ks.drop .ks-m i{background:var(--danger)}
 .ks-rows{margin-top:14px;display:flex;flex-direction:column;gap:6px}
 .ks-rows div{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.76rem;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.03);transition:opacity .3s,color .3s}
 .ks.drop .ks-rows div{color:var(--void-mute)}
@@ -608,7 +608,7 @@ if (RM) {
       const dxp = x - pt.x, dyp = p.y - pt.y, d2 = dxp * dxp + dyp * dyp;
       if (d2 < 16000) x += dxp / Math.sqrt(d2 + 1) * 18;
       const a = .35 + .65 * (1 - Math.abs(p.off) * 1.6);
-      c.fillStyle = p.hue < .55 ? `rgba(76,125,255,${a})` : p.hue < .85 ? `rgba(229,138,87,${a})` : `rgba(236,236,231,${a * .8})`;
+      c.fillStyle = p.hue < .55 ? `rgba(76,125,255,${a})` : p.hue < .85 ? `rgba(143,174,255,${a})` : `rgba(236,236,231,${a * .8})`;
       c.fillRect(x, p.y, p.s, p.s * (2 + p.v * 1.5));
     }
   })();
@@ -696,7 +696,7 @@ paint();
 /* ---------- Lanes: dynamic segmentation simulation ---------- */
 (() => {
   const cv = $('#laneCv'), c = cv.getContext('2d');
-  const COLORS = ['#4C7DFF', '#E58A57', 'var(--green)', '#C38BEA', '#F0924A', '#6CC4C9', '#E98AA8', '#B9C07A', '#ECEEF3'];
+  const COLORS = ['#4C7DFF', '#5EC4C4', 'var(--green)', '#C38BEA', '#F0924A', '#D6B072', '#E98AA8', '#B9C07A', '#ECEEF3'];
   const SIZE = 1200, MINSEG = 6, LINE = 10, PER = 1.25, MAXC = 9;
   let throttle = true, segs, conns, t, nextAdd, lastTotal, stopped, note, firstSpeed, done, vis = false, raf;
   const W = () => cv.clientWidth, H = () => cv.clientHeight;
