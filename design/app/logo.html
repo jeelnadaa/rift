@@ -12,7 +12,7 @@
 .opt h3{margin:0 0 4px;font-size:22px;letter-spacing:-.03em}
 .opt p{margin:0 0 16px;color:var(--text2);max-width:60ch}
 .tile{width:160px;height:160px;border-radius:36px;display:grid;place-items:center;position:relative;overflow:hidden;
-  background:#0B0A09;box-shadow:0 24px 50px -24px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,244,225,.07)}
+  background:#07080B;box-shadow:0 24px 50px -24px rgba(0,0,0,.7),inset 0 0 0 1px rgba(225,232,255,.07)}
 .tile svg{width:96px;height:96px}
 .tile.light{background:#F4F1EA;box-shadow:inset 0 0 0 1px rgba(23,20,15,.08)}
 .row{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
@@ -49,16 +49,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   const m = (st, sz = '') => `<svg viewBox="0 0 64 64" style="${st}${sz}"><use href="#E"/></svg>`;
   document.getElementById('opts').innerHTML = `<section class="scr" id="orb" data-t="Split orb"><div class="opt">
-    <div class="tile">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
-    <div><span class="pick">CHOSEN</span><h3>Split orb</h3><p>A tall, slim disc cut once on a steep diagonal; the two halves slide apart along the cut, like ground shifting along a fault. Two flat colors, no gradients or glow: warm ivory and muted brass on near-black, or ink and bronze on paper. The mark is 17 × 28 units, so it stays crisp from a 16 px favicon to a 512 px app icon.</p>
+    <div class="tile">${m('--l:#ECEEF3;--r:#4C7DFF;')}</div>
+    <div><span class="pick">CHOSEN</span><h3>Split orb</h3><p>A tall, slim disc cut once on a steep diagonal; the two halves slide apart along the cut, like ground shifting along a fault. Two flat colors, no gradients or glow: soft white and cobalt blue on ink-black, or ink and deep cobalt on paper. The mark is 17 × 28 units, so it stays crisp from a 16 px favicon to a 512 px app icon.</p>
       <div class="row">
-        <div class="tile light" style="width:96px;height:96px;border-radius:22px">${m('--l:#17140F;--r:#8E6119;', 'width:58px;height:58px')}</div>
-        <div class="tile sm">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
-        <div class="tile xs">${m('--l:#EDE8DF;--r:#C9A15E;')}</div>
+        <div class="tile light" style="width:96px;height:96px;border-radius:22px">${m('--l:#17140F;--r:#1E46D8;', 'width:58px;height:58px')}</div>
+        <div class="tile sm">${m('--l:#ECEEF3;--r:#4C7DFF;')}</div>
+        <div class="tile xs">${m('--l:#ECEEF3;--r:#4C7DFF;')}</div>
         <span class="mono-mark">${m('--l:currentColor;--r:currentColor;opacity:1;')}</span>
         <span class="word">${m('--l:var(--text);--r:var(--accent);')}Rift</span>
       </div>
-      <dl class="kv" style="margin-top:18px"><dt>Geometry</dt><dd class="mono">ellipse rx 17 ry 28 · cut (39.24, 6.66)→(24.76, 57.34) · halves offset ∓(1.1, 4.6)</dd><dt>Dark</dt><dd class="mono">ivory #EDE8DF + brass #C9A15E on #0B0A09</dd><dt>Light</dt><dd class="mono">ink #17140F + bronze #8E6119 on #F4F1EA</dd><dt>In the UI</dt><dd class="mono">left = currentColor (text), right = accent</dd></dl>
+      <dl class="kv" style="margin-top:18px"><dt>Geometry</dt><dd class="mono">ellipse rx 17 ry 28 · cut (39.24, 6.66)→(24.76, 57.34) · halves offset ∓(1.1, 4.6)</dd><dt>Dark</dt><dd class="mono">white #ECEEF3 + cobalt #4C7DFF on #07080B</dd><dt>Light</dt><dd class="mono">ink #17140F + cobalt #1E46D8 on #F4F1EA</dd><dt>In the UI</dt><dd class="mono">left = currentColor (text), right = accent</dd></dl>
     </div></div></section>`;
 });
 </script>

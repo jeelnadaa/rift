@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   sc.innerHTML = '<span></span>' + Array.from({ length: 24 }, (_, h) => `<span class="hd">${h % 3 ? '' : h}</span>`).join('') +
     ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, di) => `<span class="dy">${d}</span>` + Array.from({ length: 24 }, (_, h) => `<i class="${h >= 9 && h < 18 && di < 5 ? 'alt' : h >= 1 && h < 6 && di === 2 ? 'off' : ''}" title="${d} ${h}:00"></i>`).join('')).join('');
   // Accent picker mirrors the prototype toolbar picker
-  const accs = { cobalt: '#B8873A', signal: '#2D669E', green: '#1C7A58', violet: '#7F4BB3', teal: '#2A8A8F', rose: '#B34A6E' };
+  const accs = { cobalt: '#4C7DFF', champagne: '#D6B072', jade: '#4CC89A', teal: '#5EC4C4', orchid: '#C38BEA', ember: '#EE8A5E' };
   document.getElementById('accp').innerHTML = Object.entries(accs).map(([k, v], i) => `<button style="--c:${v}" aria-label="${k}" aria-pressed="${!i}"></button>`).join('');
   hydrate(document.getElementById('sw')); behaviors(document.getElementById('sw'));
 });

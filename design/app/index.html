@@ -54,7 +54,7 @@
     <div class="demo" id="states"></div>
     <h4 class="cap" style="margin:22px 0 10px">Accent choices (Settings → Appearance)</h4>
     <div class="demo">
-      <span class="chip" style="--c:#B8873A"><i></i>Cobalt (default)</span><span class="chip" style="--c:#2D669E"><i></i>Signal</span><span class="chip" style="--c:#1C7A58"><i></i>Green</span>
+      <span class="chip" style="--c:#2F5BE0"><i></i>Cobalt (default)</span><span class="chip" style="--c:#1F7F86"><i></i>Signal</span><span class="chip" style="--c:#1C7A58"><i></i>Green</span>
       <span class="chip" style="--c:#7F4BB3"><i></i>Violet</span><span class="chip" style="--c:#2A8A8F"><i></i>Teal</span><span class="chip" style="--c:#B34A6E"><i></i>Rose</span>
     </div>
     <div class="notes">
@@ -143,7 +143,7 @@
       <div class="demo" id="badgeRow"></div>
       <div class="demo"><span class="kind bt">TORRENT</span><span class="kind http">HTTP</span><span class="kind http">FTP</span><span class="priv">PRIVATE</span><span class="flag">DE</span><span class="flag">JP</span>
         <span class="health h3" title="Healthy"><i></i><i></i><i></i></span><span class="health h2" title="Slow"><i></i><i></i><i></i></span><span class="health h1" title="Dead"><i></i><i></i><i></i></span></div>
-      <div class="demo"><span class="chip" style="--c:#B8873A"><i></i>linux</span><span class="chip" style="--c:#1C7A58"><i></i>keep-seeding</span><span class="chip" style="--c:#2D669E"><i></i>4k<span class="x">✕</span></span><span class="chip" style="--c:#7F4BB3"><i></i>dead-tracker</span></div>
+      <div class="demo"><span class="chip" style="--c:#2F5BE0"><i></i>linux</span><span class="chip" style="--c:#1C7A58"><i></i>keep-seeding</span><span class="chip" style="--c:#1F7F86"><i></i>4k<span class="x">✕</span></span><span class="chip" style="--c:#7F4BB3"><i></i>dead-tracker</span></div>
     </div>
   </section>
 
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('typeScale').innerHTML = ts.map(([a, b2, c]) => `<div class="type-row"><div><b class="mono" style="font-size:12.5px">${a}</b><div class="help">${b2}</div></div><div>${c}</div></div>`).join('');
   document.getElementById('spaces').innerHTML = [2,4,6,8,12,16,20,24,32,40,48].map((v) => `<div style="width:${v}px;height:${v}px">${v >= 16 ? v : ''}</div>`).join('') + '<span class="help">2 · 4 · 6 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48</span>';
   document.getElementById('iconGrid').innerHTML = Object.keys(ICON).map((k) => `<div>${ico(k)}<span>${k}</span></div>`).join('');
-  const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+  const segc = ['#4C7DFF','#5EC4C4','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
   document.getElementById('segDemo').innerHTML = segc.map((c, i) => `<span><i style="--c:${c};width:${[90,70,100,55,80,40,95,62][i]}%"></i></span>`).join('');
   let p = ''; for (let i = 0; i < 120; i++) { const r = Math.sin(i * 12.9898) * 43758.5; const f = r - Math.floor(r); p += `<i class="${i < 40 || f < .5 ? 'h' : f < .58 ? 'a' : (i > 60 && i < 68) ? 'p' : ''}"></i>`; }
   document.getElementById('pbarDemo').innerHTML = p; document.getElementById('pgridDemo').innerHTML = p;

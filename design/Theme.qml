@@ -76,7 +76,7 @@ QtObject {
     }
 
     // ---- Colors ---------------------------------------------------------------
-    // Stone: warm paper and ink. Obsidian: near-black with warm ivory text.
+    // Stone: warm paper and ink. Obsidian: cool ink-black with soft white text.
     readonly property QtObject stone: QtObject {
         readonly property color window: "#EEEBE4"; readonly property color sidebar: "#E6E2D8"
         readonly property color surface: "#F6F4EE"; readonly property color raised: "#FCFBF8"
@@ -90,52 +90,52 @@ QtObject {
         readonly property color text: "#17140F"; readonly property color text2: "#575045"; readonly property color text3: "#857D70"
         readonly property color signal: "#7F4BB3"; readonly property color success: "#1C7A58"
         readonly property color warning: "#B85F1A"; readonly property color danger: "#B32638"
-        readonly property color violet: "#55607F"; readonly property color info: "#2D669E"
-        readonly property color down: "#1C7A58"; readonly property color up: "#2D669E"
-        readonly property color kindHttp: "#2D669E"
+        readonly property color violet: "#55607F"; readonly property color info: "#1F7F86"
+        readonly property color down: "#1C7A58"; readonly property color up: "#1F7F86"
+        readonly property color kindHttp: "#1F7F86"
         readonly property color pieceMissing: Qt.rgba(23/255, 20/255, 15/255, 0.08)
         readonly property color shadow: Qt.rgba(40/255, 30/255, 15/255, 0.16)
         readonly property color onAccent: "#FFFFFF"
     }
     readonly property QtObject obsidian: QtObject {
-        readonly property color window: "#060607"; readonly property color sidebar: "#09090B"
-        readonly property color surface: "#0C0C0E"; readonly property color raised: "#131316"
-        readonly property color sunken: "#030304"; readonly property color input: "#0A0A0C"
+        readonly property color window: "#050608"; readonly property color sidebar: "#08090C"
+        readonly property color surface: "#0B0C10"; readonly property color raised: "#12141A"
+        readonly property color sunken: "#020304"; readonly property color input: "#090A0E"
         readonly property color overlay: Qt.rgba(0, 0, 0, 0.66)
-        readonly property color hover: Qt.rgba(1, 244/255, 225/255, 0.045)
-        readonly property color pressed: Qt.rgba(1, 244/255, 225/255, 0.085)
-        readonly property color line: Qt.rgba(1, 244/255, 225/255, 0.085)
-        readonly property color lineSoft: Qt.rgba(1, 244/255, 225/255, 0.045)
-        readonly property color lineStrong: "#EDE8DF"
-        readonly property color text: "#EDE8DF"; readonly property color text2: "#A59F94"; readonly property color text3: "#6D685F"
+        readonly property color hover: Qt.rgba(225/255, 232/255, 1, 0.045)
+        readonly property color pressed: Qt.rgba(225/255, 232/255, 1, 0.085)
+        readonly property color line: Qt.rgba(225/255, 232/255, 1, 0.085)
+        readonly property color lineSoft: Qt.rgba(225/255, 232/255, 1, 0.045)
+        readonly property color lineStrong: "#ECEEF3"
+        readonly property color text: "#ECEEF3"; readonly property color text2: "#A2A7B3"; readonly property color text3: "#6A707C"
         readonly property color signal: "#C38BEA"; readonly property color success: "#4CC89A"
         readonly property color warning: "#F0924A"; readonly property color danger: "#F0596A"
-        readonly property color violet: "#9AA3C7"; readonly property color info: "#78A9E0"
-        readonly property color down: "#4CC89A"; readonly property color up: "#78A9E0"
-        readonly property color kindHttp: "#78A9E0"
-        readonly property color pieceMissing: Qt.rgba(1, 244/255, 225/255, 0.06)
+        readonly property color violet: "#9AA3C7"; readonly property color info: "#5EC4C4"
+        readonly property color down: "#4CC89A"; readonly property color up: "#5EC4C4"
+        readonly property color kindHttp: "#5EC4C4"
+        readonly property color pieceMissing: Qt.rgba(225/255, 232/255, 1, 0.06)
         readonly property color shadow: Qt.rgba(0, 0, 0, 0.7)
-        readonly property color onAccent: "#120F09"
+        readonly property color onAccent: "#FFFFFF"
     }
 
     // Active palette. Each accent has a hand-tuned light and dark value.
     readonly property QtObject c: dark ? obsidian : stone
-    property string accentName: "champagne"   // user picks in Appearance
+    property string accentName: "cobalt"   // user picks in Appearance
     readonly property var accents: ({
-        champagne: ["#8E6119", "#D6B072"], jade: ["#1C7A58", "#4CC89A"], steel: ["#2D669E", "#78A9E0"],
-        orchid: ["#7F4BB3", "#C38BEA"], ember: ["#B4532A", "#EE8A5E"], graphite: ["#2B2A27", "#E9E4DA"] })
+        cobalt: ["#1E46D8", "#4C7DFF"], champagne: ["#8E6119", "#D6B072"], jade: ["#1C7A58", "#4CC89A"],
+        teal: ["#1F7F86", "#5EC4C4"], orchid: ["#7F4BB3", "#C38BEA"], ember: ["#B4532A", "#EE8A5E"] })
     readonly property color accent: accents[accentName][dark ? 1 : 0]
     readonly property color accentHover: dark ? Qt.lighter(accent, 1.12) : Qt.darker(accent, 1.14)
     readonly property color accentPressed: Qt.darker(accent, dark ? 1.14 : 1.3)
     readonly property color accentSoft: Qt.rgba(accent.r, accent.g, accent.b, dark ? 0.14 : 0.12)
     readonly property color selection: Qt.rgba(accent.r, accent.g, accent.b, dark ? 0.16 : 0.15)
-    readonly property color onAccent: c.onAccent
+    readonly property color onAccent: (0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b) > 0.6 ? "#0B0C10" : "#FFFFFF"
     readonly property color focus: accent
     readonly property color kindTorrent: accent
     function soft(col) { return Qt.rgba(col.r, col.g, col.b, dark ? 0.14 : 0.12) }
 
-    readonly property var tagPalette: ["#B8873A", "#2D669E", "#1C7A58", "#7F4BB3", "#2A8A8F", "#B34A6E", "#B85F1A", "#575045"]
-    readonly property var connectionPalette: ["#D6B072", "#78A9E0", "#4CC89A", "#C38BEA", "#F0924A", "#6CC4C9", "#E98AA8", "#B9C07A"]
+    readonly property var tagPalette: ["#2F5BE0", "#1F7F86", "#1C7A58", "#7F4BB3", "#2A8A8F", "#B34A6E", "#B85F1A", "#575045"]
+    readonly property var connectionPalette: ["#4C7DFF", "#5EC4C4", "#4CC89A", "#C38BEA", "#F0924A", "#D6B072", "#E98AA8", "#B9C07A"]
 
     // Torrent/download state -> color
     function stateColor(s) {

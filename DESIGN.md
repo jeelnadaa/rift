@@ -29,7 +29,7 @@ Open the prototype by serving the repo root (`python -m http.server 5173`) and v
 
 1. **Honest numbers.** Every speed shown is measured payload. The rows add up to the status-bar total, idle shows `0` within 2 s, and a limit is always shown as context ("4.9 of 5 MB/s"). Never animate a number to look faster.
 2. **Quiet chrome, loud data.** Surfaces are near-neutral and warm; color is reserved for state (downloading, seeding, error) and the single accent.
-3. **One accent.** Champagne (dark) / bronze (light) by default. The other hues are semantic, never decorative. No neon, no glow, no rainbow gradients.
+3. **One accent.** Cobalt blue by default. The other hues are semantic, never decorative. No neon, no glow, no rainbow gradients.
 4. **Everything explains itself.** Every control has a tooltip; disabled items stay visible with a reason; errors say what happened and what to do.
 5. **Motion is feedback, not decoration.** Short, springy, meaningful, and fully disabled by reduced-motion.
 6. **Roomy, not sparse.** 46 px list rows, 36 px sidebar items, 14 px text. Density is a user choice (compact / comfortable), never a cramped default.
@@ -38,47 +38,47 @@ Open the prototype by serving the repo root (`python -m http.server 5173`) and v
 
 ## 2. Color
 
-Two themes: **Stone** (light, warm paper and ink) and **Obsidian** (dark, near-black with warm ivory text). "System" follows the OS.
+Two themes: **Stone** (light, warm paper and ink) and **Obsidian** (dark, cool ink-black with soft white text). "System" follows the OS.
 
 ### Surfaces and text
 
 | Token | Stone | Obsidian | Use |
 |---|---|---|---|
-| `window` | `#EEEBE4` | `#060607` | window background, toolbar |
-| `sidebar` | `#E6E2D8` | `#09090B` | sidebar, title bar, status bar |
-| `surface` | `#F6F4EE` | `#0C0C0E` | list, details panel, settings body |
-| `raised` | `#FCFBF8` | `#131316` | cards, menus, dialogs, buttons |
-| `sunken` | `#DEDAD0` | `#030304` | segmented control track, wells |
-| `input` | `#FFFFFF` | `#0A0A0C` | text fields |
-| `text` | `#17140F` | `#EDE8DF` | primary text |
-| `text2` | `#575045` | `#A59F94` | secondary text |
-| `text3` | `#857D70` | `#6D685F` | captions, placeholders, idle icons |
-| `line` | ink 12 % | ivory 8.5 % | borders, dividers |
-| `lineSoft` | ink 6.5 % | ivory 4.5 % | row separators |
-| `hover` / `pressed` | ink 5 / 9 % | ivory 4.5 / 8.5 % | interaction fills |
+| `window` | `#EEEBE4` | `#050608` | window background, toolbar |
+| `sidebar` | `#E6E2D8` | `#08090C` | sidebar, title bar, status bar |
+| `surface` | `#F6F4EE` | `#0B0C10` | list, details panel, settings body |
+| `raised` | `#FCFBF8` | `#12141A` | cards, menus, dialogs, buttons |
+| `sunken` | `#DEDAD0` | `#020304` | segmented control track, wells |
+| `input` | `#FFFFFF` | `#090A0E` | text fields |
+| `text` | `#17140F` | `#ECEEF3` | primary text |
+| `text2` | `#575045` | `#A2A7B3` | secondary text |
+| `text3` | `#857D70` | `#6A707C` | captions, placeholders, idle icons |
+| `line` | ink 12 % | cool white 8.5 % | borders, dividers |
+| `lineSoft` | ink 6.5 % | cool white 4.5 % | row separators |
+| `hover` / `pressed` | ink 5 / 9 % | cool white 4.5 / 8.5 % | interaction fills |
 | `overlay` | ink 38 % | black 66 % | dialog scrim |
 
-Obsidian's lines and hovers are tinted warm ivory (`rgba(255,244,225,…)`), not pure white. This keeps the dark theme rich instead of grey.
+Obsidian's lines and hovers are tinted a faint cool blue-white (`rgba(225,232,255,…)`), not pure white. This keeps the dark theme deep and clean instead of grey.
 
 ### Accent
 
 | Accent | Stone | Obsidian | On-accent text |
 |---|---|---|---|
-| **Champagne** (default) | `#8E6119` | `#D6B072` | white / `#120F09` |
-| Jade | `#1C7A58` | `#4CC89A` | 〃 |
-| Steel | `#2D669E` | `#78A9E0` | 〃 |
-| Orchid | `#7F4BB3` | `#C38BEA` | 〃 |
-| Ember | `#B4532A` | `#EE8A5E` | 〃 |
-| Graphite | `#2B2A27` | `#E9E4DA` | 〃 |
+| **Cobalt** (default) | `#1E46D8` | `#4C7DFF` | white |
+| Champagne | `#8E6119` | `#D6B072` | white / `#0B0C10` |
+| Jade | `#1C7A58` | `#4CC89A` | white / `#0B0C10` |
+| Teal | `#1F7F86` | `#5EC4C4` | white / `#0B0C10` |
+| Orchid | `#7F4BB3` | `#C38BEA` | white / `#0B0C10` |
+| Ember | `#B4532A` | `#EE8A5E` | white / `#0B0C10` |
 
-Each accent has a hand-tuned value per theme. Derived values: hover (dark: lighter 12 %, light: darker 14 %), pressed, `accentSoft` (14 % / 12 % alpha), and `selection` (16 % / 15 % alpha). In dark mode, text on accent is near-black (`#120F09`), never white.
+Each accent has a hand-tuned value per theme. Derived values: hover (dark: lighter 12 %, light: darker 14 %), pressed, `accentSoft` (14 % / 12 % alpha), and `selection` (16 % / 15 % alpha). Text on the accent is white, unless the accent is light (relative luminance above 0.45 in the prototype, 0.6 in QML); then it's `#0B0C10`. Cobalt always gets white.
 
 ### Semantic
 
 | Token | Stone | Obsidian | Meaning |
 |---|---|---|---|
 | `success` / `down` | `#1C7A58` | `#4CC89A` | seeding, completed, download speed |
-| `info` / `up` / `kindHttp` | `#2D669E` | `#78A9E0` | upload speed, direct links, scheduled |
+| `info` / `up` / `kindHttp` | `#1F7F86` | `#5EC4C4` | upload speed, direct links, scheduled (teal, so it never competes with the blue accent) |
 | `signal` | `#7F4BB3` | `#C38BEA` | streaming, pieces in flight |
 | `warning` | `#B85F1A` | `#F0924A` | stalled, low disk, alt speed |
 | `danger` | `#B32638` | `#F0596A` | errors, kill switch, destructive |
@@ -101,8 +101,8 @@ Each has a `-soft` variant (≈ 12–14 % alpha) for badge and banner background
 
 ### Palettes
 
-- **Connections** (one color per HTTP connection in the segment bar): `#D6B072 #78A9E0 #4CC89A #C38BEA #F0924A #6CC4C9 #E98AA8 #B9C07A`
-- **Tags**: `#B8873A #2D669E #1C7A58 #7F4BB3 #2A8A8F #B34A6E #B85F1A #575045`
+- **Connections** (one color per HTTP connection in the segment bar): `#4C7DFF #5EC4C4 #4CC89A #C38BEA #F0924A #D6B072 #E98AA8 #B9C07A`
+- **Tags**: `#2F5BE0 #1F7F86 #1C7A58 #7F4BB3 #2A8A8F #B34A6E #B85F1A #575045`
 
 ---
 
@@ -159,7 +159,7 @@ Numbers always use the mono face with `tnum` so columns don't jitter while value
   | e2 | menus, toasts, tooltips |
   | e3 | dialogs, windows |
 
-  Dark-mode e3 adds a 1 px ivory hairline at 5 % so edges read on black.
+  Dark-mode e3 adds a 1 px cool-white hairline at 5 % so edges read on black.
 
 ---
 
@@ -243,8 +243,8 @@ Every interactive element has a tooltip.
 
   | Context | Left half | Right half | Background |
   |---|---|---|---|
-  | App icon | ivory `#EDE8DF` | brass `#C9A15E` | `#0B0A09` |
-  | On paper | ink `#17140F` | bronze `#8E6119` | — |
+  | App icon | soft white `#ECEEF3` | cobalt `#4C7DFF` | `#07080B` |
+  | On paper | ink `#17140F` | deep cobalt `#1E46D8` | — |
   | In the UI | currentColor | accent | — |
   | On an accent background | currentColor | currentColor at 55 % | — |
 
@@ -328,7 +328,7 @@ Behavior on scale { NumberAnimation { duration: Theme.motion.press } }
 | CSS | QML |
 |---|---|
 | `--surface` | `Theme.c.surface` |
-| `--accent` | `Theme.accent` (from `accentName`) |
+| `--accent` | `Theme.accent` (from `accentName`, default `"cobalt"`) |
 | `--on-accent` | `Theme.onAccent` |
 | `--row` | `Theme.size.row` (follows `density`) |
 | `--fast` | `Theme.motion.fast` (follows `reducedMotion`) |

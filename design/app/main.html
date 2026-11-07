@@ -178,7 +178,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const TAGC = { linux: '#B8873A', '4k': '#2D669E', 'keep-seeding': '#1C7A58', 'dead-tracker': '#7F4BB3', work: '#2A8A8F' };
+const TAGC = { linux: '#2F5BE0', '4k': '#1F7F86', 'keep-seeding': '#1C7A58', 'dead-tracker': '#7F4BB3', work: '#2A8A8F' };
 const D = [
   { id: 1, k: 'bt', n: 'ubuntu-24.04.1-desktop-amd64.iso', mb: 5940, p: .624, s: 'downloading', d: 6.1, u: .92, sp: [84, 412], r: .21, cat: 'ISO', tags: ['linux'], added: 'Today 09:12', tr: 'torrent.ubuntu.com', h: 3, files: 1 },
   { id: 2, k: 'http', n: 'Blender-4.2-windows-x64.zip', mb: 1230, p: .41, s: 'downloading', d: 9.4, u: 0, conn: 8, cat: 'Programs', tags: [], added: 'Today 09:40', tr: 'download.blender.org', h: 3 },
@@ -246,7 +246,7 @@ function visible() {
 function progCell(it) {
   if (it.k === 'http' && it.s === 'downloading') {
     const ws = [1.2, .8, 1, .9, 1.1, .7, 1, .9];
-    return `<div class="segbar" title="${it.conn} connections">${ws.slice(0, it.conn).map((w, i) => `<span style="--w:${w}"><i style="width:${Math.min(100, it.p * 100 + Math.sin(i * 7.1) * 30 + 10)}%;--c:${['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'][i]}"></i></span>`).join('')}</div>`;
+    return `<div class="segbar" title="${it.conn} connections">${ws.slice(0, it.conn).map((w, i) => `<span style="--w:${w}"><i style="width:${Math.min(100, it.p * 100 + Math.sin(i * 7.1) * 30 + 10)}%;--c:${['#4C7DFF','#5EC4C4','#4CC89A','#C38BEA','#F0924A','#D6B072','#E98AA8','#B9C07A'][i]}"></i></span>`).join('')}</div>`;
   }
   return `<div class="row-f"><div class="prog grow ${it.s === 'metadata' ? 'indet' : ''} ${['downloading', 'streaming'].includes(it.s) && state !== 'kill' ? 'live' : ''}"><i style="width:${it.p * 100}%;--pc:${PC[it.s]}"></i></div><span class="num" style="width:38px;text-align:right">${it.s === 'metadata' ? '' : (it.p >= 1 ? '100%' : (it.p * 100).toFixed(1) + '%')}</span></div>`;
 }
@@ -365,7 +365,7 @@ function pane(it, t) {
     </div>
     <div class="row-f" style="margin-top:14px">${/mkv|mp4/.test(it.n) ? `<button class="btn primary sm">${ico('stream', 's')}Stream</button>` : ''}<button class="btn sm">${ico('folderOpen', 's')}Open folder</button><button class="btn sm">${ico('magnet', 's')}Copy magnet</button><button class="btn sm">${ico('speed', 's')}Limits…</button></div>`;
   if (t === 'ov') {
-    const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+    const segc = ['#4C7DFF','#5EC4C4','#4CC89A','#C38BEA','#F0924A','#D6B072','#E98AA8','#B9C07A'];
     return `
     <div class="row-f" style="margin-bottom:6px"><span class="cap">Ranges · one color per connection</span><span class="grow"></span><span class="num t3">${(it.p * 100).toFixed(1)}% · ${it.conn || 0} active · split ≥ 1 MiB</span></div>
     <div class="bigseg" style="margin-bottom:14px">${it.conn ? segc.map((c, i) => `<span style="--w:${[1.2, .8, 1, .9, 1.1, .7, 1, .9][i]}"><i style="--c:${c};width:${Math.min(100, it.p * 100 + Math.sin(i * 7.1) * 30 + 10)}%"></i></span>`).join('') : `<span style="--w:1"><i style="--c:var(--success);width:${it.p * 100}%"></i></span>`}</div>
@@ -398,7 +398,7 @@ function pane(it, t) {
     <div class="gwrap"><canvas class="graph" style="height:170px"></canvas></div><p class="help">Current values (1 s). Hover shows time + exact values. Totals: ↓ ${fmtBytes(it.mb * it.p)} · ↑ ${fmtBytes(it.mb * it.r)}.</p>`;
   if (t === 'pieces') return `<div class="dtool"><span class="num">${Math.round(it.p * 368)} of 368 pieces · 16 MB · 4 in flight</span><span class="grow"></span><div class="legend"><span style="--c:var(--piece-have)"><i></i>Have</span><span style="--c:var(--piece-active)"><i></i>Downloading</span><span style="--c:var(--piece-prio)"><i></i>Priority / deadline</span><span style="--c:var(--piece-missing)"><i></i>Missing</span></div></div><div class="pgrid">${pieces(368, it.p, 2)}</div>`;
   if (t === 'conn') {
-    const segc = ['#D6B072','#78A9E0','#4CC89A','#C38BEA','#F0924A','#6CC4C9','#E98AA8','#B9C07A'];
+    const segc = ['#4C7DFF','#5EC4C4','#4CC89A','#C38BEA','#F0924A','#D6B072','#E98AA8','#B9C07A'];
     return `<div class="dtool"><span class="help">Each connection fetches its own byte range. When one finishes it takes half of the largest range left.</span></div>
     <div class="tbl" style="--cols:34px 220px 130px 84px 140px 70px 64px 90px"><div class="th"><span>#</span><span>Range</span><span>Progress</span><span class="r">Speed</span><span>Server IP</span><span>HTTP</span><span class="r">Retries</span><span>State</span></div>
     ${segc.slice(0, it.conn || 1).map((c, i) => { const sp = [1.24, 1.19, 1.22, 1.08, 1.25, .91, 1.2, 1.15][i]; const p = Math.min(1, it.p + Math.sin(i * 7.1) * .3 + .1); return `<div class="tr"><span class="row-f num"><span class="dot" style="--c:${c}"></span>${i + 1}</span><span class="mono t2">${(i * 153).toLocaleString()}–${((i + 1) * 153).toLocaleString()} MB</span><div class="row-f"><div class="prog grow"><i style="width:${p * 100}%;--pc:${c}"></i></div><span class="num">${Math.round(p * 100)}%</span></div><span class="num r down">${it.conn ? fmtSpeed(sp) : '—'}</span><span class="mono t2">128.153.${i}.${20 + i}</span><span class="num">1.1</span><span class="num r">${i === 5 ? 1 : 0}</span><span class="badge ${i === 5 ? 'st-stalled' : 'st-downloading'}">${i === 5 ? 'Slow' : 'Active'}</span></div>`; }).join('')}</div>

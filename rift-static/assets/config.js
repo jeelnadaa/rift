@@ -6,7 +6,7 @@
  * stores: browser extension store pages. Leave a value empty to show "Coming soon".
  */
 window.RIFT_CONFIG = {
-  repo: 'OWNER/rift',
+  repo: 'jeelnadaa/rift',
   stores: {
     chrome: '',   // https://chromewebstore.google.com/detail/rift/<id>
     edge: '',     // https://microsoftedge.microsoft.com/addons/detail/<id>

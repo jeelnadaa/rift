@@ -8,20 +8,20 @@
   --stone3:#D7D1C4;
   --ink:#17140F;
   --ink2:#2A251D;
-  --cobalt:#8E6119;          /* primary accent (name kept for the markup) */
+  --cobalt:#1E46D8;          /* primary accent (name kept for the markup) */
   --signal:#B4532A;          /* secondary accent: ember */
   --green:#1C7A58;
-  --steel:#2D669E;
+  --steel:#1F7F86;
   --mute:#575045;
   --on-accent:#FFFFFF;
   --hair:rgba(23,20,15,.13);
   --glass:rgba(238,235,228,.8);
   /* "Inside the rift" is always dark, in both themes */
-  --void:#060607;
-  --void2:#0E0E10;
-  --void-line:rgba(255,244,225,.08);
-  --void-text:#EDE8DF;
-  --void-mute:#8F897E;
+  --void:#050608;
+  --void2:#0C0D11;
+  --void-line:rgba(225,232,255,.08);
+  --void-text:#ECEEF3;
+  --void-mute:#8A90A0;
   --shadow:0 30px 80px -24px rgba(40,30,15,.3);
   --f:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
   --serif:"Instrument Serif",ui-serif,Georgia,serif;
@@ -33,19 +33,19 @@
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="stone"]){
-    --stone:#060607;--stone2:#0E0E10;--stone3:#17171A;
-    --ink:#EDE8DF;--ink2:#D9D3C7;--mute:#A59F94;
-    --cobalt:#D6B072;--signal:#E58A57;--green:#4CC89A;--steel:#78A9E0;--on-accent:#120F09;
-    --hair:rgba(255,244,225,.09);--glass:rgba(6,6,7,.8);
+    --stone:#050608;--stone2:#0C0D11;--stone3:#16181E;
+    --ink:#ECEEF3;--ink2:#D3D7E0;--mute:#A2A7B3;
+    --cobalt:#4C7DFF;--signal:#E58A57;--green:#4CC89A;--steel:#5EC4C4;--on-accent:#FFFFFF;
+    --hair:rgba(225,232,255,.09);--glass:rgba(5,6,8,.8);
     --shadow:0 30px 80px -24px rgba(0,0,0,.85);
     color-scheme:dark;
   }
 }
 :root[data-theme="obsidian"]{
-  --stone:#060607;--stone2:#0E0E10;--stone3:#17171A;
-  --ink:#EDE8DF;--ink2:#D9D3C7;--mute:#A59F94;
-  --cobalt:#D6B072;--signal:#E58A57;--green:#4CC89A;--steel:#78A9E0;--on-accent:#120F09;
-  --hair:rgba(255,244,225,.09);--glass:rgba(6,6,7,.8);
+  --stone:#050608;--stone2:#0C0D11;--stone3:#16181E;
+  --ink:#ECEEF3;--ink2:#D3D7E0;--mute:#A2A7B3;
+  --cobalt:#4C7DFF;--signal:#E58A57;--green:#4CC89A;--steel:#5EC4C4;--on-accent:#FFFFFF;
+  --hair:rgba(225,232,255,.09);--glass:rgba(5,6,8,.8);
   --shadow:0 30px 80px -24px rgba(0,0,0,.85);
   color-scheme:dark;
 }

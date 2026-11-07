@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Rift: Torrents. Direct links. One rift.">
 <meta property="og:description" content="A native download manager for Windows, macOS and Linux, with browser extensions for Chrome, Edge, Brave and Firefox.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B0A09'/%3E%3Cg transform='translate(32 32) scale(.7) translate(-32 -32)'%3E%3Cpath transform='translate(-1.1 -4.6)' d='M39.24 6.66A17 28 0 1 0 24.76 57.34Z' fill='%23EDE8DF'/%3E%3Cpath transform='translate(1.1 4.6)' d='M39.24 6.66A17 28 0 1 1 24.76 57.34Z' fill='%23C9A15E'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307080B'/%3E%3Cg transform='translate(32 32) scale(.7) translate(-32 -32)'%3E%3Cpath transform='translate(-1.1 -4.6)' d='M39.24 6.66A17 28 0 1 0 24.76 57.34Z' fill='%23ECEEF3'/%3E%3Cpath transform='translate(1.1 4.6)' d='M39.24 6.66A17 28 0 1 1 24.76 57.34Z' fill='%234C7DFF'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,13 +72,13 @@
 .rows{flex:1}
 .row{min-height:60px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.86rem;transition:background .2s,opacity .35s,transform .35s var(--ease)}
 .row:hover{background:rgba(255,255,255,.03)}
-.row.sel{background:rgba(214,176,114,.13)}
+.row.sel{background:rgba(76,125,255,.13)}
 .row.gone{display:none}
 .nm{min-width:0}
 .nm b{display:block;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nm small{display:block;font-family:var(--mono);font-size:.7rem;color:var(--void-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kind{font-family:var(--mono);font-size:.66rem;font-weight:700;padding:3px 7px;border-radius:5px;justify-self:start;letter-spacing:.04em}
-.kind.bt{background:rgba(214,176,114,.18);color:var(--cobalt)}
+.kind.bt{background:rgba(76,125,255,.18);color:var(--cobalt)}
 .kind.http{background:rgba(229,138,87,.16);color:var(--steel)}
 .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;position:relative}
 .bar>i{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:var(--cobalt)}
@@ -158,8 +158,8 @@ section.blk{padding:clamp(80px,12vw,180px) 0;position:relative}
 .bw-body h5{margin:0 0 6px;font-size:1.35rem;font-weight:700;letter-spacing:-.02em}
 .bw-body p{margin:0 0 18px;color:var(--void-mute);font-size:.92rem}
 .dl-link{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--void-line);font-family:var(--mono);font-size:.82rem;transition:background .3s,border-color .3s}
-.dl-link.hl2{background:rgba(214,176,114,.18);border-color:var(--cobalt)}
-.ctxmenu{position:absolute;min-width:230px;padding:6px;border-radius:10px;background:#131316;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5);
+.dl-link.hl2{background:rgba(76,125,255,.18);border-color:var(--cobalt)}
+.ctxmenu{position:absolute;min-width:230px;padding:6px;border-radius:10px;background:#12141A;border:1px solid rgba(255,255,255,.1);box-shadow:0 20px 40px rgba(0,0,0,.5);
   font-size:.84rem;opacity:0;transform:scale(.92);transform-origin:0 0;transition:opacity .2s,transform .3s var(--spring);pointer-events:none}
 .ctxmenu.on{opacity:1;transform:none}
 .ctxmenu div{padding:7px 10px;border-radius:6px;color:var(--void-mute)}
@@ -608,7 +608,7 @@ if (RM) {
       const dxp = x - pt.x, dyp = p.y - pt.y, d2 = dxp * dxp + dyp * dyp;
       if (d2 < 16000) x += dxp / Math.sqrt(d2 + 1) * 18;
       const a = .35 + .65 * (1 - Math.abs(p.off) * 1.6);
-      c.fillStyle = p.hue < .55 ? `rgba(214,176,114,${a})` : p.hue < .85 ? `rgba(229,138,87,${a})` : `rgba(236,236,231,${a * .8})`;
+      c.fillStyle = p.hue < .55 ? `rgba(76,125,255,${a})` : p.hue < .85 ? `rgba(229,138,87,${a})` : `rgba(236,236,231,${a * .8})`;
       c.fillRect(x, p.y, p.s, p.s * (2 + p.v * 1.5));
     }
   })();
@@ -696,7 +696,7 @@ paint();
 /* ---------- Lanes: dynamic segmentation simulation ---------- */
 (() => {
   const cv = $('#laneCv'), c = cv.getContext('2d');
-  const COLORS = ['#D6B072', '#E58A57', 'var(--green)', '#C38BEA', '#F0924A', '#6CC4C9', '#E98AA8', '#B9C07A', '#EDE8DF'];
+  const COLORS = ['#4C7DFF', '#E58A57', 'var(--green)', '#C38BEA', '#F0924A', '#6CC4C9', '#E98AA8', '#B9C07A', '#ECEEF3'];
   const SIZE = 1200, MINSEG = 6, LINE = 10, PER = 1.25, MAXC = 9;
   let throttle = true, segs, conns, t, nextAdd, lastTotal, stopped, note, firstSpeed, done, vis = false, raf;
   const W = () => cv.clientWidth, H = () => cv.clientHeight;

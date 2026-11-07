@@ -119,7 +119,7 @@ const store = { get: (k) => { try { return localStorage.getItem(k); } catch { re
 const root = document.documentElement;
 const PAGES = [['index.html', 'System'], ['main.html', 'Main window'], ['dialogs.html', 'Dialogs'], ['settings.html', 'Settings'], ['tabs.html', 'Search · RSS · Stats · Logs'], ['more.html', 'Wizard · Player · Tray · Extension'], ['logo.html', 'Logo']];
 // [light, dark] — each accent is tuned per theme rather than lightened mechanically
-const ACC = { champagne: ['#8E6119', '#D6B072'], jade: ['#1C7A58', '#4CC89A'], steel: ['#2D669E', '#78A9E0'], orchid: ['#7F4BB3', '#C38BEA'], ember: ['#B4532A', '#EE8A5E'], graphite: ['#2B2A27', '#E9E4DA'] };
+const ACC = { cobalt: ['#1E46D8', '#4C7DFF'], champagne: ['#8E6119', '#D6B072'], jade: ['#1C7A58', '#4CC89A'], teal: ['#1F7F86', '#5EC4C4'], orchid: ['#7F4BB3', '#C38BEA'], ember: ['#B4532A', '#EE8A5E'] };
 function shell() {
   const here = location.pathname.split('/').pop() || 'index.html';
   const bar = document.createElement('header');
@@ -136,14 +136,14 @@ function shell() {
   const apply = () => {
     const t = store.get('rift_app_theme') || (sysDark ? 'obsidian' : 'stone');
     const d = store.get('rift_app_density') || 'compact';
-    let a = store.get('rift_app_accent'); if (!ACC[a]) a = 'champagne';
+    let a = store.get('rift_app_accent'); if (!ACC[a]) a = 'cobalt';
     root.dataset.theme = t; root.dataset.density = d;
     const dk = t === 'obsidian', base = ACC[a][dk ? 1 : 0];
     root.style.setProperty('--accent', base);
     root.style.setProperty('--accent-hover', dk ? mix(base, '#ffffff', .14) : mix(base, '#000000', .12));
     root.style.setProperty('--accent-pressed', mix(base, '#000000', dk ? .12 : .24));
     root.style.setProperty('--piece-have', base);
-    root.style.setProperty('--on-accent', dk ? '#120F09' : '#FFFFFF');
+    root.style.setProperty('--on-accent', lum(base) > .45 ? '#0B0C10' : '#FFFFFF');
     bar.querySelectorAll('[data-theme-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === t)));
     bar.querySelectorAll('[data-density-set]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.densitySet === d)));
     bar.querySelectorAll('[data-acc]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.acc === a)));
@@ -169,6 +169,8 @@ function shell() {
     scrs.forEach((s) => io.observe(s));
   }
 }
+// Relative luminance (0–1), used to pick readable text on the accent
+function lum(h) { const v = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
 function mix(a, b, t) {
   const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   const [x, y] = [p(a), p(b)];
