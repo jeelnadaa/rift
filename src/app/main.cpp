@@ -4,6 +4,7 @@
 #include "version.hpp"
 
 #include <QApplication>
+#include <QtQml/qqmlextensionplugin.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -20,6 +21,8 @@
 #include <QTimer>
 
 #include <cstdio>
+
+Q_IMPORT_QML_PLUGIN(RiftPlugin)
 
 namespace {
 int g_qmlProblems = 0;
