@@ -260,7 +260,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ninja-build pkg-config libtorrent-rasterbar-dev libcurl4-openssl-dev \
             libboost-dev libssl-dev libgl1-mesa-dev libxkbcommon-dev libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
-            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libfuse2 rpm ruby ruby-dev file
+            libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libfuse2 rpm ruby ruby-dev file gdb
           sudo gem install --no-document fpm
       - uses: jurplel/install-qt-action@v4
         with:
@@ -273,7 +273,8 @@ jobs:
       - name: Configure and build
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRIFT_VERSION="$V" -DCMAKE_INSTALL_PREFIX=/usr \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_FLAGS=-g1 # line tables for crash backtraces; linuxdeploy strips what ships
           cmake --build build
       - name: Tests
         run: |
@@ -286,6 +287,12 @@ jobs:
             # Public annotations (logs need a sign-in): the most frequent distinct QML messages.
             grep -E 'qrc:|\.qml' harness.log | sed -E 's/:[0-9]+:[0-9]+:/:/' | sort | uniq -c | sort -rn | head -9 | sed 's/^ */::warning::QML /' || true
           fi
+          # The real app as built (system libtorrent, Qt from install-qt-action), before any bundling.
+          # A crash here is in Rift or its libraries; a crash only in the AppImage step is a packaging problem.
+          set +e
+          QT_QPA_PLATFORM=offscreen bash scripts/ci-crash-report.sh build-smoke build-smoke.log ./build/rift --smoke-test; rc=$?
+          set -e
+          if [ $rc -ne 0 ] && [ $rc -ne 4 ]; then echo "::warning::The unbundled app's smoke test failed ($rc)"; fi
       - name: AppImage
         run: |
           DESTDIR=$PWD/AppDir cmake --install build
@@ -317,9 +324,8 @@ jobs:
           chmod +x "$img"
           # Smoke test the extracted image (no FUSE needed). Exit 127 means a missing library or file: list them.
           rm -rf squashfs-root && ./"$img" --appimage-extract > /dev/null
-          QT_QPA_PLATFORM=offscreen ./squashfs-root/AppRun --smoke-test > smoke.log 2>&1; rc=$?
+          QT_QPA_PLATFORM=offscreen bash scripts/ci-crash-report.sh appimage-smoke smoke.log ./squashfs-root/AppRun --smoke-test; rc=$?
           set -e
-          cat smoke.log
           if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"
           elif [ $rc -ne 0 ]; then
             tail -n 9 smoke.log | sed 's/^/::error::smoke: /'
