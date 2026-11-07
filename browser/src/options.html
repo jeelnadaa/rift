@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rift extension settings</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { padding: 18px 22px 24px; max-width: 620px; }
+    h1 { font-size: 20px; letter-spacing: -.02em; margin: 14px 0 4px; }
+    textarea.field { height: 90px; padding: 9px 11px; resize: vertical; font-family: var(--mono); font-size: 12.5px; }
+    .stack { flex-direction: column; align-items: stretch; }
+    .num { width: 110px; }
+    #saved { color: var(--success); font-size: 12.5px; opacity: 0; transition: opacity var(--base); }
+    #saved.on { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="brand">
+    <svg viewBox="13 0 38 64" aria-hidden="true"><path transform="translate(-1.1 -4.6)" fill="currentColor" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path transform="translate(1.1 4.6)" fill="var(--accent)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>
+    <b>Rift</b>
+  </div>
+  <h1>Extension settings</h1>
+  <p class="muted">File types and the minimum size come from Rift's own settings when Rift is running; these are used otherwise.</p>
+
+  <label class="row">
+    <div><div class="label">Send downloads to Rift</div><div class="muted">Turn the extension off without removing it</div></div>
+    <span class="switch" data-tip="Enabled"><input type="checkbox" id="enabled" aria-label="Enabled"><span></span></span>
+  </label>
+  <label class="row">
+    <div><div class="label">Catch downloads</div><div class="muted">Hand matching browser downloads to Rift</div></div>
+    <span class="switch" data-tip="Take over downloads"><input type="checkbox" id="takeOver" aria-label="Catch downloads"><span></span></span>
+  </label>
+  <div class="row stack">
+    <div><div class="label">File types</div><div class="muted">Extensions, separated by commas</div></div>
+    <textarea class="field" id="types" aria-label="File types"></textarea>
+  </div>
+  <label class="row">
+    <div><div class="label">Only files bigger than</div><div class="muted">In MB. Smaller files stay in the browser</div></div>
+    <input class="field num" type="number" min="0" id="minMB" aria-label="Minimum size in MB">
+  </label>
+  <div class="row stack">
+    <div><div class="label">Sites to leave alone</div><div class="muted">One host per line, e.g. example.com</div></div>
+    <textarea class="field" id="skipSites" aria-label="Skipped sites"></textarea>
+  </div>
+  <div class="row" style="border:0">
+    <div><span id="saved">Saved</span></div>
+    <button class="btn" id="reset" data-tip="Restore defaults">Reset</button>
+    <button class="btn primary" id="save" data-tip="Save these settings">Save</button>
+  </div>
+  <script src="logic.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Rift</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { width: 340px; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; border-bottom: 1px solid var(--line); background: var(--raised); }
+    main { padding: 6px 16px 14px; }
+    form { display: flex; gap: 6px; margin-top: 12px; }
+    .notice { margin: 12px 0 2px; padding: 10px 12px; border-radius: var(--r-md); background: var(--accent-soft); font-size: 13px; }
+    .notice a { color: var(--accent); font-weight: 600; }
+    footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line-soft); }
+    #msg { min-height: 18px; margin-top: 8px; font-size: 12.5px; }
+    #msg.err { color: var(--danger); } #msg.ok { color: var(--success); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <svg viewBox="13 0 38 64" aria-hidden="true"><path transform="translate(-1.1 -4.6)" fill="currentColor" d="M39.24 6.66A17 28 0 1 0 24.76 57.34Z"/><path transform="translate(1.1 4.6)" fill="var(--accent)" d="M39.24 6.66A17 28 0 1 1 24.76 57.34Z"/></svg>
+      <b>Rift</b>
+    </div>
+    <span id="status" class="status off"><i></i><span>Checking…</span></span>
+  </header>
+  <main>
+    <div id="missing" class="notice" hidden>
+      Rift isn't installed on this computer, or it hasn't run yet.
+      <a href="https://rift.app/download.html" target="_blank" rel="noopener">Get Rift</a>, open it once, then reopen this.
+    </div>
+    <label class="row">
+      <div><div class="label">Catch downloads</div><div class="muted">Send matching browser downloads to Rift</div></div>
+      <span class="switch" data-tip="Take over downloads"><input type="checkbox" id="takeOver" aria-label="Catch downloads"><span></span></span>
+    </label>
+    <label class="row">
+      <div><div class="label">On this site</div><div class="muted" id="site">—</div></div>
+      <span class="switch" data-tip="Catch downloads on this site"><input type="checkbox" id="siteOn" aria-label="Catch downloads on this site"><span></span></span>
+    </label>
+    <form id="send">
+      <input class="field" id="url" placeholder="Paste a link or magnet" aria-label="Link or magnet" autocomplete="off">
+      <button class="btn primary" type="submit" data-tip="Send to Rift">Send</button>
+    </form>
+    <div id="msg" role="status"></div>
+  </main>
+  <footer>
+    <span class="muted" id="ver"></span>
+    <button class="btn ghost" id="options" data-tip="Extension settings">Settings</button>
+  </footer>
+  <script src="logic.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

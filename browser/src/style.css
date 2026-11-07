@@ -1,0 +1,85 @@
+/* Rift extension: same tokens as the app (DESIGN.md / design/tokens.json). Stone = light, Obsidian = dark. */
+:root {
+  --window: #EEEBE4; --surface: #F6F4EE; --raised: #FCFBF8; --sunken: #DEDAD0; --input: #FFFFFF;
+  --line: rgba(23, 20, 15, .12); --line-soft: rgba(23, 20, 15, .065); --hover: rgba(23, 20, 15, .05);
+  --text: #17140F; --text2: #575045; --text3: #857D70;
+  --accent: #1E46D8; --accent-hover: #1A3CBC; --accent-soft: rgba(30, 70, 216, .12); --on-accent: #FFFFFF;
+  --success: #1C7A58; --danger: #B32638; --warning: #B85F1A;
+  --r-sm: 7px; --r-md: 9px; --r-big: 14px; --r-xs: 4px;
+  --fast: 140ms; --base: 200ms; --spring: cubic-bezier(.2, 1.3, .3, 1); --standard: cubic-bezier(.2, .8, .2, 1);
+  --font: "Bricolage Grotesque", "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --window: #050608; --surface: #0B0C10; --raised: #12141A; --sunken: #020304; --input: #090A0E;
+    --line: rgba(225, 232, 255, .085); --line-soft: rgba(225, 232, 255, .045); --hover: rgba(225, 232, 255, .045);
+    --text: #ECEEF3; --text2: #A2A7B3; --text3: #6A707C;
+    --accent: #4C7DFF; --accent-hover: #6A93FF; --accent-soft: rgba(76, 125, 255, .14); --on-accent: #FFFFFF;
+    --success: #4CC89A; --danger: #F0596A; --warning: #F0924A;
+  }
+}
+@media (prefers-reduced-motion: reduce) { :root { --fast: 0ms; --base: 0ms; } }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface); color: var(--text); font: 14px/1.4 var(--font); }
+button, input { font: inherit; color: inherit; }
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand svg { height: 22px; width: auto; }
+.brand b { font-size: 18px; font-weight: 800; letter-spacing: -.04em; }
+.cap { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.muted { color: var(--text3); font-size: 12.5px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  height: 32px; padding: 0 13px; border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: var(--raised); font-weight: 600; cursor: pointer;
+  transition: transform var(--base) var(--spring), background var(--fast), box-shadow var(--fast);
+}
+.btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--raised), var(--text) 5%); }
+.btn:active { transform: scale(.965); transition-duration: 60ms; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-hover); box-shadow: 0 6px 18px -8px var(--accent); }
+.btn.ghost { background: transparent; border-color: transparent; }
+.btn.ghost:hover { background: var(--hover); transform: none; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+
+.field {
+  width: 100%; height: 34px; padding: 0 11px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--input); outline: none;
+  transition: border-color var(--fast), box-shadow var(--base);
+}
+.field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* switch */
+.switch { position: relative; width: 34px; height: 20px; flex: none; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; border-radius: 10px; background: var(--sunken); border: 1px solid var(--line); transition: background var(--base); pointer-events: none; }
+.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 7px; background: var(--raised); border: 1px solid var(--line); transition: transform var(--base) var(--spring); }
+.switch input:checked + span { background: var(--accent); border-color: var(--accent); }
+.switch input:checked + span::after { transform: translateX(14px); background: #fff; border-color: transparent; }
+.switch input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+.row > div { flex: 1; min-width: 0; }
+.row .label { font-weight: 600; }
+
+.status { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: 11px; font-size: 12px; font-weight: 600; }
+.status i { width: 6px; height: 6px; border-radius: 3px; background: currentColor; }
+.status.ok { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.status.off { color: var(--warning); background: color-mix(in srgb, var(--warning) 12%, transparent); }
+.status.missing { color: var(--danger); background: color-mix(in srgb, var(--danger) 12%, transparent); }
+.status.ok i { animation: pulse 1.6s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 currentColor; } 100% { box-shadow: 0 0 0 6px transparent; } }
+@media (prefers-reduced-motion: reduce) { .status.ok i { animation: none; } }
+
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip); position: absolute; top: calc(100% + 6px); right: 0; z-index: 9; white-space: nowrap;
+  background: var(--text); color: var(--window); font-size: 12px; font-weight: 600; padding: 5px 9px;
+  border-radius: 7px; pointer-events: none; animation: tip var(--fast) 450ms both;
+}
+@keyframes tip { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: none; } }
