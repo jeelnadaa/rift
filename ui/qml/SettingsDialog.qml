@@ -150,6 +150,61 @@ Popup {
                     Toggle { checked: sd.s.launchAtLogin; tip: qsTr("Launch at login"); onToggled: sd.set("launchAtLogin", checked) }
                 }
                 SettingRow {
+                    label: qsTr("Updates")
+                    help: !App.updater.canInstall ? App.updater.installNote
+                        : sd.s.updateMode === "notify" ? qsTr("Tell me when a new version is out, and update when I say so.")
+                        : sd.s.updateMode === "off" ? qsTr("Never check on its own. You can still check by hand.")
+                        : qsTr("Download new versions in the background and install them when Rift restarts.")
+                    Select {
+                        options: [["auto", qsTr("Automatic")], ["notify", qsTr("Ask first")], ["off", qsTr("Off")]]
+                        value: sd.s.updateMode; tip: qsTr("How Rift updates itself"); onActivated: (v) => sd.set("updateMode", v)
+                    }
+                }
+                SettingRow {
+                    label: qsTr("Version %1").arg(App.version)
+                    help: {
+                        var u = App.updater
+                        switch (u.state) {
+                        case "checking": return qsTr("Checking for updates…")
+                        case "uptodate": return qsTr("You have the latest version.") + (u.lastChecked > 0 ? " " + qsTr("Checked %1.").arg(App.fmtRelative(u.lastChecked)) : "")
+                        case "available": return qsTr("Rift %1 is out.").arg(u.latest)
+                        case "downloading": return qsTr("Downloading Rift %1… %2%").arg(u.latest).arg(Math.round(u.progress * 100))
+                        case "ready": return qsTr("Rift %1 is ready and installs when Rift restarts.").arg(u.latest)
+                        case "error": return u.error
+                        case "dev": return qsTr("This is a development build, so it doesn't update itself.")
+                        default: return qsTr("Rift checks GitHub Releases for new versions.")
+                        }
+                    }
+                    Row {
+                        spacing: 6
+                        Btn {
+                            visible: App.updater.state === "ready"
+                            variant: "primary"; small: true; iconName: "refresh"
+                            text: qsTr("Restart now"); tip: qsTr("Quit, install Rift %1 and start again").arg(App.updater.latest)
+                            onClicked: App.updater.restartNow()
+                        }
+                        Btn {
+                            visible: App.updater.state === "available" && App.updater.canInstall
+                            variant: "primary"; small: true; iconName: "download"
+                            text: qsTr("Update"); tip: qsTr("Download and install Rift %1").arg(App.updater.latest)
+                            onClicked: App.updater.download()
+                        }
+                        Btn {
+                            visible: App.updater.state === "available" && !App.updater.canInstall
+                            small: true; iconName: "external"
+                            text: qsTr("Release page"); tip: qsTr("Open the release on GitHub")
+                            onClicked: Qt.openUrlExternally(App.updater.pageUrl)
+                        }
+                        Btn {
+                            visible: App.updater.state !== "ready" && App.updater.state !== "dev"
+                            enabled: App.updater.state !== "checking" && App.updater.state !== "downloading"
+                            small: true; iconName: "refresh"
+                            text: qsTr("Check now"); tip: qsTr("Check GitHub for a newer Rift")
+                            onClicked: App.updater.check()
+                        }
+                    }
+                }
+                SettingRow {
                     label: qsTr("Start minimized")
                     Toggle { checked: sd.s.startMinimized; tip: qsTr("Start hidden in the tray"); onToggled: sd.set("startMinimized", checked) }
                 }

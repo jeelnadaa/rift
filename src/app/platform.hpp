@@ -33,4 +33,12 @@ void setDarkTitleBar(bool dark);
 // Returns true when the system font list now includes them, so installAppFonts(true) must not add them again.
 bool registerAppFontsWithSystem();
 
+// Self-update. The release asset kind this build can replace itself from (core::updateAssetName targets):
+// "windows-setup" for an installed Windows build, "macos-arm64"/"macos-x64" for a writable Rift.app,
+// "linux-appimage" for a writable AppImage, or "" (portable zip, deb/rpm, tarball, a build run in place).
+QString updateTarget(bool portable);
+// Starts a detached helper that waits for this process to exit, installs `file` (already verified by the
+// caller) and, if `relaunch`, starts Rift again with `relaunchArgs`. False if the helper could not start.
+bool launchUpdate(const QString &target, const QString &file, bool relaunch, const QStringList &relaunchArgs);
+
 } // namespace platform

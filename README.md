@@ -11,6 +11,7 @@ extension adds **Download with Rift** to Chrome, Edge, Brave and Firefox.
 - **Desktop integration:** tray icon, notifications, clipboard watcher, drag and drop, magnet and `.torrent` file associations, prevent sleep while downloading, single instance, portable mode.
 - **Design:** Stone (light) and Obsidian (dark) themes, compact and comfortable densities, spring motion, bundled fonts. See [DESIGN.md](DESIGN.md).
 - **Private by default:** the only network listener is the BitTorrent port. The browser bridge uses Native Messaging and a user-only local socket.
+- **Updates itself:** checks GitHub Releases, downloads the new version in the background, verifies it against `SHA256SUMS` and installs it when Rift restarts. Choose Automatic, Ask first or Off in Settings > General. Portable and package-manager installs only get a link to the release page.
 
 ## Download
 

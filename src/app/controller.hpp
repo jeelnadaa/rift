@@ -4,6 +4,7 @@
 #include "downloadmodel.hpp"
 #include "settings.hpp"
 #include "storage.hpp"
+#include "updater.hpp"
 
 #include <QHash>
 #include <QSet>
@@ -59,6 +60,7 @@ class Controller : public QObject {
     Q_PROPERTY(QString detailTab READ detailTab WRITE setDetailTab NOTIFY detailTabChanged)
     Q_PROPERTY(QString clipboardOffer READ clipboardOffer NOTIFY clipboardChanged)
     Q_PROPERTY(bool trayAvailable READ trayAvailable CONSTANT)
+    Q_PROPERTY(Updater *updater READ updater CONSTANT)
 
 public:
     Controller(const QString &dataDir, bool portable, QObject *parent = nullptr);
@@ -73,6 +75,7 @@ public:
     void handleArguments(const QStringList &args);
 
     Settings *settings() const { return m_settings; }
+    Updater *updater() const { return m_updater; }
     DownloadFilter *list() const { return m_filter; }
     QString version() const;
     QString engineVersions() const;
@@ -222,6 +225,7 @@ private:
     QString m_dataDir;
     bool m_portable = false;
     Settings *m_settings = nullptr;
+    Updater *m_updater = nullptr;
     Storage m_store;
     std::unique_ptr<rift::bt::Engine> m_bt;
     std::unique_ptr<rift::http::Engine> m_http;

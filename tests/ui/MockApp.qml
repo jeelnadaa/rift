@@ -112,6 +112,23 @@ QtObject {
     function setConnections(ids, n) {} function moveTo(ids, f) {} function addTracker(id, url) {}
     function openFolder(id) {} function openFile(id) {} function openFileAt(id, p) {}
     function setDarkFrame(dark) {}
+    // The updater with an update downloaded, so the banner and Settings show the "ready" state.
+    property QtObject updater: QtObject {
+        property string state: "ready"
+        property string latest: "1.5.0"
+        property string notes: ""
+        property string pageUrl: "https://github.com/jeelnadaa/rift/releases/tag/v1.5.0"
+        property real progress: 1
+        property string error: ""
+        property real lastChecked: Date.now()
+        property bool dismissed: false
+        property bool canInstall: true
+        property string installNote: ""
+        function check() { state = "checking" }
+        function download() { state = "downloading" }
+        function restartNow() {}
+        function dismiss() { dismissed = true }
+    }
     function extensionDownloads() {
         return { release: true, chromiumFile: "Rift-1.0.0-browser-chromium.zip", firefoxFile: "Rift-1.0.0-browser-firefox.zip",
                  chromium: "https://github.com/jeelnadaa/rift/releases/download/v1.0.0/Rift-1.0.0-browser-chromium.zip",

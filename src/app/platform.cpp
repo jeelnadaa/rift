@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QStorageInfo>
+#include <QSysInfo>
 #include <QUrl>
 
 #ifdef Q_OS_WIN
@@ -287,6 +288,106 @@ bool registerAppFontsWithSystem() {
     }
 #endif
     return false;
+}
+
+QString updateTarget(bool portable) {
+    if (portable) return {};
+    const QString exeDir = QCoreApplication::applicationDirPath();
+#if defined(Q_OS_WIN)
+    // Inno Setup leaves unins000.exe next to Rift.exe; the portable zip and a build folder don't have one.
+    return QFileInfo::exists(exeDir + QStringLiteral("/unins000.exe")) ? QStringLiteral("windows-setup") : QString();
+#elif defined(Q_OS_MACOS)
+    // Rift.app/Contents/MacOS → Rift.app. The folder holding the bundle must be writable to swap it (an app
+    // run from the DMG or a translocated quarantine copy isn't).
+    QDir bundle(exeDir);
+    if (!bundle.cdUp() || !bundle.cdUp() || !bundle.path().endsWith(QLatin1String(".app"))) return {};
+    if (!QFileInfo(QFileInfo(bundle.path()).absolutePath()).isWritable()) return {};
+    return QSysInfo::buildCpuArchitecture() == QLatin1String("arm64") ? QStringLiteral("macos-arm64")
+                                                                     : QStringLiteral("macos-x64");
+#elif defined(Q_OS_LINUX)
+    const QString image = qEnvironmentVariable("APPIMAGE");
+    if (image.isEmpty() || !QFileInfo(image).isFile()) return {};
+    return QFileInfo(QFileInfo(image).absolutePath()).isWritable() ? QStringLiteral("linux-appimage") : QString();
+#else
+    Q_UNUSED(exeDir);
+    return {};
+#endif
+}
+
+bool launchUpdate(const QString &target, const QString &file, bool relaunch, const QStringList &relaunchArgs) {
+    const QString pid = QString::number(QCoreApplication::applicationPid());
+#if defined(Q_OS_WIN)
+    if (target != QLatin1String("windows-setup")) return false;
+    // A hidden PowerShell waits for Rift to exit, then runs the installer silently in the same install mode
+    // (per user under %LOCALAPPDATA%, else all users, which asks for elevation). rift.iss relaunches Rift
+    // when /RELAUNCH=1 is passed.
+    auto psq = [](QString s) { return QLatin1Char('\'') + s.replace(QLatin1Char('\''), QStringLiteral("''")) + QLatin1Char('\''); };
+    const QString exe = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    const QString local = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
+    const bool perUser = !local.isEmpty() && exe.startsWith(local, Qt::CaseInsensitive);
+    QStringList setupArgs = {QStringLiteral("/VERYSILENT"), QStringLiteral("/SUPPRESSMSGBOXES"), QStringLiteral("/NORESTART"),
+                             QStringLiteral("/NOCANCEL"), QStringLiteral("/SP-"),
+                             perUser ? QStringLiteral("/CURRENTUSER") : QStringLiteral("/ALLUSERS")};
+    if (relaunch) {
+        setupArgs << QStringLiteral("/RELAUNCH=1");
+        if (!relaunchArgs.isEmpty()) setupArgs << QStringLiteral("/RIFTARGS=") + relaunchArgs.join(QLatin1Char(' '));
+    }
+    QStringList quoted;
+    for (const QString &a : setupArgs) quoted << psq(a);
+    const QString script =
+        QStringLiteral("try { Wait-Process -Id %1 -Timeout 120 -ErrorAction SilentlyContinue } catch {}\n"
+                       "Start-Process -FilePath %2 -ArgumentList %3%4\n")
+            .arg(pid, psq(QDir::toNativeSeparators(file)), quoted.join(QLatin1Char(',')),
+                 perUser ? QString() : QStringLiteral(" -Verb RunAs"));
+    const QByteArray utf16(reinterpret_cast<const char *>(script.utf16()), script.size() * 2);
+    QProcess p;
+    p.setProgram(QStringLiteral("powershell.exe"));
+    p.setArguments({QStringLiteral("-NoProfile"), QStringLiteral("-NonInteractive"), QStringLiteral("-WindowStyle"),
+                    QStringLiteral("Hidden"), QStringLiteral("-ExecutionPolicy"), QStringLiteral("Bypass"),
+                    QStringLiteral("-EncodedCommand"), QString::fromLatin1(utf16.toBase64())});
+    p.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *a) {
+        a->flags &= ~static_cast<DWORD>(CREATE_NEW_CONSOLE);
+        a->flags |= CREATE_NO_WINDOW;
+    });
+    return p.startDetached();
+#elif defined(Q_OS_MACOS)
+    if (!target.startsWith(QLatin1String("macos-"))) return false;
+    QDir bundle(QCoreApplication::applicationDirPath());
+    bundle.cdUp();
+    bundle.cdUp();
+    // Values go in as positional parameters, never into the script text.
+    static const char *script = R"(pid=$1; zip=$2; app=$3; relaunch=$4; shift 4
+while kill -0 "$pid" 2>/dev/null; do sleep 0.5; done
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/rift-update.XXXXXX") || exit 1
+ditto -x -k "$zip" "$tmp" && [ -d "$tmp/Rift.app" ] || { rm -rf "$tmp"; exit 1; }
+old="$app.old-$$"
+mv "$app" "$old" || { rm -rf "$tmp"; exit 1; }
+if ! mv "$tmp/Rift.app" "$app"; then mv "$old" "$app"; rm -rf "$tmp"; exit 1; fi
+rm -rf "$old" "$tmp" "$zip"
+xattr -dr com.apple.quarantine "$app" 2>/dev/null
+[ "$relaunch" = 1 ] && open -n "$app" --args "$@"
+exit 0)";
+    QStringList args = {QStringLiteral("-c"), QString::fromUtf8(script), QStringLiteral("rift-update"), pid, file,
+                        bundle.absolutePath(), relaunch ? QStringLiteral("1") : QStringLiteral("0")};
+    args += relaunchArgs;
+    return QProcess::startDetached(QStringLiteral("/bin/sh"), args);
+#elif defined(Q_OS_LINUX)
+    if (target != QLatin1String("linux-appimage")) return false;
+    const QString image = QFileInfo(qEnvironmentVariable("APPIMAGE")).absoluteFilePath();
+    static const char *script = R"(pid=$1; src=$2; dst=$3; relaunch=$4; shift 4
+while kill -0 "$pid" 2>/dev/null; do sleep 0.5; done
+cp "$src" "$dst.new" && chmod 755 "$dst.new" && mv -f "$dst.new" "$dst" || { rm -f "$dst.new"; exit 1; }
+rm -f "$src"
+[ "$relaunch" = 1 ] && nohup "$dst" "$@" >/dev/null 2>&1 &
+exit 0)";
+    QStringList args = {QStringLiteral("-c"), QString::fromUtf8(script), QStringLiteral("rift-update"), pid, file, image,
+                        relaunch ? QStringLiteral("1") : QStringLiteral("0")};
+    args += relaunchArgs;
+    return QProcess::startDetached(QStringLiteral("/bin/sh"), args);
+#else
+    Q_UNUSED(target); Q_UNUSED(file); Q_UNUSED(relaunch); Q_UNUSED(relaunchArgs); Q_UNUSED(pid);
+    return false;
+#endif
 }
 
 } // namespace platform

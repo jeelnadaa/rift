@@ -38,7 +38,7 @@ Read this file first, then **PROGRESS.md**, then the parts of **PLAN.md** and **
 7. **Strings** in QML use `qsTr()`.
 8. **Cross-platform:** OS-specific code stays behind `#ifdef Q_OS_*` in `src/app/platform.cpp`.
 9. **Versioning is automatic.** Do not hand-edit version numbers. CI computes the next version from the latest `v*` tag (`scripts/next-version.py`) and passes `-DRIFT_VERSION=` to CMake.
-10. **Release asset names are a contract** with `rift-static/download.html`. If you change one, change both:
+10. **Release asset names are a contract** with `rift-static/download.html` and the in-app updater (`src/core/update.cpp` reads the setup.exe, macOS .zip and AppImage names plus `SHA256SUMS`). If you change one, change all of them:
     - `Rift-<v>-windows-x64-setup.exe`, `Rift-<v>-windows-x64-portable.zip`
     - `Rift-<v>-macos-arm64.dmg`, `Rift-<v>-macos-x64.dmg`, `Rift-<v>-macos-arm64.zip`, `Rift-<v>-macos-x64.zip`
     - `Rift-<v>-linux-x86_64.AppImage`, `rift_<v>_amd64.deb`, `rift-<v>.x86_64.rpm`, `Rift-<v>-linux-x86_64.tar.gz`

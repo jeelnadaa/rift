@@ -203,6 +203,31 @@ ApplicationWindow {
                 onClosed: App.dismissClipboard()
             }
             Banner {
+                // In-app update (src/app/updater.cpp). Auto mode downloads quietly and only shows "ready";
+                // "Ask first" offers it; builds that can't replace themselves link to the release page.
+                id: updateBanner
+                readonly property var u: App.updater
+                readonly property bool auto: App.settings.updateMode !== "notify" && App.settings.updateMode !== "off"
+                Layout.fillWidth: true
+                strip: true
+                visible: !u.dismissed && root.page === "transfers"
+                         && (u.state === "ready" || u.state === "available" || (u.state === "downloading" && !auto))
+                kind: u.state === "ready" ? "ok" : "info"
+                iconName: u.state === "ready" ? "refresh" : "download"
+                text: u.state === "ready" ? qsTr("Rift %1 is ready. It installs when you quit Rift, or right now.").arg(u.latest)
+                    : u.state === "downloading" ? qsTr("Downloading Rift %1… %2%").arg(u.latest).arg(Math.round(u.progress * 100))
+                    : qsTr("Rift %1 is out.").arg(u.latest)
+                actionText: u.state === "ready" ? qsTr("Restart now")
+                          : u.state === "downloading" ? ""
+                          : u.canInstall ? qsTr("Update") : qsTr("Release page")
+                onAction: {
+                    if (u.state === "ready") u.restartNow()
+                    else if (u.canInstall) u.download()
+                    else Qt.openUrlExternally(u.pageUrl)
+                }
+                onClosed: u.dismiss()
+            }
+            Banner {
                 Layout.fillWidth: true
                 strip: true
                 visible: App.freeBytes >= 0 && App.settings.minFreeSpaceGB > 0 && App.freeBytes < App.settings.minFreeSpaceGB * 1073741824 && root.page === "transfers"

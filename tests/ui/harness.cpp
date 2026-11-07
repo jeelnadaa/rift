@@ -114,6 +114,9 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(t + 900, root, [win, shots] { win->grabWindow().save(shots + "/add-dark.png"); });
         QTimer::singleShot(t + 1000, root, [root] { QMetaObject::invokeMethod(root, "openSettings", Q_ARG(QVariant, QString("appearance"))); });
         QTimer::singleShot(t + 1900, root, [win, shots] { win->grabWindow().save(shots + "/settings-dark.png"); });
+        QTimer::singleShot(t + 1950, root, [root] { QMetaObject::invokeMethod(root, "openSettings", Q_ARG(QVariant, QString("general"))); });
+        QTimer::singleShot(t + 2800, root, [win, shots] { win->grabWindow().save(shots + "/settings-general-dark.png"); });
+        t += 1000;
         QTimer::singleShot(t + 2000, root, [root] { QMetaObject::invokeMethod(root, "openExtension"); });
         QTimer::singleShot(t + 2900, root, [win, shots] { win->grabWindow().save(shots + "/extension-dark.png"); });
         QTimer::singleShot(t + 3000, root, [root] { QMetaObject::invokeMethod(root, "openPick", Q_ARG(QVariant, QString("t:mock"))); });

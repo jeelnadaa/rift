@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
         for (QObject *o : engine.rootObjects())
             if (auto *w = qobject_cast<QQuickWindow *>(o)) w->hide();
         ctrl.shutdown();
+        ctrl.updater()->applyOnExit(); // a downloaded, verified update installs once Rift has exited
         QCoreApplication::quit();
     };
     QObject::connect(&ctrl, &Controller::quitRequested, &app, doQuit);

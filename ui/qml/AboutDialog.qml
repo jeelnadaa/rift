@@ -29,6 +29,22 @@ RDialog {
             font.pixelSize: 13
         }
         Text {
+            // Update status under the version; the controls live in Settings, General.
+            readonly property var u: App.updater
+            Layout.alignment: Qt.AlignHCenter
+            visible: text.length > 0
+            text: u.state === "ready" ? qsTr("Rift %1 installs when Rift restarts.").arg(u.latest)
+                : u.state === "available" ? qsTr("Rift %1 is out.").arg(u.latest)
+                : u.state === "downloading" ? qsTr("Downloading Rift %1… %2%").arg(u.latest).arg(Math.round(u.progress * 100))
+                : u.state === "uptodate" ? qsTr("Up to date")
+                : u.state === "checking" ? qsTr("Checking for updates…")
+                : ""
+            color: u.state === "ready" || u.state === "available" ? Theme.accent : Theme.c.text3
+            font.family: Theme.fontUi
+            font.pixelSize: 12
+            font.weight: Font.Medium
+        }
+        Text {
             Layout.fillWidth: true
             Layout.topMargin: 4
             horizontalAlignment: Text.AlignHCenter

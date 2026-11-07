@@ -31,6 +31,7 @@
 #include <QSet>
 #include <QStandardPaths>
 #include <QSysInfo>
+#include <QWindow>
 #include <QThreadPool>
 #include <QUrl>
 
@@ -72,6 +73,14 @@ Controller::Controller(const QString &dataDir, bool portable, QObject *parent)
     });
     connect(m_settings, &Settings::changed, this, [this](const QString &k) { applySettings(k); });
     connect(&m_timer, &QTimer::timeout, this, &Controller::tick);
+    m_updater = new Updater(version(), portable, m_settings, dataDir + "/updates", this);
+    m_updater->idleProbe = [this] {
+        if (m_downloading > 0 || !m_pick.isEmpty()) return false;
+        for (QWindow *w : QGuiApplication::topLevelWindows())
+            if (w->isVisible()) return false;
+        return true;
+    };
+    connect(m_updater, &Updater::restartRequested, this, &Controller::quitRequested);
     connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, this, &Controller::checkClipboard);
 }
 
@@ -136,6 +145,7 @@ bool Controller::start(QString *error) {
     }
 
     if (m_systemIntegration) platform::registerNativeHost();
+    if (m_systemIntegration) m_updater->start();
     setupTray();
     applySettings();
     m_timer.start(500);

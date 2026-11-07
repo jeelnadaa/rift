@@ -3,6 +3,7 @@
 #include "../src/core/segments.hpp"
 #include "../src/core/speed.hpp"
 #include "../src/core/text.hpp"
+#include "../src/core/update.hpp"
 
 #include <cstdio>
 #include <random>
@@ -178,6 +179,39 @@ static void testArbiter() {
     CHECK_EQ(h3, int64_t(850'000));
 }
 
+static void testUpdate() {
+    CHECK(parseVersion("1.2.3") == (std::array<int, 3>{1, 2, 3}));
+    CHECK(parseVersion("v10.0.42") == (std::array<int, 3>{10, 0, 42}));
+    CHECK(!parseVersion("1.2"));
+    CHECK(!parseVersion("1.2.3-dev"));
+    CHECK(!parseVersion("1.2.3.4"));
+    CHECK(!parseVersion(""));
+    CHECK(!parseVersion("v"));
+    CHECK(!parseVersion("1..3"));
+    CHECK(isNewerVersion("v1.2.4", "1.2.3"));
+    CHECK(isNewerVersion("1.10.0", "1.9.9"));   // numeric, not string, comparison
+    CHECK(isNewerVersion("2.0.0", "1.99.99"));
+    CHECK(!isNewerVersion("1.2.3", "1.2.3"));
+    CHECK(!isNewerVersion("1.2.2", "1.2.3"));
+    CHECK(!isNewerVersion("9.9.9", "0.0.0"));   // dev builds never self-update
+    CHECK(!isNewerVersion("9.9.9", "1.0.0-dev"));
+    CHECK(!isNewerVersion("garbage", "1.0.0"));
+    CHECK_EQ(updateAssetName("v1.4.0", "windows-setup"), std::string("Rift-1.4.0-windows-x64-setup.exe"));
+    CHECK_EQ(updateAssetName("1.4.0", "macos-arm64"), std::string("Rift-1.4.0-macos-arm64.zip"));
+    CHECK_EQ(updateAssetName("1.4.0", "macos-x64"), std::string("Rift-1.4.0-macos-x64.zip"));
+    CHECK_EQ(updateAssetName("1.4.0", "linux-appimage"), std::string("Rift-1.4.0-linux-x86_64.AppImage"));
+    CHECK_EQ(updateAssetName("1.4.0", "linux-deb"), std::string());
+    CHECK_EQ(updateAssetName("1.4", "windows-setup"), std::string());
+    const std::string h1(64, 'a'), h2 = "0123456789ABCDEF0123456789abcdef0123456789abcdef0123456789abcdef";
+    const std::string sums = h1 + "  Rift-1.4.0-macos-arm64.zip\n" + h2 + " *Rift-1.4.0-windows-x64-setup.exe\r\n"
+                             + "zz  broken\n";
+    CHECK_EQ(sha256ForFile(sums, "Rift-1.4.0-macos-arm64.zip"), h1);
+    CHECK_EQ(sha256ForFile(sums, "Rift-1.4.0-windows-x64-setup.exe"),
+             std::string("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"));
+    CHECK_EQ(sha256ForFile(sums, "Rift-1.4.0-macos-arm64"), std::string()); // exact names only
+    CHECK_EQ(sha256ForFile(sums, "missing"), std::string());
+}
+
 int main() {
     testArbiter();
     testRangeSet();
@@ -187,6 +221,7 @@ int main() {
     testSpeed();
     testFormat();
     testNames();
+    testUpdate();
     std::printf("%d passed, %d failed\n", g_pass, g_fail);
     return g_fail ? 1 : 0;
 }

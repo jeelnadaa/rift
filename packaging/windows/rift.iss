@@ -76,6 +76,15 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: 
 
 [Run]
 Filename: "{app}\Rift.exe"; Description: "{cm:LaunchProgram,Rift}"; Flags: nowait postinstall skipifsilent
+; In-app updates run this setup with /VERYSILENT /RELAUNCH=1 [/RIFTARGS=--minimized] (src/app/platform.cpp):
+; start Rift again as the signed-in user once the files are replaced.
+Filename: "{app}\Rift.exe"; Parameters: "{param:RIFTARGS|}"; Flags: nowait runasoriginaluser; Check: RelaunchAfterUpdate
+
+[Code]
+function RelaunchAfterUpdate: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;
 
 [UninstallRun]
 Filename: "{cmd}"; Parameters: "/C taskkill /IM Rift.exe /F"; Flags: runhidden; RunOnceId: "KillRift"

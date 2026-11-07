@@ -26,7 +26,7 @@ elseif(WIN32)
 endif()
 
 # ---------------------------------------------------------------- core (pure C++)
-add_library(rift_core STATIC src/core/segments.cpp src/core/text.cpp)
+add_library(rift_core STATIC src/core/segments.cpp src/core/text.cpp src/core/update.cpp)
 target_include_directories(rift_core PUBLIC src)
 
 if(RIFT_BUILD_TESTS)
@@ -53,7 +53,8 @@ add_library(rift_appqt STATIC
     src/app/downloadmodel.cpp src/app/downloadmodel.hpp
     src/app/storage.cpp src/app/storage.hpp
     src/app/ipc.cpp src/app/ipc.hpp
-    src/app/platform.cpp src/app/platform.hpp)
+    src/app/platform.cpp src/app/platform.hpp
+    src/app/updater.cpp src/app/updater.hpp)
 target_include_directories(rift_appqt PUBLIC src)
 target_link_libraries(rift_appqt PUBLIC rift_core Qt6::Core Qt6::Gui Qt6::Qml Qt6::Sql Qt6::Network Qt6::Widgets)
 if(APPLE)
