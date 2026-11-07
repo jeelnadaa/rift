@@ -1128,6 +1128,21 @@ void Controller::openFileAt(const QString &id, const QString &relativePath) {
     platform::openPath(QDir(base.isEmpty() ? QFileInfo(r->path).absolutePath() : base).filePath(relativePath));
 }
 
+QVariantMap Controller::extensionDownloads() const {
+    // Release builds (x.y.z from CI) have matching extension zips attached to release vX.Y.Z.
+    const QString v = version();
+    static const QRegularExpression semver(QStringLiteral(R"(^\d+\.\d+\.\d+$)"));
+    const bool release = semver.match(v).hasMatch() && v != QLatin1String("0.0.0");
+    const QString base = QStringLiteral("https://github.com/%1/releases").arg(platform::kGithubRepo);
+    const QString chromium = QStringLiteral("Rift-%1-browser-chromium.zip").arg(v), firefox = QStringLiteral("Rift-%1-browser-firefox.zip").arg(v);
+    return {{"release", release},
+            {"chromiumFile", chromium},
+            {"firefoxFile", firefox},
+            {"chromium", release ? QStringLiteral("%1/download/v%2/%3").arg(base, v, chromium) : QString()},
+            {"firefox", release ? QStringLiteral("%1/download/v%2/%3").arg(base, v, firefox) : QString()},
+            {"page", release ? QStringLiteral("%1/tag/v%2").arg(base, v) : base + QStringLiteral("/latest")}};
+}
+
 QString Controller::linkFor(const QString &id) const {
     if (id.startsWith(QLatin1String("t:"))) return q(m_bt->magnet(u(id.mid(2))));
     return m_httpRec.value(id.mid(2).toLongLong()).url;

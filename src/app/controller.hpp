@@ -133,6 +133,9 @@ public:
     Q_INVOKABLE void openFile(const QString &id);
     Q_INVOKABLE void openFileAt(const QString &id, const QString &relativePath);
     Q_INVOKABLE QString linkFor(const QString &id) const; // magnet or URL
+    // Browser extension zips for this exact version on GitHub Releases:
+    // {release: bool, chromium: url, firefox: url, chromiumFile, firefoxFile, page: url}
+    Q_INVOKABLE QVariantMap extensionDownloads() const;
     Q_INVOKABLE void copyLinks(const QStringList &ids);
     Q_INVOKABLE void copyText(const QString &text);
     Q_INVOKABLE bool exportTorrent(const QString &id, const QString &path);

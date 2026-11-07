@@ -169,7 +169,14 @@ jobs:
       - name: Tests
         run: |
           ./build/core_tests
-          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness || echo "::warning::UI harness reported QML problems ($?)"
+          set +e
+          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness > harness.log 2>&1; rc=$?
+          set -e
+          if [ $rc -ne 0 ]; then
+            echo "::warning::UI harness reported QML problems ($rc)"
+            # Public annotations (logs need a sign-in): the most frequent distinct QML messages.
+            grep -E 'qrc:|\.qml' harness.log | sed -E 's/:[0-9]+:[0-9]+:/:/' | sort | uniq -c | sort -rn | head -9 | sed 's/^ */::warning::QML /' || true
+          fi
       - name: Bundle
         run: |
           APP=build/Rift.app
@@ -217,20 +224,40 @@ jobs:
       - name: Tests
         run: |
           ./build/core_tests
-          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness || echo "::warning::UI harness reported QML problems ($?)"
+          set +e
+          QT_QPA_PLATFORM=offscreen ./build/rift_ui_harness > harness.log 2>&1; rc=$?
+          set -e
+          if [ $rc -ne 0 ]; then
+            echo "::warning::UI harness reported QML problems ($rc)"
+            # Public annotations (logs need a sign-in): the most frequent distinct QML messages.
+            grep -E 'qrc:|\.qml' harness.log | sed -E 's/:[0-9]+:[0-9]+:/:/' | sort | uniq -c | sort -rn | head -9 | sed 's/^ */::warning::QML /' || true
+          fi
       - name: AppImage
         run: |
           DESTDIR=$PWD/AppDir cmake --install build
           wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
           chmod +x linuxdeploy*.AppImage
-          export QML_SOURCES_PATHS=$PWD/ui/qml EXTRA_QT_MODULES="svg" LDAI_OUTPUT="Rift-$V-linux-x86_64.AppImage"
-          ./linuxdeploy-x86_64.AppImage --appdir AppDir --executable AppDir/usr/bin/rift-native-host \
-            --desktop-file packaging/linux/rift.desktop --icon-file packaging/linux/rift.png --plugin qt --output appimage
+          # offscreen is bundled too, so the smoke test (and headless use) works; wayland/xcb come from the plugin.
+          export QML_SOURCES_PATHS=$PWD/ui/qml EXTRA_QT_MODULES="svg" EXTRA_PLATFORM_PLUGINS="libqoffscreen.so" \
+                 LDAI_OUTPUT="Rift-$V-linux-x86_64.AppImage"
           set +e
-          QT_QPA_PLATFORM=offscreen ./Rift-$V-linux-x86_64.AppImage --appimage-extract-and-run --smoke-test; rc=$?
+          ./linuxdeploy-x86_64.AppImage --appdir AppDir --executable AppDir/usr/bin/rift-native-host \
+            --desktop-file packaging/linux/rift.desktop --icon-file packaging/linux/rift.png --plugin qt --output appimage \
+            > linuxdeploy.log 2>&1; rc=$?
+          if [ $rc -ne 0 ]; then
+            cat linuxdeploy.log
+            grep -iE 'error|could not|cannot|failed|not found' linuxdeploy.log | tail -9 | sed 's/^/::error::linuxdeploy: /'
+            exit 1
+          fi
+          QT_QPA_PLATFORM=offscreen ./Rift-$V-linux-x86_64.AppImage --appimage-extract-and-run --smoke-test > smoke.log 2>&1; rc=$?
           set -e
-          if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"; elif [ $rc -ne 0 ]; then echo "::error::Smoke test failed ($rc)"; exit 1; fi
+          cat smoke.log
+          if [ $rc -eq 4 ]; then echo "::warning::Smoke test reported QML warnings"
+          elif [ $rc -ne 0 ]; then
+            tail -n 9 smoke.log | sed 's/^/::error::smoke: /'
+            echo "::error::Smoke test failed ($rc)"; exit 1
+          fi
           mkdir -p out && mv "Rift-$V-linux-x86_64.AppImage" out/
       - name: deb, rpm and tar.gz
         run: |
@@ -242,7 +269,7 @@ jobs:
           cp packaging/linux/rift.desktop stage/usr/share/applications/
           cp packaging/linux/rift.png stage/usr/share/icons/hicolor/512x512/apps/
           cp packaging/linux/app.rift.Rift.metainfo.xml stage/usr/share/metainfo/
-          common=(-s dir -C stage -n rift -v "$V" --license MIT --url https://rift.app -m "Rift <noreply@rift.app>"
+          common=(-s dir -C stage -n rift -v "$V" --license MIT --url https://rift.solarquack.in -m "Rift <noreply@rift.solarquack.in>"
                   --description "Torrents and direct downloads in one fast, calm window" --category net)
           fpm "${common[@]}" -t deb -a amd64 -p "out/rift_${V}_amd64.deb" -d libc6 -d libgl1 -d libxkbcommon0 -d libfontconfig1 -d libxcb-cursor0 .
           fpm "${common[@]}" -t rpm -a x86_64 -p "out/rift-${V}.x86_64.rpm" .
@@ -284,6 +311,8 @@ jobs:
             echo "| macOS 12+ Intel | \`Rift-$V-macos-x64.dmg\` |"
             echo "| Linux x86_64 | \`.AppImage\` · \`.deb\` · \`.rpm\` · \`.tar.gz\` |"
             echo "| Browser extension | Chromium / Firefox \`.zip\` |"
+            echo ""
+            echo "**Browser extension:** in Rift, open Settings → Browser → Get extension (it downloads the right zip and shows the steps). Or by hand: unzip \`Rift-$V-browser-chromium.zip\` into a folder you keep, open \`chrome://extensions\`, turn on Developer mode and click Load unpacked. Firefox: \`about:debugging#/runtime/this-firefox\` → Load Temporary Add-on → pick \`Rift-$V-browser-firefox.zip\`."
             echo
             echo "The app is not code-signed yet: on Windows choose *More info → Run anyway*; on macOS right-click Rift → *Open* the first time."
             echo

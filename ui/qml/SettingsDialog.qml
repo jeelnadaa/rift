@@ -442,7 +442,7 @@ Popup {
                     closable: false
                     text: qsTr("Install the Rift extension for Chrome, Edge, Brave or Firefox to send downloads here. Rift registers itself with your browsers automatically.")
                     actionText: qsTr("Get extension")
-                    onAction: Qt.openUrlExternally("https://rift.app/download.html#browser")
+                    onAction: sd.win.openExtension()
                 }
                 SettingRow { label: qsTr("Accept downloads from the browser"); Toggle { checked: sd.s.browserEnabled; tip: qsTr("Browser integration"); onToggled: sd.set("browserEnabled", checked) } }
                 SettingRow {

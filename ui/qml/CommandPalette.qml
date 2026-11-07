@@ -38,6 +38,7 @@ Popup {
         { n: qsTr("Theme: follow system"), i: "window", k: "", run: function () { App.settings.set("theme", "system") } },
         { n: qsTr("Settings"), i: "settings", k: "Ctrl+,", run: function () { win.openSettings("") } },
         { n: qsTr("Browser integration settings"), i: "puzzle", k: "", run: function () { win.openSettings("browser") } },
+        { n: qsTr("Get the browser extension"), i: "puzzle", k: "", run: function () { win.openExtension() } },
         { n: qsTr("About Rift"), i: "info", k: "", run: function () { win.openAbout() } },
         { n: qsTr("Quit Rift"), i: "power", k: "Ctrl+Q", run: function () { App.quit() } }
     ]

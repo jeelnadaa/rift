@@ -113,7 +113,9 @@ int main(int argc, char *argv[]) {
         QTimer::singleShot(t + 900, root, [win, shots] { win->grabWindow().save(shots + "/add-dark.png"); });
         QTimer::singleShot(t + 1000, root, [root] { QMetaObject::invokeMethod(root, "openSettings", Q_ARG(QVariant, QString("appearance"))); });
         QTimer::singleShot(t + 1900, root, [win, shots] { win->grabWindow().save(shots + "/settings-dark.png"); });
-        QTimer::singleShot(t + 2100, &app, [&app] { app.exit(g_problems == 0 ? 0 : 4); });
+        QTimer::singleShot(t + 2000, root, [root] { QMetaObject::invokeMethod(root, "openExtension"); });
+        QTimer::singleShot(t + 2900, root, [win, shots] { win->grabWindow().save(shots + "/extension-dark.png"); });
+        QTimer::singleShot(t + 3100, &app, [&app] { app.exit(g_problems == 0 ? 0 : 4); });
         return app.exec();
     }
 

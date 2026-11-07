@@ -12,7 +12,7 @@
     <p>A browser extension for Chrome, Edge, Brave and Firefox sends downloads straight to Rift.</p>
   </description>
   <launchable type="desktop-id">rift.desktop</launchable>
-  <url type="homepage">https://rift.app</url>
+  <url type="homepage">https://rift.solarquack.in</url>
   <url type="bugtracker">https://github.com/jeelnadaa/rift/issues</url>
   <developer id="app.rift"><name>Rift contributors</name></developer>
   <content_rating type="oars-1.1"/>

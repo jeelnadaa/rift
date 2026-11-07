@@ -72,6 +72,7 @@ ApplicationWindow {
     function prompt(t, label, value, cb) { promptDlg.ask(t, label, value, cb) }
     function openSettings(section) { settingsDlg.show(section) }
     function openAbout() { aboutDlg.open() }
+    function openExtension() { extDlg.show() }
     function openPalette() { palette.show() }
     function openContextMenu() { if (App.selection.length) ctxMenu.popup() }
     function pickFolder(cb) { folderCallback = cb; folderPicker.open() }
@@ -298,6 +299,7 @@ ApplicationWindow {
     SettingsDialog { id: settingsDlg; win: root }
     CommandPalette { id: palette; win: root }
     AboutDialog { id: aboutDlg }
+    ExtensionDialog { id: extDlg }
     RowMenu { id: ctxMenu; win: root }
 
     FileDialog {
@@ -376,6 +378,7 @@ ApplicationWindow {
         settingsDlg.close()
         palette.show(); palette.close()
         aboutDlg.open(); aboutDlg.close()
+        extDlg.show(); extDlg.browser = "firefox"; extDlg.close(); extDlg.browser = "chromium"
         toasts.show("Smoke test", "ok", "undo")
         App.settings.set("theme", "stone")
         App.settings.set("density", "compact")

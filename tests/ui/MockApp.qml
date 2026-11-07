@@ -103,6 +103,12 @@ QtObject {
     function setCategory(ids, c) {} function toggleTag(ids, t) {} function setLimits(ids, d, u) {}
     function setConnections(ids, n) {} function moveTo(ids, f) {} function addTracker(id, url) {}
     function openFolder(id) {} function openFile(id) {} function openFileAt(id, p) {}
+    function extensionDownloads() {
+        return { release: true, chromiumFile: "Rift-1.0.0-browser-chromium.zip", firefoxFile: "Rift-1.0.0-browser-firefox.zip",
+                 chromium: "https://github.com/jeelnadaa/rift/releases/download/v1.0.0/Rift-1.0.0-browser-chromium.zip",
+                 firefox: "https://github.com/jeelnadaa/rift/releases/download/v1.0.0/Rift-1.0.0-browser-firefox.zip",
+                 page: "https://github.com/jeelnadaa/rift/releases/tag/v1.0.0" }
+    }
     function linkFor(id) { return "magnet:?xt=urn:btih:0123" } function copyLinks(ids) {} function copyText(t) {}
     function exportTorrent(id, p) { return true } function verifyChecksum(id, e) {}
     function pauseAll() {} function resumeAll() {}

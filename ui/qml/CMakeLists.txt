@@ -13,5 +13,5 @@ qt_add_qml_module(rift_ui
         Sidebar.qml SideItem.qml Toolbar.qml DownloadList.qml DownloadRow.qml BulkBar.qml DetailsPanel.qml
         StatusBar.qml EmptyState.qml RowMenu.qml
         AddLinkDialog.qml AddTorrentDialog.qml RemoveDialog.qml LimitsDialog.qml TextPrompt.qml
-        SettingsDialog.qml SettingRow.qml CommandPalette.qml AboutDialog.qml
+        SettingsDialog.qml SettingRow.qml CommandPalette.qml AboutDialog.qml ExtensionDialog.qml
         StatsView.qml HistoryView.qml ComingSoon.qml)

@@ -52,7 +52,7 @@ RDialog {
     }
 
     footerItems: [
-        Btn { text: qsTr("Website"); iconName: "external"; tip: qsTr("Open rift.app"); onClicked: Qt.openUrlExternally("https://rift.app") },
+        Btn { text: qsTr("Website"); iconName: "external"; tip: qsTr("Open rift.solarquack.in"); onClicked: Qt.openUrlExternally("https://rift.solarquack.in") },
         Btn { text: qsTr("Source"); iconName: "terminal"; tip: qsTr("Open the source code on GitHub"); onClicked: Qt.openUrlExternally("https://github.com/jeelnadaa/rift") },
         Item { Layout.fillWidth: true },
         Btn { variant: "primary"; text: qsTr("Close"); tip: qsTr("Close"); kbd: "Esc"; onClicked: dlg.close() }

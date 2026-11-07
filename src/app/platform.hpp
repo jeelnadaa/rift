@@ -10,6 +10,9 @@ namespace platform {
 inline const QStringList kChromiumExtensionIds = {QStringLiteral("llhjnffjocckdmklgdcpnllflgcacppo")};
 inline const QString kFirefoxExtensionId = QStringLiteral("browser@rift.app");
 inline const QString kNativeHostName = QStringLiteral("app.rift.native");
+// Where releases (app + browser extension zips) are published, and the website.
+inline const QString kGithubRepo = QStringLiteral("jeelnadaa/rift");
+inline const QString kWebsite = QStringLiteral("https://rift.solarquack.in");
 
 void preventSleep(bool on);                       // while anything downloads
 void revealInFolder(const QString &path);         // select the file in Explorer/Finder, or open its folder

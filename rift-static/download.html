@@ -343,12 +343,12 @@ const P = {
   browser: {
     name: 'Browser', req: ['Needs Rift for desktop', 'Chrome · Edge · Brave · Firefox'],
     files: [
-      { t: 'Chrome & Brave', tag: 'Chrome Web Store', f: 'Works in Chrome, Brave and other Chromium browsers', d: 'Adds "Download with Rift" to links and can take over downloads by type and size.', store: 'Add to Chrome' },
-      { t: 'Microsoft Edge', tag: 'Edge Add-ons', f: 'Microsoft Edge Add-ons', d: 'The same extension, from Microsoft\'s store.', store: 'Add to Edge' },
-      { t: 'Firefox', tag: 'Firefox Add-ons', f: 'addons.mozilla.org', d: 'Context menu, download take-over and cookies for signed-in downloads.', store: 'Add to Firefox' },
+      { t: 'Chrome, Edge & Brave', tag: 'Recommended', f: `Rift-${V}-browser-chromium.zip`, d: 'Unzip into a folder you keep. Open <code>chrome://extensions</code> (or <code>edge://extensions</code>), turn on Developer mode, click <b>Load unpacked</b> and pick that folder.' },
+      { t: 'Firefox', f: `Rift-${V}-browser-firefox.zip`, d: 'Open <code>about:debugging#/runtime/this-firefox</code>, click <b>Load Temporary Add-on…</b> and pick the zip. Firefox drops temporary add-ons on restart until the extension is on Firefox Add-ons.' },
+      { t: 'Browser stores', tag: 'After 1.0', f: 'Chrome Web Store · Edge Add-ons · Firefox Add-ons', d: 'One-click installs with automatic updates, once the listings are approved.', soon: true },
     ],
-    note: 'The Rift installer sets up the browser bridge. It uses native messaging, so no network port is opened.',
-    steps: ['Install Rift for your computer.', 'Add the extension to your browser.', 'Right-click a link and pick “Download with Rift”.'],
+    note: 'Easiest: in Rift, open Settings → Browser → <b>Get extension</b>. Rift downloads the matching zip from GitHub and shows these steps. The extension talks to Rift through native messaging, so no network port is opened.',
+    steps: ['Install Rift for your computer.', 'Download the extension zip and load it in your browser.', 'Right-click a link and pick “Download with Rift”.'],
     rec: null,
   },
 };
