@@ -267,9 +267,8 @@
         <div class="vres" id="vres" aria-live="polite">Waiting for a file.</div>
         <div class="cmds">
           <div class="cmd"><span>certutil -hashfile Rift-1.0.0-windows-x64-setup.exe SHA256</span><button type="button" data-copy>Copy</button></div>
-          <div class="cmd"><span>shasum -a 256 Rift-1.0.0-macos-universal.dmg</span><button type="button" data-copy>Copy</button></div>
+          <div class="cmd"><span>shasum -a 256 Rift-1.0.0-macos-arm64.dmg</span><button type="button" data-copy>Copy</button></div>
           <div class="cmd"><span>sha256sum -c SHA256SUMS</span><button type="button" data-copy>Copy</button></div>
-          <div class="cmd"><span>minisign -Vm SHA256SUMS -P &lt;Rift public key&gt;</span><button type="button" data-copy>Copy</button></div>
         </div>
       </div>
     </div>
@@ -279,10 +278,10 @@
   <section class="sec">
     <span class="eyebrow rv"><b>05</b> Good to know</span>
     <div class="grid4">
-      <div class="gc rv"><h4>Updates you approve</h4><p>Rift checks for new versions, verifies the signature, and installs only when you say so. Stable or beta channel.</p></div>
+      <div class="gc rv"><h4>Every release, every platform</h4><p>Each version is built in the open on GitHub Actions and published with a SHA256SUMS file. Nothing updates behind your back.</p></div>
       <div class="gc rv" style="--d:.08s"><h4>Portable mode</h4><p>The portable builds keep every setting in a <code>Data</code> folder beside the app. Carry it on a USB drive.</p></div>
       <div class="gc rv" style="--d:.16s"><h4>Clean uninstall</h4><p>Removing Rift removes its shortcuts, file links and browser bridge, and asks whether to keep your data.</p></div>
-      <div class="gc rv" style="--d:.24s"><h4>Linux packages</h4><p>DEB and RPM installs update through your package manager. The AppImage tells you when a new one is out.</p></div>
+      <div class="gc rv" style="--d:.24s"><h4>Linux packages</h4><p>DEB and RPM add a menu entry and magnet link handling. The AppImage and tar.gz run from anywhere.</p></div>
     </div>
   </section>
 
@@ -311,32 +310,35 @@ const P = {
       { t: 'Portable', f: `Rift-${V}-windows-x64-portable.zip`, d: 'Unzip anywhere and run Rift.exe. All settings stay in a Data folder next to it.' },
       { t: 'Windows on ARM', tag: 'After 1.0', f: 'arm64 installer and portable ZIP', d: 'Native builds for Arm-based Windows PCs are planned after the first release.', soon: true },
     ],
-    note: 'Signed with Authenticode. No Visual C++ Redistributable or .NET needed.',
+    note: 'Not code-signed yet, so SmartScreen may ask once: choose More info → Run anyway. No Visual C++ Redistributable or .NET needed.',
     steps: ['Run the setup and pick where Rift goes.', 'Tick shortcuts, file links and the browser bridge.', 'Open Rift and paste a magnet or any link.'],
-    rec: { main: 'Download installer (.exe)', alt: 'Portable ZIP', desc: 'One installer with everything inside. Choose any install folder, for just you or everyone on this PC.', facts: [['Format', 'Setup .exe'], ['Architecture', 'x64'], ['Requires', 'Windows 10 / 11'], ['Signed', 'Authenticode']] },
+    rec: { main: 'Download installer (.exe)', alt: 'Portable ZIP', desc: 'One installer with everything inside. Choose any install folder, for just you or everyone on this PC.', facts: [['Format', 'Setup .exe'], ['Architecture', 'x64'], ['Requires', 'Windows 10 / 11'], ['Verify', 'SHA256SUMS']] },
   },
   macos: {
-    name: 'macOS', req: ['macOS 12 Monterey or later', 'Apple Silicon + Intel'],
+    name: 'macOS', req: ['macOS 12 Monterey or later', 'Apple silicon and Intel'],
     files: [
-      { t: 'Universal DMG', tag: 'Recommended', f: `Rift-${V}-macos-universal.dmg`, d: 'One app for Apple Silicon and Intel Macs. Open it and drag Rift to Applications.' },
-      { t: 'Universal ZIP', f: `Rift-${V}-macos-universal.zip`, d: 'The same signed app in a ZIP, for scripts and managed Macs.' },
+      { t: 'Apple silicon DMG', tag: 'Recommended', f: `Rift-${V}-macos-arm64.dmg`, d: 'For Macs with M-series chips. Open it and drag Rift to Applications.' },
+      { t: 'Intel DMG', f: `Rift-${V}-macos-x64.dmg`, d: 'For Intel Macs. Open it and drag Rift to Applications.' },
+      { t: 'Apple silicon ZIP', f: `Rift-${V}-macos-arm64.zip`, d: 'The same app in a ZIP, for scripts and managed Macs.' },
+      { t: 'Intel ZIP', f: `Rift-${V}-macos-x64.zip`, d: 'The Intel app in a ZIP.' },
     ],
-    note: 'Signed with a Developer ID and notarized by Apple, so it opens without warnings.',
-    steps: ['Open the DMG.', 'Drag Rift into Applications.', 'Launch it. Rift lives in your menu bar.'],
-    rec: { main: 'Download for Mac (.dmg)', alt: 'ZIP', desc: 'A single universal app for Apple Silicon and Intel. Drag it to Applications and you are done.', facts: [['Format', 'Disk image .dmg'], ['Architecture', 'Universal'], ['Requires', 'macOS 12+'], ['Signed', 'Notarized']] },
+    note: 'Not notarized yet. The first time, right-click Rift in Applications and choose Open, or allow it in System Settings → Privacy & Security.',
+    steps: ['Open the DMG.', 'Drag Rift into Applications.', 'Right-click Rift → Open the first time. It lives in your menu bar.'],
+    rec: { main: 'Download for Apple silicon', alt: 'Intel Mac', desc: 'Pick the build for your chip: Apple silicon (M1 and later) or Intel. Drag it to Applications and you are done.', facts: [['Format', 'Disk image .dmg'], ['Architecture', 'arm64 · x64'], ['Requires', 'macOS 12+'], ['Verify', 'SHA256SUMS']] },
   },
   linux: {
-    name: 'Linux', req: ['Most distributions', 'x64 and arm64'], arch: true,
+    name: 'Linux', req: ['Most distributions', '64-bit (x86_64)'],
     files: [
-      { t: 'AppImage', tag: 'Recommended', f: (a) => `Rift-${V}-linux-${a === 'arm64' ? 'aarch64' : 'x86_64'}.AppImage`, d: 'Everything bundled. Make it executable and run it, on almost any distribution.' },
-      { t: 'DEB', f: (a) => `rift_${V}_${a === 'arm64' ? 'arm64' : 'amd64'}.deb`, d: 'Debian, Ubuntu, Linux Mint, Pop!_OS. Adds a menu entry and magnet link handling.' },
-      { t: 'RPM', f: (a) => `rift-${V}.${a === 'arm64' ? 'aarch64' : 'x86_64'}.rpm`, d: 'Fedora, openSUSE, RHEL and friends.' },
-      { t: 'tar.gz', f: (a) => `Rift-${V}-linux-${a === 'arm64' ? 'aarch64' : 'x86_64'}.tar.gz`, d: 'Portable archive. Unpack and run, settings can stay beside it.' },
+      { t: 'AppImage', tag: 'Recommended', f: `Rift-${V}-linux-x86_64.AppImage`, d: 'Everything bundled. Make it executable and run it, on almost any distribution.' },
+      { t: 'DEB', f: `rift_${V}_amd64.deb`, d: 'Debian, Ubuntu, Linux Mint, Pop!_OS. Adds a menu entry and magnet link handling.' },
+      { t: 'RPM', f: `rift-${V}.x86_64.rpm`, d: 'Fedora, openSUSE, RHEL and friends.' },
+      { t: 'tar.gz', f: `Rift-${V}-linux-x86_64.tar.gz`, d: 'Portable archive. Unpack and run, settings can stay beside it.' },
+      { t: 'arm64', tag: 'After 1.0', f: 'AppImage, DEB and RPM for arm64', d: 'Native builds for Arm Linux machines are planned after the first release.', soon: true },
       { t: 'Flatpak', tag: 'After 1.0', f: 'Flathub', d: 'Planned after the first release.', soon: true },
     ],
     note: 'Tray icon works on KDE, GNOME (with AppIndicator) and other desktops.',
     steps: ['Download the AppImage.', 'Run <code>chmod +x Rift-*.AppImage</code>.', 'Double-click it, or install the DEB / RPM instead.'],
-    rec: { main: 'Download AppImage', alt: 'DEB / RPM / tar.gz', desc: 'One file that runs on nearly every distribution, with everything bundled. Prefer packages? DEB and RPM are right below.', facts: [['Format', 'AppImage'], ['Architecture', 'x64 · arm64'], ['Requires', 'Most distributions'], ['Signed', 'SHA256SUMS + minisign']] },
+    rec: { main: 'Download AppImage', alt: 'DEB / RPM / tar.gz', desc: 'One file that runs on nearly every distribution, with everything bundled. Prefer packages? DEB and RPM are right below.', facts: [['Format', 'AppImage'], ['Architecture', 'x86_64'], ['Requires', 'Most distributions'], ['Verify', 'SHA256SUMS']] },
   },
   browser: {
     name: 'Browser', req: ['Needs Rift for desktop', 'Chrome · Edge · Brave · Firefox'],
@@ -358,11 +360,10 @@ let arch = 'x64';
 /* ---------- OS detection ---------- */
 const det = detectOS();
 let mine = ORDER.includes(det.os) ? det.os : 'windows';
-if (det.os === 'linux' && det.arm) arch = 'arm64';
 const niceOS = { windows: 'Windows', macos: 'macOS', linux: 'Linux' };
 $('#sniff').innerHTML = det.os === 'mobile'
   ? 'Rift is a desktop app. Open this page on your <b>computer</b> to get it.'
-  : `Looks like you're on <b>${niceOS[mine]}${det.os === 'linux' ? ' (' + arch + ')' : ''}</b>.`;
+  : `Looks like you're on <b>${niceOS[mine]}</b>.`;
 
 function fileName(f) { return typeof f.f === 'function' ? f.f(arch) : f.f; }
 
@@ -377,7 +378,7 @@ function paintRec(os) {
   $('#recMain').dataset.file = fileName(p.files[0]);
   $('#recAlt').dataset.file = os === 'linux' ? 'DEB / RPM / tar.gz' : fileName(p.files[1]);
   $('#recAlt').dataset.jump = os === 'linux' ? 'linux' : '';
-  $('#recFacts').innerHTML = r.facts.map(([k, v]) => `<li><span>${k}</span><b>${k === 'Architecture' && os === 'linux' ? arch : v}</b></li>`).join('');
+  $('#recFacts').innerHTML = r.facts.map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join('');
 }
 paintRec(mine);
 // Ghost word drifts with scroll
