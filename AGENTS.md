@@ -24,7 +24,7 @@ Read this file first, then **PROGRESS.md**, then the parts of **PLAN.md** and **
 | `browser/` | One MV3 extension source; `browser/build.mjs` emits Chromium and Firefox builds. |
 | `packaging/` | Inno Setup (Windows), Info.plist (macOS), desktop file + AppImage/deb/rpm (Linux), native-messaging manifests. |
 | `.github/workflows/release.yml` | Every push to `main` builds all platforms and publishes the next `vX.Y.Z` release. |
-| `rift-static/` | Public website (Cloudflare). Not part of the app build. |
+| `rift-static/` | Public website (Cloudflare Worker, `wrangler.jsonc`). Not part of the app build. `.github/workflows/website.yml` deploys it when it changes on `main` (needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets). |
 | `design/` | Design prototype and tokens. **The app must match it.** |
 
 ## Rules

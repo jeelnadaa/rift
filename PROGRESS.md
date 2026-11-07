@@ -105,6 +105,7 @@ Tracked so nothing from PLAN.md is forgotten. Not started.
 - 2026-11-07: Get extension downloads the release zip from GitHub, website domain is rift.solarquack.in, launch video in `brag-output/` (web copy on the site's home page). Release CI: Windows caches vcpkg builds (actions/cache, files backend), the Linux AppImage smoke test reports missing libraries, and Run workflow takes a `platforms` input (e.g. `linux`) for quick partial builds that don't publish.
 - 2026-11-07: CI skips pushes that only touch docs (`*.md`), `rift-static/`, `brag-output/` or `wrangler.jsonc`; every build job uses a compiler cache (ccache, sccache on Windows).
 - 2026-11-07: Linux CI segfaulted in `QFontDatabase::addApplicationFont` (Qt 6.8 fontconfig backend, Ubuntu 22.04; backtrace via `scripts/ci-crash-report.sh`). On Linux the bundled fonts now go to fontconfig directly (`platform::registerAppFontsWithSystem`, before the app object exists).
+- 2026-11-07: The live site was still the 08:40 version (no deploys since). Added `.github/workflows/website.yml`: wrangler deploy on changes to `rift-static/`, once the two Cloudflare secrets are set.
 
 ### Resume note
 - 1.0 checklist complete. Local full build: put `C:\msys64\ucrt64\bin` first on PATH, then

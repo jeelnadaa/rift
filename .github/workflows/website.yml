@@ -1,0 +1,44 @@
+# Deploys the website (rift-static/, served by the Cloudflare Worker in wrangler.jsonc) whenever it changes
+# on main. Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   a token from the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_ACCOUNT_ID  shown on the Workers & Pages overview page
+name: Website
+
+on:
+  push:
+    branches: [main]
+    paths: ['rift-static/**', 'wrangler.jsonc', '.github/workflows/website.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: website
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the secrets are set
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$ACCOUNT" ]; then
+            echo "::error::Add the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repository secrets (see the top of website.yml)."
+            exit 1
+          fi
+          # Cloudflare serves files up to 25 MiB.
+          big=$(find rift-static -type f -size +25M)
+          if [ -n "$big" ]; then echo "::error::Over Cloudflare's 25 MiB file limit: $big"; exit 1; fi
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+      - name: Check the live site
+        run: |
+          sleep 5
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://rift.solarquack.in/assets/rift-launch.mp4)
+          echo "Launch video on the live site: HTTP $code"
+          [ "$code" = 200 ] || echo "::warning::The live site does not serve the launch video yet (HTTP $code)"
